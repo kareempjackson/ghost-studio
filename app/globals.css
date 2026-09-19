@@ -1,26 +1,549 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------------------
+   Ghost Savvy Studios — design tokens.
+
+   Mirrors lib/brand/color.ts, lib/brand/layout.ts and lib/brand/typography.ts.
+   Those files are the source of truth; if a value changes there, change it
+   here. The /brand page renders from the TypeScript, so any drift shows up on
+   the page immediately.
+--------------------------------------------------------------------------- */
+
+@theme {
+  /* -- Ink: warm neutral, hue held near 40deg at very low saturation ------ */
+  --color-ink-50: #f7f6f3;
+  --color-ink-100: #edebe7;
+  --color-ink-200: #dedbd4;
+  --color-ink-300: #c2beb6;
+  --color-ink-400: #9a958c;
+  --color-ink-500: #78746c;
+  --color-ink-600: #625e58;
+  --color-ink-700: #45423c;
+  --color-ink-800: #2b2925;
+  --color-ink-900: #1a1815;
+  --color-ink-950: #0e0d0b;
+
+  /* -- Signal: vermilion. One per viewport. ------------------------------ */
+  --color-signal-50: #fdeeeb;
+  --color-signal-100: #fbd8d1;
+  --color-signal-200: #f7b3a6;
+  --color-signal-300: #f28a76;
+  --color-signal-400: #ee6448;
+  --color-signal-500: #e8452b;
+  --color-signal-600: #ce3a21;
+  --color-signal-700: #b4321b;
+  --color-signal-800: #8e2413;
+  --color-signal-900: #6b1b0e;
+  --color-signal-950: #48120a;
+
+  /* -- Acid: chartreuse. Never carries text on a light ground. ----------- */
+  --color-acid-50: #fafce6;
+  --color-acid-100: #f3f8c2;
+  --color-acid-200: #e9f28a;
+  --color-acid-300: #dfe95f;
+  --color-acid-400: #d7e23f;
+  --color-acid-500: #bfcb2e;
+  --color-acid-600: #9ca622;
+  --color-acid-700: #77801a;
+  --color-acid-800: #565c14;
+  --color-acid-900: #3a3e0e;
+  --color-acid-950: #252708;
+
+  /* -- Slate: product chrome and diagrams. ------------------------------- */
+  --color-slate-50: #f2f4f7;
+  --color-slate-100: #e2e7ed;
+  --color-slate-200: #c6cfda;
+  --color-slate-300: #a2afc1;
+  --color-slate-400: #7c8ca4;
+  --color-slate-500: #5b6b84;
+  --color-slate-600: #47556a;
+  --color-slate-700: #374152;
+  --color-slate-800: #262d39;
+  --color-slate-900: #171c23;
+  --color-slate-950: #0d1014;
+
+  /* -- Type ------------------------------------------------------------- */
+  --font-sans: var(--font-dm-sans), "Helvetica Neue", Helvetica, "Segoe UI",
+    Roboto, Arial, sans-serif;
+  --font-grotesk: var(--font-dm-sans), "Helvetica Neue", Helvetica, "Segoe UI",
+    Roboto, Arial, sans-serif;
+  --font-editorial: "hardcover-vf", Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-space-mono), ui-monospace, "SF Mono", SFMono-Regular,
+    Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* -- Radius: square by default; pill is the aperture, and is reserved. -- */
+  --radius-pill: 9999px;
+
+  /* -- Elevation --------------------------------------------------------- */
+  --shadow-raised: 0 1px 2px rgb(14 13 11 / 0.06), 0 2px 8px rgb(14 13 11 / 0.04);
+  --shadow-overlay: 0 8px 24px rgb(14 13 11 / 0.12), 0 2px 6px rgb(14 13 11 / 0.08);
+
+  /* -- Motion ------------------------------------------------------------ */
+  --ease-entrance: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-signature: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* -- Layout ------------------------------------------------------------ */
+  --container-field: 90rem; /* 1440px — outer bound of the layout field */
+  --container-prose: 45rem; /* 720px  — long-form reading column */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ---------------------------------------------------------------------------
+   Semantic layer. Runtime-switchable, so components never name a raw ramp.
+--------------------------------------------------------------------------- */
+
+:root {
+  /* The header row, locked here so the hero can subtract it. Tight: the row
+     is chrome, and every rem it takes is a rem off the first thing read. */
+  --gs-header-h: 4rem;
+
+  --gs-surface-page: #ffffff;
+  --gs-surface-subtle: #f7f6f3;
+  --gs-surface-raised: #ffffff;
+  --gs-surface-sunken: #edebe7;
+  --gs-surface-inverse: #000000;
+  --gs-surface-accent: #e8452b;
+
+  --gs-text-primary: #0e0d0b;
+  --gs-text-secondary: #625e58;
+  --gs-text-tertiary: #78746c;
+  --gs-text-disabled: #9a958c;
+  --gs-text-inverse: #ffffff;
+  --gs-text-on-accent: #ffffff;
+  --gs-text-accent: #b4321b;
+
+  --gs-border-subtle: #edebe7;
+  --gs-border-default: #dedbd4;
+  --gs-border-strong: #0e0d0b;
+  --gs-border-inverse: #ffffff;
+  --gs-border-focus: #e8452b;
+
+  --gs-accent-signal: #e8452b;
+  --gs-accent-acid: #d7e23f;
+  --gs-accent-slate: #5b6b84;
+
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --gs-surface-page: #000000;
+    --gs-surface-subtle: #0e0d0b;
+    --gs-surface-raised: #1a1815;
+    --gs-surface-sunken: #000000;
+    --gs-surface-inverse: #ffffff;
+    --gs-surface-accent: #e8452b;
+
+    --gs-text-primary: #f7f6f3;
+    --gs-text-secondary: #c2beb6;
+    --gs-text-tertiary: #9a958c;
+    --gs-text-disabled: #625e58;
+    --gs-text-inverse: #0e0d0b;
+    --gs-text-on-accent: #ffffff;
+    --gs-text-accent: #f28a76;
+
+    --gs-border-subtle: #2b2925;
+    --gs-border-default: #45423c;
+    --gs-border-strong: #f7f6f3;
+    --gs-border-inverse: #0e0d0b;
+    --gs-border-focus: #ee6448;
+
+    --gs-accent-signal: #e8452b;
+    --gs-accent-acid: #d7e23f;
+    --gs-accent-slate: #7c8ca4;
+
+    color-scheme: dark;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* An explicit choice always wins over the system preference, both ways. */
+:root[data-theme="dark"] {
+  --gs-surface-page: #000000;
+  --gs-surface-subtle: #0e0d0b;
+  --gs-surface-raised: #1a1815;
+  --gs-surface-sunken: #000000;
+  --gs-surface-inverse: #ffffff;
+  --gs-surface-accent: #e8452b;
+
+  --gs-text-primary: #f7f6f3;
+  --gs-text-secondary: #c2beb6;
+  --gs-text-tertiary: #9a958c;
+  --gs-text-disabled: #625e58;
+  --gs-text-inverse: #0e0d0b;
+  --gs-text-on-accent: #ffffff;
+  --gs-text-accent: #f28a76;
+
+  --gs-border-subtle: #2b2925;
+  --gs-border-default: #45423c;
+  --gs-border-strong: #f7f6f3;
+  --gs-border-inverse: #0e0d0b;
+  --gs-border-focus: #ee6448;
+
+  --gs-accent-signal: #e8452b;
+  --gs-accent-acid: #d7e23f;
+  --gs-accent-slate: #7c8ca4;
+
+  color-scheme: dark;
+}
+
+/* The header opens up once there is room for the nav to sit beside the mark. */
+@media (min-width: 1024px) {
+  :root {
+    --gs-header-h: 4.5rem;
+  }
+}
+
+/* Expose the semantic layer as utilities: bg-surface-page, text-secondary… */
+@theme inline {
+  --color-surface-page: var(--gs-surface-page);
+  --color-surface-subtle: var(--gs-surface-subtle);
+  --color-surface-raised: var(--gs-surface-raised);
+  --color-surface-sunken: var(--gs-surface-sunken);
+  --color-surface-inverse: var(--gs-surface-inverse);
+  --color-surface-accent: var(--gs-surface-accent);
+
+  --color-primary: var(--gs-text-primary);
+  --color-secondary: var(--gs-text-secondary);
+  --color-tertiary: var(--gs-text-tertiary);
+  --color-disabled: var(--gs-text-disabled);
+  --color-inverse: var(--gs-text-inverse);
+  --color-on-accent: var(--gs-text-on-accent);
+  --color-accent: var(--gs-text-accent);
+
+  --color-edge-subtle: var(--gs-border-subtle);
+  --color-edge: var(--gs-border-default);
+  --color-edge-strong: var(--gs-border-strong);
+  --color-edge-inverse: var(--gs-border-inverse);
+  --color-focus: var(--gs-border-focus);
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--gs-surface-page);
+    color: var(--gs-text-primary);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem; /* 17px — the `body` role */
+    line-height: 1.6;
+    font-feature-settings: "kern" 1, "liga" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* The focus ring is a brand element. It is never removed, only restyled. */
+  :focus-visible {
+    outline: 2px solid var(--gs-border-focus);
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
+
+  ::selection {
+    background-color: var(--gs-accent-acid);
+    color: #0e0d0b;
+  }
+
+  /* Anchors land clear of any sticky chrome. */
+  :target {
+    scroll-margin-top: 6rem;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--gs-border-default);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Header ink.
+
+   The header is fixed, so for part of the hero sequence the reel is directly
+   behind it. `data-hero-over` is set by the hero from the measured top edge of
+   the opening — not from a guessed scroll position — so the flip happens
+   exactly when the picture arrives under the header and again when it leaves.
+--------------------------------------------------------------------------- */
+
+.gs-header {
+  background-color: var(--gs-surface-page);
+  transition:
+    background-color 240ms var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color 240ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*
+   Reading is downward. The header leaves while the reader is going that way
+   and comes back the moment they turn around, which is when a way out is what
+   they are looking for. It travels by its own height and no further, so it is
+   never a panel sliding over the page — and `visibility` is left alone, so a
+   keyboard tabbing into a link inside it brings the whole row back.
+*/
+.gs-header[data-hidden="true"] {
+  transform: translateY(-100%);
+}
+
+.gs-nav-ink {
+  color: var(--gs-text-primary);
+  transition: color 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gs-nav-link {
+  color: var(--gs-text-primary);
+  transition: color 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gs-nav-link:hover {
+  color: var(--gs-text-secondary);
+}
+
+/* The menu button steps back: the header grey from the brand spec. */
+.gs-nav-muted {
+  color: #b8b8b8;
+  transition: color 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover > .gs-nav-muted {
+  color: var(--gs-text-primary);
+}
+
+/* The primary control (ArrowPill): ink pill, paper type. */
+.gs-pill {
+  background-color: var(--color-ink-950);
+  color: #ffffff;
+}
+
+.gs-pill:hover {
+  background-color: var(--color-ink-800);
+}
+
+/* The arrow's disc: the label's ink at 13% (#FFFFFF22 on the ink pill). */
+.gs-pill-disc {
+  background-color: #ffffff22;
+  transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gs-pill:hover .gs-pill-disc {
+  background-color: #ffffff33;
+}
+
+/* Signal: the one call to action on a dark band. Ink type, ink disc. */
+.gs-pill-signal {
+  background-color: #eb5b32;
+  color: var(--color-ink-950);
+}
+
+.gs-pill-signal:hover {
+  background-color: #f07350;
+}
+
+.gs-pill-signal .gs-pill-disc,
+.gs-pill-signal:hover .gs-pill-disc {
+  background-color: var(--color-ink-950);
+  color: #ffffff;
+}
+
+/*
+   Light ink, from either direction: the hero measures its reel against the
+   row's own edge, and every other dark band is found by the row itself. Two
+   ways of answering the same question, so they share one set of rules — the
+   ground goes transparent rather than turning black, which means the header
+   takes whatever colour is behind it instead of naming one.
+*/
+[data-hero-over="1"] .gs-header,
+.gs-header[data-over-dark="true"] {
+  background-color: transparent;
+}
+
+[data-hero-over="1"] .gs-nav-ink,
+[data-hero-over="1"] .gs-nav-link,
+.gs-header[data-over-dark="true"] .gs-nav-ink,
+.gs-header[data-over-dark="true"] .gs-nav-link {
+  color: #ffffff;
+}
+
+[data-hero-over="1"] .gs-nav-link:hover,
+[data-hero-over="1"] .gs-nav-muted,
+.gs-header[data-over-dark="true"] .gs-nav-link:hover,
+.gs-header[data-over-dark="true"] .gs-nav-muted {
+  color: rgb(255 255 255 / 0.7);
+}
+
+/* Over the reel the pill turns over with the row: paper pill, ink type. */
+[data-hero-over="1"] .gs-header .gs-pill,
+.gs-header[data-over-dark="true"] .gs-pill {
+  background-color: #ffffff;
+  color: var(--color-ink-950);
+}
+
+[data-hero-over="1"] .gs-header .gs-pill-disc,
+.gs-header[data-over-dark="true"] .gs-pill-disc {
+  background-color: rgb(14 13 11 / 0.13);
+}
+
+/* ---------------------------------------------------------------------------
+   The menu.
+
+   A full-screen plate carrying the site as a contents page. It is a native
+   <dialog>: the width, height and margin below only undo the UA's fit-content
+   sizing, and the `display` and `overlay` transitions are what let it fade out
+   instead of vanishing the instant close() is called.
+
+   The dimming is a spotlight, not a resting state. Every line sits at ink-200
+   — 14:1 on ink-950, far above the AA floor — and the others recede only while
+   a pointer is genuinely on one of them. It is gated behind hover: hover so a
+   touch device never strands the list dim, and it steps around :focus-visible
+   so a keyboard user is never the one being dimmed.
+--------------------------------------------------------------------------- */
+
+.gs-menu {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background-color: var(--color-ink-950);
+  color: #ffffff;
+
+  opacity: 0;
+  transition:
+    opacity 240ms var(--ease-exit),
+    overlay 240ms allow-discrete,
+    display 240ms allow-discrete;
+}
+
+.gs-menu[open] {
+  opacity: 1;
+  transition:
+    opacity 240ms var(--ease-entrance),
+    overlay 240ms allow-discrete,
+    display 240ms allow-discrete;
+}
+
+/* The first frame the plate is rendered on, so it has somewhere to come from. */
+@starting-style {
+  .gs-menu[open] {
+    opacity: 0;
+  }
+}
+
+.gs-menu::backdrop {
+  background-color: var(--color-ink-950);
+}
+
+/* Rows rise as the plate arrives, on a delay set per row by the component. */
+.gs-menu-row {
+  opacity: 0;
+  translate: 0 1.25rem;
+  transition:
+    opacity 400ms var(--ease-signature),
+    translate 400ms var(--ease-signature);
+}
+
+.gs-menu[data-shown="true"] .gs-menu-row {
+  opacity: 1;
+  translate: none;
+}
+
+/* Resting ink. Colour is the only thing that moves on hover, and it moves at
+   `fast` — the row is already where it is going to be. */
+.gs-menu-word,
+.gs-menu-rule,
+.gs-menu-index,
+.gs-menu-back {
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gs-menu-word {
+  color: var(--color-ink-200);
+}
+
+.gs-menu-rule {
+  background-color: var(--color-ink-700);
+}
+
+.gs-menu-index {
+  color: var(--color-ink-400); /* 6.5:1 — the floor for type this small. */
+}
+
+.gs-menu-back {
+  color: #ffffff;
+}
+
+.gs-menu-back:hover {
+  color: var(--color-ink-300);
+}
+
+/* Lit: the line the pointer or the keyboard is on. */
+.gs-menu-item:hover .gs-menu-word,
+.gs-menu-item:focus-visible .gs-menu-word,
+.gs-menu-item:hover .gs-menu-index,
+.gs-menu-item:focus-visible .gs-menu-index {
+  color: #ffffff;
+}
+
+.gs-menu-item:hover .gs-menu-rule,
+.gs-menu-item:focus-visible .gs-menu-rule {
+  background-color: #ffffff;
+}
+
+/* Recessed: only ever the lines the pointer is not on. */
+@media (hover: hover) {
+  .gs-menu-list:has(.gs-menu-item:hover)
+    .gs-menu-item:not(:hover):not(:focus-visible)
+    .gs-menu-word {
+    color: var(--color-ink-700);
+  }
+
+  .gs-menu-list:has(.gs-menu-item:hover)
+    .gs-menu-item:not(:hover):not(:focus-visible)
+    .gs-menu-index {
+    color: var(--color-ink-800);
+  }
+
+  .gs-menu-list:has(.gs-menu-item:hover)
+    .gs-menu-item:not(:hover):not(:focus-visible)
+    .gs-menu-rule {
+    background-color: var(--color-ink-900);
+  }
+}
+
+/* The engagement tabs' timer: the rule over the open tab fills, then the
+   tabs advance. Paused inline while the card is being read. */
+@keyframes gs-tab-timer {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.gs-tab-timer {
+  animation: gs-tab-timer 7s linear both;
+}
+
+/* Reduce travel, keep feedback. See lib/brand/motion.ts. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    /* A stagger is travel measured in time. Removing the duration without
+       the delay leaves the sequence intact and only makes each step snap. */
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
 }
