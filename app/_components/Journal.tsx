@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 import { journal, journalHref } from "@/lib/journal";
 import { ArrowPill } from "./ArrowPill";
+import { JournalIndex } from "./JournalIndex";
 
 /** 36px at 390 to 56px at 1440, held there. */
 const HEADING_STYLE: CSSProperties = {
@@ -19,21 +20,12 @@ const FEATURED_STYLE: CSSProperties = {
   lineHeight: 1.05,
 };
 
-/** 20px at 390 to 26px at 1440, held there. */
-const ENTRY_STYLE: CSSProperties = {
-  fontSize: "clamp(1.25rem, 1.1107rem + 0.571vw, 1.625rem)",
-  letterSpacing: "-0.03em",
-  lineHeight: 1.15,
-};
-
-const pad = (n: number) => String(n).padStart(2, "0");
-
 /**
  * The journal: one featured piece, then the next three as a ruled index.
  *
  * The featured card is a plate and a leaf, the same construction as the
- * process cards, so it reads as part of the same system. Each row of the
- * index is one link; hovering it fills the arrow and nudges the title.
+ * process cards, so it reads as part of the same system. The index below it
+ * is a client island: its rows carry a hover preview that follows the cursor.
  */
 export function Journal() {
   const { featured } = journal;
@@ -41,22 +33,22 @@ export function Journal() {
   return (
     <section
       aria-labelledby="journal-heading"
-      className="relative z-10 bg-surface-page px-5 pt-16 pb-48 sm:px-8 lg:px-12 lg:pt-28 lg:pb-72"
+      className="relative z-10 bg-surface-page px-5 pt-20 pb-56 sm:px-8 lg:px-12 lg:pt-32 lg:pb-80"
     >
-      <div className="border-t border-ink-200 pt-8 lg:pt-12">
+      <div className="border-t border-edge-subtle pt-10 lg:pt-14">
         <p className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-950 uppercase">
           {journal.eyebrow}
         </p>
         <h2
           id="journal-heading"
-          className="mt-5 text-ink-950"
+          className="mt-6 text-ink-950"
           style={HEADING_STYLE}
         >
           {journal.heading}
         </h2>
       </div>
 
-      <article className="mt-10 grid overflow-hidden rounded-[0.75rem] bg-[#f0efed] text-ink-950 lg:mt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)]">
+      <article className="mt-14 grid overflow-hidden rounded-[0.75rem] bg-[#f0efed] text-ink-950 lg:mt-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)]">
         <div className="relative aspect-[16/11] bg-[#16151b] lg:aspect-auto lg:min-h-[26rem]">
           <Image
             src={featured.image.src}
@@ -97,47 +89,7 @@ export function Journal() {
         </div>
       </article>
 
-      <ol className="mt-6 border-t border-ink-200 lg:mt-8">
-        {journal.entries.map((entry, index) => (
-          <li key={entry.slug} className="border-b border-ink-200">
-            <a
-              href={journalHref(entry.slug)}
-              className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 py-5 sm:grid-cols-[4rem_minmax(0,1fr)_auto] lg:grid-cols-[minmax(0,1fr)_minmax(0,6fr)_auto] lg:py-6"
-            >
-              <span className="hidden font-mono text-[0.6875rem] leading-none text-ink-500 sm:block">
-                {pad(index + 1)}
-              </span>
-              <span className="min-w-0">
-                <span className="block font-mono text-[0.625rem] leading-none tracking-[0.04em] text-ink-500 uppercase">
-                  {entry.category}
-                </span>
-                <span
-                  className="mt-2 block transition-transform duration-300 ease-out group-hover:translate-x-1.5"
-                  style={ENTRY_STYLE}
-                >
-                  {entry.title}
-                </span>
-              </span>
-              <span
-                aria-hidden
-                className="grid size-10 place-items-center rounded-full border border-ink-300 text-ink-950 transition-colors duration-200 group-hover:border-ink-950 group-hover:bg-ink-950 group-hover:text-white"
-              >
-                <svg
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-3.5 transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                >
-                  <path d="M4.5 11.5l7-7M5.5 4.5h6v6" />
-                </svg>
-              </span>
-            </a>
-          </li>
-        ))}
-      </ol>
+      <JournalIndex />
     </section>
   );
 }

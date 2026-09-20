@@ -24,7 +24,7 @@ export function Methodology() {
       aria-labelledby="methodology-heading"
       className="relative z-10 bg-surface-page px-5 pt-28 pb-20 sm:px-8 lg:px-12 lg:pt-44 lg:pb-32"
     >
-      <div className="grid gap-8 border-t border-ink-200 pt-8 lg:grid-cols-12 lg:gap-6 lg:pt-10">
+      <div className="grid gap-8 border-t border-edge-subtle pt-8 lg:grid-cols-12 lg:gap-6 lg:pt-10">
         <h2
           id="methodology-heading"
           className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-500 uppercase lg:col-span-3 lg:pt-3 lg:text-[0.8125rem]"

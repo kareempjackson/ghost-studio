@@ -3,7 +3,8 @@
  *
  * One featured piece at full width, then the three after it as a ruled list.
  *
- * PLACEHOLDER: the featured image points at the hero poster. Export the
+ * PLACEHOLDER: the featured image points at the hero poster, and each entry's
+ * hover preview at whichever plate is already in `public/images/`. Export the
  * comp's plate (the profile card, browser and app icons on the dark ground)
  * to `public/images/` and change `featured.image`. Every `href` assumes the
  * article exists; any that does not should come off the list.
@@ -13,6 +14,8 @@ export interface JournalEntry {
   readonly slug: string;
   readonly category: string;
   readonly title: string;
+  /** Shown under the cursor while the row is hovered. */
+  readonly preview: { src: string; alt: string };
 }
 
 export const journal = {
@@ -36,16 +39,19 @@ export const journal = {
       slug: "design-systems-that-grow-with-you",
       category: "Design",
       title: "Design systems that grow with you",
+      preview: { src: "/images/merch.png", alt: "" },
     },
     {
       slug: "built-to-be-handed-over",
       category: "Engineering",
       title: "Built to be handed over",
+      preview: { src: "/images/city-hall.png", alt: "" },
     },
     {
       slug: "how-we-work-together",
       category: "Studio",
       title: "How we work, together",
+      preview: { src: "/media/hero-poster.jpg", alt: "" },
     },
   ],
 } as const satisfies {

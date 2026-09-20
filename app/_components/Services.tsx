@@ -174,7 +174,7 @@ export function Services() {
   const position = useTransform(scrollYProgress, (p) => p * (COUNT - 1));
 
   const header = (
-    <div className="flex items-center justify-between gap-6 border-t border-white/15 pt-8 lg:pt-10">
+    <div className="flex items-center justify-between gap-6 border-t border-white/8 pt-8 lg:pt-10">
       <h2
         id="services-heading"
         className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-300 uppercase sm:text-[0.8125rem]"

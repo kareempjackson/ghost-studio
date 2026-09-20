@@ -311,24 +311,31 @@ button:hover > .gs-nav-muted {
   color: var(--gs-text-primary);
 }
 
-/* The primary control (ArrowPill): ink pill, paper type. */
+/*
+   The primary control (ArrowPill).
+
+   Two tones, and one gesture between them: hovered, each turns into the
+   other — ink to vermilion, vermilion to ink — and the arrow's disc takes
+   whichever ink the label has just left. The disc's travel is in the
+   component; only the colour is here.
+*/
 .gs-pill {
   background-color: var(--color-ink-950);
   color: #ffffff;
 }
 
-.gs-pill:hover {
-  background-color: var(--color-ink-800);
-}
-
-/* The arrow's disc: the label's ink at 13% (#FFFFFF22 on the ink pill). */
 .gs-pill-disc {
   background-color: #ffffff22;
-  transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gs-pill:hover {
+  background-color: #eb5b32;
+  color: var(--color-ink-950);
 }
 
 .gs-pill:hover .gs-pill-disc {
-  background-color: #ffffff33;
+  background-color: var(--color-ink-950);
+  color: #ffffff;
 }
 
 /* Signal: the one call to action on a dark band. Ink type, ink disc. */
@@ -337,13 +344,18 @@ button:hover > .gs-nav-muted {
   color: var(--color-ink-950);
 }
 
-.gs-pill-signal:hover {
-  background-color: #f07350;
+.gs-pill-signal .gs-pill-disc {
+  background-color: var(--color-ink-950);
+  color: #ffffff;
 }
 
-.gs-pill-signal .gs-pill-disc,
-.gs-pill-signal:hover .gs-pill-disc {
+.gs-pill-signal:hover {
   background-color: var(--color-ink-950);
+  color: #ffffff;
+}
+
+.gs-pill-signal:hover .gs-pill-disc {
+  background-color: #ffffff22;
   color: #ffffff;
 }
 
@@ -380,9 +392,25 @@ button:hover > .gs-nav-muted {
   color: var(--color-ink-950);
 }
 
+/* Hovered, it turns over the same way it does anywhere else. */
+[data-hero-over="1"] .gs-header .gs-pill:hover,
+.gs-header[data-over-dark="true"] .gs-pill:hover {
+  background-color: #eb5b32;
+  color: var(--color-ink-950);
+}
+
+/* The white pill's disc is its own ink at 13%, the same as anywhere else. */
 [data-hero-over="1"] .gs-header .gs-pill-disc,
 .gs-header[data-over-dark="true"] .gs-pill-disc {
   background-color: rgb(14 13 11 / 0.13);
+  color: var(--color-ink-950);
+}
+
+/* Hovered it is vermilion, so the disc goes back to ink. */
+[data-hero-over="1"] .gs-header .gs-pill:hover .gs-pill-disc,
+.gs-header[data-over-dark="true"] .gs-pill:hover .gs-pill-disc {
+  background-color: var(--color-ink-950);
+  color: #ffffff;
 }
 
 /* ---------------------------------------------------------------------------

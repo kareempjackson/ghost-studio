@@ -6,8 +6,10 @@
  * client's own team. Each has a one-word name, what it is in three words, a
  * paragraph, and the way through.
  *
- * PLACEHOLDER: the Integrate copy is from the comp. Build and Engage are
- * written to the same shape and need confirming.
+ * The three are set from the `/services` comp, which reads Build as the
+ * standing team and Engage as the scoped project — the other way round from
+ * the first draft of this file. `headline` is the two-line version the cards
+ * on `/services` carry; `copy` is the paragraph under it.
  */
 
 export interface EngagementModel {
@@ -15,6 +17,8 @@ export interface EngagementModel {
   readonly name: string;
   /** What the model is, in three words or fewer. */
   readonly kind: string;
+  /** The offer, set as two lines on the card. */
+  readonly headline: readonly string[];
   readonly copy: string;
   readonly action: { readonly label: string; readonly href: string };
 }
@@ -33,26 +37,30 @@ export const engagement = {
     {
       slug: "build",
       name: "Build",
-      kind: "Project partnership",
-      /* PLACEHOLDER — confirm. */
-      copy: "A defined piece of work, from first question to launch. We scope it, design it and build it with you, then hand over a product your team can run.",
-      action: { label: "Start a project", href: "/contact?model=build" },
+      kind: "Standing team",
+      headline: ["A team that", "stays with you."],
+      copy: "Ongoing design, engineering and product direction for a business with work to keep moving.",
+      action: {
+        label: "Discuss an ongoing team",
+        href: "/contact?model=build",
+      },
     },
     {
       slug: "engage",
       name: "Engage",
-      kind: "Ongoing support",
-      /* PLACEHOLDER — confirm. */
-      copy: "A standing team on call every month. Design, engineering and strategy that keep your product moving, improving and ready for what comes next.",
-      action: { label: "Keep us on hand", href: "/contact?model=engage" },
+      kind: "Scoped project",
+      headline: ["A clear brief.", "A defined outcome."],
+      copy: "A scoped project, from discovery and design through delivery and handover.",
+      action: { label: "Talk about a project", href: "/contact?model=engage" },
     },
     {
       slug: "integrate",
       name: "Integrate",
-      kind: "Embedded team",
-      copy: "Specialist thinking, embedded in your team. We work with your people and processes, bringing design and engineering capacity to the challenges that matter.",
+      kind: "The business behind the work",
+      headline: ["The systems", "behind the business."],
+      copy: "Cloud, identity, collaboration and automation that help the organisation operate.",
       action: {
-        label: "Bring us into your team",
+        label: "Explore your systems",
         href: "/contact?model=integrate",
       },
     },

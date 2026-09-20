@@ -59,7 +59,7 @@ export function PointOfView() {
       data-ground="dark"
       className="relative z-10 bg-black px-5 pt-16 pb-28 text-white sm:px-8 lg:px-12 lg:pt-24 lg:pb-40"
     >
-      <div className="flex items-center justify-between gap-6 border-t border-white/15 pt-8 lg:pt-10">
+      <div className="flex items-center justify-between gap-6 border-t border-white/8 pt-8 lg:pt-10">
         <p className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-300 uppercase sm:text-[0.8125rem]">
           {pointOfView.eyebrow}
         </p>

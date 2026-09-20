@@ -85,7 +85,7 @@ export function Testimonials() {
       aria-labelledby="testimonials-heading"
       className="relative z-10 bg-surface-page px-5 pt-16 pb-20 sm:px-8 lg:px-12 lg:pt-24 lg:pb-24"
     >
-      <div className="grid gap-12 border-t border-ink-200 pt-8 lg:grid-cols-12 lg:gap-6 lg:pt-12">
+      <div className="grid gap-12 border-t border-edge-subtle pt-8 lg:grid-cols-12 lg:gap-6 lg:pt-12">
         <div className="lg:col-span-5">
           <p className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-950 uppercase">
             {testimonials.eyebrow}
@@ -165,7 +165,7 @@ export function Testimonials() {
             </AnimatePresence>
           </div>
 
-          <div className="mt-6 flex items-center justify-between gap-4 border-t border-ink-200 pt-5">
+          <div className="mt-6 flex items-center justify-between gap-4 border-t border-edge-subtle pt-5">
             <p className="font-mono text-[0.6875rem] leading-none tracking-[0.04em] whitespace-nowrap">
               <span className="sr-only">Quote </span>
               {pad(index + 1)} / {pad(ITEMS.length)}

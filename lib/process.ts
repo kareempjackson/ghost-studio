@@ -9,6 +9,8 @@ export type ProcessIcon = "target" | "merge" | "layers" | "cycle";
 
 export interface ProcessStep {
   readonly title: string;
+  /** The step in one word, for the columns on `/services`. */
+  readonly short: string;
   /** The question the step exists to answer. */
   readonly question: string;
   readonly body: string;
@@ -23,6 +25,7 @@ export const process = {
   steps: [
     {
       title: "Discover the job",
+      short: "Discover",
       question: "What are we actually solving?",
       body: "Understand the business, the people and the problem before deciding what to make.",
       outputs: ["Research", "Direction", "Positioning"],
@@ -30,6 +33,7 @@ export const process = {
     },
     {
       title: "Define the direction",
+      short: "Define",
       question: "What does the right solution look like?",
       body: "Turn the findings into a clear strategy, shared priorities and a focused plan.",
       outputs: ["Strategy", "Scope", "Success criteria"],
@@ -37,6 +41,7 @@ export const process = {
     },
     {
       title: "Design & build",
+      short: "Build",
       question: "How do we make it work beautifully?",
       body: "Bring brand, product and engineering together. Prototype, test and build as one team.",
       outputs: ["Design", "Prototyping", "Engineering"],
@@ -44,6 +49,7 @@ export const process = {
     },
     {
       title: "Launch & evolve",
+      short: "Evolve",
       question: "What happens after we go live?",
       body: "Launch with confidence, hand over with care, and improve with real-world feedback.",
       outputs: ["Launch", "Handover", "Iteration"],

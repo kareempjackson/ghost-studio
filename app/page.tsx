@@ -1,4 +1,5 @@
 import { Engagement } from "./_components/Engagement";
+import { ChatLauncher } from "./_components/ChatLauncher";
 import { ContactBand } from "./_components/ContactBand";
 import { ExploreWork } from "./_components/ExploreWork";
 import { Hero } from "./_components/Hero";
@@ -36,6 +37,7 @@ export default function Home() {
           corners open onto the footer beneath it. */}
       <ContactBand />
       <SiteFooter />
+      <ChatLauncher />
     </>
   );
 }

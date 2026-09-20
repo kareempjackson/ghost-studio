@@ -160,7 +160,7 @@ export function Engagement() {
           <div
             role="tablist"
             aria-label={engagement.subtitle}
-            className="mt-10 grid grid-cols-3 gap-4 border-t border-ink-200"
+            className="mt-10 grid grid-cols-3 gap-4 border-t border-edge-subtle"
           >
             {MODELS.map((m, index) => {
               const selected = index === active;

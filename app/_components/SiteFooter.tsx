@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { footer } from "@/lib/footer";
 import { FooterReveal } from "./FooterReveal";
+import { FooterWordmark } from "./FooterWordmark";
 
 const MONO =
   "font-mono text-[0.625rem] leading-none tracking-[0.08em] uppercase";
@@ -96,48 +96,37 @@ export function SiteFooter() {
           </div>
         </div>
 
-        {/*
-          The name and the small print share the last row: the wordmark takes
-          two thirds and sits on the baseline, and the space it leaves is
-          where the way back up and the credits go.
-        */}
-        <div className="mt-14 grid items-end gap-8 lg:mt-20 lg:grid-cols-12 lg:gap-6">
-          <Image
-            src="/logos/wordmark-flat.svg"
-            alt="Ghost Savvy"
-            width={923}
-            height={204}
-            className="h-auto w-full lg:col-span-8"
-          />
+        {/* The name, full width and sitting on the baseline of the page. */}
+        <FooterWordmark />
 
-          <div
-            className={`flex items-end justify-between gap-6 text-ink-400 lg:col-span-4 lg:flex-col lg:items-end lg:justify-between lg:self-stretch ${MONO}`}
+        {/*
+          The small print, as one thin rule of a row under the name: the
+          credits, the sign-off and the way back up, in three equal columns
+          so the middle one sits on the centre of the page.
+        */}
+        <div
+          className={`mt-10 grid gap-x-6 gap-y-3 text-ink-500 sm:grid-cols-3 sm:items-center lg:mt-12 ${MONO}`}
+        >
+          <p>&copy; {new Date().getFullYear()} Ghostsavvy</p>
+          <p className="sm:text-center">{footer.signoff}</p>
+          <a
+            href="#"
+            className="group inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-white sm:justify-self-end"
           >
-            <a
-              href="#"
-              aria-label={footer.top}
-              className="group order-last grid size-12 shrink-0 place-items-center rounded-full border border-white/20 text-white transition-colors duration-200 hover:border-white hover:bg-white hover:text-ink-950 lg:order-first lg:size-14"
+            {footer.top}
+            <svg
+              aria-hidden
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-2.5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5"
             >
-              <svg
-                aria-hidden
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="size-4 transition-transform duration-300 ease-out group-hover:-translate-y-0.5"
-              >
-                <path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" />
-              </svg>
-            </a>
-            <p className="space-y-2 leading-[1.6] lg:text-right">
-              <span className="block">{footer.signoff}</span>
-              <span className="block">
-                &copy; {new Date().getFullYear()} Ghostsavvy
-              </span>
-            </p>
-          </div>
+              <path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" />
+            </svg>
+          </a>
         </div>
       </footer>
     </FooterReveal>

@@ -111,7 +111,7 @@ export function Sectors() {
         <div className="px-5 sm:px-8 lg:px-12">
           <h2
             id="sectors-heading"
-            className="border-t border-ink-200 pt-8 font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-500 uppercase lg:pt-12 lg:text-[0.8125rem]"
+            className="border-t border-edge-subtle pt-8 font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-500 uppercase lg:pt-12 lg:text-[0.8125rem]"
           >
             {sectors.eyebrow}
           </h2>
@@ -125,7 +125,7 @@ export function Sectors() {
         <div className="relative mt-10 flex flex-1 flex-col px-5 sm:px-8 lg:mt-0 lg:block lg:px-0">
           <div
             aria-hidden
-            className="absolute inset-x-0 top-1/2 hidden border-t border-ink-200 lg:block"
+            className="absolute inset-x-0 top-1/2 hidden border-t border-edge-subtle lg:block"
           />
 
           <Swap

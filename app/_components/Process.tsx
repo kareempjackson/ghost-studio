@@ -16,8 +16,11 @@ export function Process() {
 
   return (
     <section
+      id="process"
       aria-label="How we work"
-      className="relative z-10 bg-surface-page px-5 pb-28 sm:px-8 lg:px-12 lg:pb-44"
+      /* `scroll-mt` keeps the fixed header off the first card when /work
+         hands the reader here. */
+      className="relative z-10 scroll-mt-[var(--gs-header-h)] bg-surface-page px-5 pb-28 sm:px-8 lg:px-12 lg:pb-44"
     >
       <ol className="grid gap-4 xl:grid-cols-2 xl:gap-5">
         {process.steps.map((step, index) => (
@@ -53,7 +56,7 @@ export function Process() {
                 </p>
               </div>
 
-              <p className="-mr-6 mt-4 border-t border-ink-200 pt-4 font-mono text-[0.6875rem] leading-none text-primary">
+              <p className="-mr-6 mt-4 border-t border-edge-subtle pt-4 font-mono text-[0.6875rem] leading-none text-primary">
                 {step.outputs.join("  ·  ")}
               </p>
             </div>
