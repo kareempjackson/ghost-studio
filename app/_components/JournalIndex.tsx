@@ -24,14 +24,12 @@ const PREVIEW = { width: 320, height: 150 };
 /** How slack the preview is on the cursor. Lower stiffness, longer tail. */
 const FOLLOW = { stiffness: 240, damping: 30, mass: 0.6 };
 
-const pad = (n: number) => String(n).padStart(2, "0");
-
 /**
  * The journal index: three ruled rows, one link each.
  *
- * Hovering a row fills its arrow, nudges the title, and floats that piece's
- * plate under the cursor — a capsule that trails the pointer a beat behind
- * rather than sticking to it. The plate is decorative: it is pointer-inert,
+ * Hovering a row nudges the title and floats that piece's plate under the
+ * cursor — a capsule that trails the pointer a beat behind rather than
+ * sticking to it. The plate is decorative: it is pointer-inert,
  * hidden from the reader, and never shown to a pen, a finger, or anyone who
  * asked for less motion, all of whom get the row on its own.
  */
@@ -80,38 +78,20 @@ export function JournalIndex() {
         <li key={item.slug} className="border-b border-edge-subtle">
           <a
             href={journalHref(item.slug)}
-            className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 py-7 sm:grid-cols-[4rem_minmax(0,1fr)_auto] lg:grid-cols-[minmax(0,1fr)_minmax(0,6fr)_auto] lg:py-10"
+            className="group block py-7 lg:py-10"
             onPointerEnter={enter(index)}
           >
-            <span className="hidden font-mono text-[0.6875rem] leading-none text-ink-500 sm:block">
-              {pad(index + 1)}
-            </span>
-            <span className="min-w-0">
-              <span className="block font-mono text-[0.625rem] leading-none tracking-[0.04em] text-ink-500 uppercase">
-                {item.category}
-              </span>
-              <span
-                className="mt-3 block transition-transform duration-300 ease-out group-hover:translate-x-1.5"
-                style={ENTRY_STYLE}
-              >
-                {item.title}
-              </span>
+            <span className="block font-mono text-[0.625rem] leading-none tracking-[0.04em] text-ink-500 uppercase">
+              {item.category}
             </span>
             <span
-              aria-hidden
-              className="grid size-10 place-items-center rounded-full border border-ink-300 text-ink-950 transition-colors duration-200 group-hover:border-ink-950 group-hover:bg-ink-950 group-hover:text-white"
+              className="mt-3 block transition-transform duration-300 ease-out group-hover:translate-x-1.5"
+              style={ENTRY_STYLE}
             >
-              <svg
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="size-3.5 transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              >
-                <path d="M4.5 11.5l7-7M5.5 4.5h6v6" />
-              </svg>
+              {item.title}
+            </span>
+            <span className="mt-3 block max-w-[40rem] text-[0.9375rem] leading-[1.6] tracking-[-0.01em] text-ink-600">
+              {item.excerpt}
             </span>
           </a>
         </li>

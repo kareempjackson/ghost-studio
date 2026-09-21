@@ -1,15 +1,8 @@
 "use client";
 
-import {
-  motion,
-  useScroll,
-  useSpring,
-  useTransform,
-  useVelocity,
-} from "motion/react";
 import type { CSSProperties } from "react";
 import { contactBand, email } from "@/lib/footer";
-import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+import { SheetTrails } from "./SheetTrails";
 
 /** 44px at 390 to 80px at 1440, held there. */
 const HEADING_STYLE: CSSProperties = {
@@ -20,42 +13,6 @@ const HEADING_STYLE: CSSProperties = {
 };
 
 /**
- * The colours that trail out from under the band, nearest first: a lighter
- * vermilion, then the yellow and teal from the point-of-view cards.
- */
-const TRAILS = ["#f2875f", "#eedf4e", "#63cdab"] as const;
-/** How far each trail can hang below the one in front of it, in px. */
-const TRAIL_MAX = 22;
-/** Px of trail per px/s of scroll speed. */
-const TRAIL_GAIN = 0.012;
-
-/**
- * One colour hanging under the band. Its drop follows the scroll speed, so
- * a flick leaves a longer trail than a slow drag, and it tucks back under the
- * band as the scroll settles.
- */
-function Trail({
-  color,
-  depth,
-  speed,
-}: {
-  color: string;
-  depth: number;
-  speed: ReturnType<typeof useSpring>;
-}) {
-  const y = useTransform(speed, (v) =>
-    Math.min(Math.max(v, 0) * TRAIL_GAIN * depth, TRAIL_MAX * depth),
-  );
-  return (
-    <motion.div
-      aria-hidden
-      style={{ y, backgroundColor: color, zIndex: -depth }}
-      className="absolute inset-0 rounded-b-[32px]"
-    />
-  );
-}
-
-/**
  * The close: one question on vermilion, and one way to answer it.
  *
  * It sits after `main`, directly over the footer lying underneath, so its
@@ -64,18 +21,9 @@ function Trail({
  * trails out from under its bottom edge.
  */
 export function ContactBand() {
-  const reduced = usePrefersReducedMotion();
-  const { scrollY } = useScroll();
-  const velocity = useVelocity(scrollY);
-  /* Smoothed, so the trail stretches and settles rather than jitters. */
-  const speed = useSpring(velocity, { stiffness: 260, damping: 38, mass: 0.6 });
-
   return (
     <div className="relative z-[1] isolate">
-      {!reduced &&
-        TRAILS.map((color, index) => (
-          <Trail key={color} color={color} depth={index + 1} speed={speed} />
-        ))}
+      <SheetTrails />
       <section
         aria-labelledby="contact-heading"
         className="relative rounded-b-[32px] bg-[#eb5b32] px-5 pt-14 pb-14 text-ink-950 sm:px-8 lg:px-12 lg:pt-16 lg:pb-16"

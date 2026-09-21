@@ -47,7 +47,7 @@ export function SelectedWork() {
               }}
             >
               <a href={projectHref(project.slug)} className="group block">
-                <div className="relative aspect-[1.065] overflow-hidden rounded-[0.75rem] bg-ink-950">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-[0.75rem] bg-ink-950">
                   <Image
                     src={project.image}
                     alt=""
@@ -57,13 +57,13 @@ export function SelectedWork() {
                   />
                 </div>
 
-                <h3 className="mt-6 text-[1.5rem] leading-[1.2] font-normal tracking-[-0.02em] text-primary lg:mt-8 lg:text-[1.75rem]">
+                <h3 className="mt-5 text-[1.25rem] leading-[1.2] font-normal tracking-[-0.02em] text-primary lg:mt-6 lg:text-[1.5rem]">
                   {project.name}
                 </h3>
-                <p className="mt-1.5 text-[1.0625rem] leading-[1.4] text-secondary lg:text-[1.1875rem]">
+                <p className="mt-1 text-[0.9375rem] leading-[1.4] text-secondary lg:text-[1.0625rem]">
                   {project.scope}
                 </p>
-                <span className="mt-6 inline-block bg-ink-100 px-3 py-2 font-mono text-[0.75rem] leading-none tracking-[0.04em] text-primary uppercase lg:mt-8">
+                <span className="mt-5 inline-block bg-ink-100 px-2.5 py-1.5 font-mono text-[0.6875rem] leading-none tracking-[0.04em] text-primary uppercase lg:mt-6">
                   {selectedWork.tag}
                 </span>
               </a>

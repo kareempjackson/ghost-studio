@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { typekit } from "@/lib/brand";
+import { introScript } from "@/lib/intro";
 import "./globals.css";
 
 /**
@@ -76,8 +77,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
          white ground, black ink, at every system setting. */
       data-theme="light"
       className={`${dmSans.variable} ${spaceMono.variable} h-full antialiased`}
+      /* The intro script may set `data-intro` before React hydrates. */
+      suppressHydrationWarning
     >
       <head>
+        {/* Decides, before first paint, whether this tab has seen the intro.
+            See lib/intro.ts. */}
+        <script dangerouslySetInnerHTML={{ __html: introScript }} />
+        {/* The intro's mark, fetched before it has to rise. */}
+        <link rel="preload" as="image" href="/logos/logo-mark.svg" />
+        <link rel="preload" as="image" href="/logos/logo-mark-grey.svg" />
+        <link rel="preload" as="image" href="/media/intro-still.jpg" />
         {typekit.preconnect.map((href) => (
           <link key={href} rel="preconnect" href={href} crossOrigin="" />
         ))}

@@ -111,7 +111,7 @@ export function Sectors() {
         <div className="px-5 sm:px-8 lg:px-12">
           <h2
             id="sectors-heading"
-            className="border-t border-edge-subtle pt-8 font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-500 uppercase lg:pt-12 lg:text-[0.8125rem]"
+            className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-500 uppercase lg:text-[0.8125rem]"
           >
             {sectors.eyebrow}
           </h2>

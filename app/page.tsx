@@ -3,6 +3,7 @@ import { ChatLauncher } from "./_components/ChatLauncher";
 import { ContactBand } from "./_components/ContactBand";
 import { ExploreWork } from "./_components/ExploreWork";
 import { Hero } from "./_components/Hero";
+import { IntroOverlay } from "./_components/IntroOverlay";
 import { Journal } from "./_components/Journal";
 import { Methodology } from "./_components/Methodology";
 import { PointOfView } from "./_components/PointOfView";
@@ -38,6 +39,7 @@ export default function Home() {
       <ContactBand />
       <SiteFooter />
       <ChatLauncher />
+      <IntroOverlay />
     </>
   );
 }

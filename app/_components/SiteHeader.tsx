@@ -107,7 +107,15 @@ function useGroundInk(ref: RefObject<HTMLElement | null>) {
             if (entry.isIntersecting) over.add(entry.target);
             else over.delete(entry.target);
           }
-          header.dataset.overDark = over.size > 0 ? "true" : "false";
+          /* A band inside the lying-under footer does not count. It is
+             sticky to the bottom of the screen, so its box spans the
+             viewport — and on a short window reaches up into the row's
+             strip — while the page covers every pixel of it. Only a band
+             the reader can actually see decides the ink. */
+          const seen = [...over].some(
+            (band) => !band.closest("[data-reveal='true']"),
+          );
+          header.dataset.overDark = seen ? "true" : "false";
         },
         {
           rootMargin: `0px 0px ${row - window.innerHeight}px 0px`,
@@ -211,10 +219,13 @@ export function SiteHeader() {
               className="grid size-11 shrink-0 place-items-center"
             >
               <span className="sr-only">Open menu</span>
-              <span aria-hidden className="gs-nav-muted grid w-5 gap-[5px]">
-                <span className="h-[1.5px] rounded-full bg-current" />
-                <span className="h-[1.5px] rounded-full bg-current" />
-                <span className="h-[1.5px] rounded-full bg-current" />
+              <span
+                aria-hidden
+                className="gs-nav-ink flex size-6 flex-col justify-between py-1 text-ink-950"
+              >
+                <span className="h-[2.5px] w-full rounded-full bg-current" />
+                <span className="h-[2.5px] w-full rounded-full bg-current" />
+                <span className="h-[2.5px] w-full rounded-full bg-current" />
               </span>
             </button>
           </div>

@@ -7,6 +7,23 @@
 
 export const email = "hello@ghostsavvy.com";
 
+/**
+ * Where else the studio is. PLACEHOLDER: the Instagram handle is read off the
+ * comp; the LinkedIn company slug is a guess. Confirm both before this ships.
+ */
+export const social = [
+  {
+    id: "instagram",
+    label: "Instagram",
+    href: "https://www.instagram.com/ghostsavvystudios",
+  },
+  {
+    id: "linkedin",
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/ghostsavvystudios",
+  },
+] as const;
+
 export const contactBand = {
   eyebrow: "Your next chapter starts here",
   heading: ["Have a good", "feeling about this?"],

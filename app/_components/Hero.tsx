@@ -308,49 +308,56 @@ export function Hero() {
             className="relative w-full"
             style={{ aspectRatio: "1512 / 323" }}
           >
-            <motion.div
-              aria-hidden
-              style={{
-                ...wordmarkSplitCss.left,
-                ...letterMask(wordmarkSplit.left.src),
-                x: leftX,
-              }}
-              className="absolute top-0 h-full text-ink-100"
-            />
-            <motion.div
-              aria-hidden
-              style={{
-                ...wordmarkSplitCss.right,
-                ...letterMask(wordmarkSplit.right.src),
-                x: rightX,
-              }}
-              className="absolute top-0 h-full text-ink-100"
-            />
+            {/* The intro reads the artwork box off this. */}
+            <div className="gs-hero-rise absolute inset-0">
+              <div className="gs-hero-slot gs-hero-slot-left absolute inset-0">
+                <motion.div
+                  aria-hidden
+                  style={{
+                    ...wordmarkSplitCss.left,
+                    ...letterMask(wordmarkSplit.left.src),
+                    x: leftX,
+                  }}
+                  className="gs-hero-letter absolute top-0 h-full text-ink-100"
+                />
+              </div>
+              <div className="gs-hero-slot gs-hero-slot-right absolute inset-0">
+                <motion.div
+                  aria-hidden
+                  style={{
+                    ...wordmarkSplitCss.right,
+                    ...letterMask(wordmarkSplit.right.src),
+                    x: rightX,
+                  }}
+                  className="gs-hero-letter absolute top-0 h-full text-ink-100"
+                />
+              </div>
 
-            {/*
+              {/*
               Resting position comes from the artwork's own aperture, in per
               cent, so the opening is correct before a single frame runs.
             */}
-            <motion.div
-              style={{ ...wordmarkApertureCss, ...openingStyle }}
-              /* Dark ground for the header's ink, once it is pushed under it. */
-              data-ground="dark"
-              className="absolute overflow-hidden rounded-pill bg-ink-950 will-change-[width,height,transform]"
-            >
-              <video
-                ref={videoRef}
-                className="size-full object-cover"
-                poster="/media/hero-poster.jpg"
-                preload="metadata"
-                muted
-                loop
-                playsInline
-                aria-label="Ghost Savvy Studios showreel"
+              <motion.div
+                style={{ ...wordmarkApertureCss, ...openingStyle }}
+                /* Dark ground for the header's ink, once it is pushed under it. */
+                data-ground="dark"
+                className="gs-hero-aperture absolute overflow-hidden rounded-pill bg-ink-950 will-change-[width,height,transform]"
               >
-                <source src="/media/hero.mp4" type="video/mp4" />
-              </video>
-              <CursorPlay onActivate={openReel} />
-            </motion.div>
+                <video
+                  ref={videoRef}
+                  className="size-full object-cover"
+                  poster="/media/hero-poster.jpg"
+                  preload="metadata"
+                  muted
+                  loop
+                  playsInline
+                  aria-label="Ghost Savvy Studios showreel"
+                >
+                  <source src="/media/hero.mp4" type="video/mp4" />
+                </video>
+                <CursorPlay onActivate={openReel} />
+              </motion.div>
+            </div>
           </div>
         </div>
 
@@ -363,7 +370,9 @@ export function Hero() {
           style={claimStyle}
           className="px-5 pb-[6svh] sm:px-8 lg:px-12"
         >
-          <Claim headingId="hero-heading" />
+          <div className="gs-hero-claim">
+            <Claim headingId="hero-heading" />
+          </div>
         </motion.div>
       </div>
     </section>

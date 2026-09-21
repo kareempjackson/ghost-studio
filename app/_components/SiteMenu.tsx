@@ -1,19 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import Image from "next/image";
+import { useEffect, useRef, type CSSProperties } from "react";
+import { social } from "@/lib/footer";
 import { siteNavigation } from "@/lib/navigation";
+import { projectHref, projects } from "@/lib/work";
 import { Mark } from "./Mark";
-import { Type } from "./Type";
 
 /**
- * The menu, as a full-screen plate.
+ * The menu, as a white sheet dropped over the top of the page.
  *
- * A printed contents page: the six routes of the site set at section-opener
- * size, each one counted, with a leader rule running from the word out to its
- * number. The rule is the same hairline the rest of the site is built on,
- * doing the job it has done in books for four hundred years — carrying the eye
- * across the gap without adding a second graphic idea.
+ * It does not take the whole screen: it comes down from the top edge as far
+ * as it needs to, with the same rounded bottom corners as the orange close,
+ * and the page stays dimmed beneath it. On the way down the colours trail
+ * out from under its bottom edge, the teal first and the white last, and
+ * they fold back under the sheet as it settles. The routes are set small and
+ * plain, and one piece of work sits beside them so the menu shows the studio
+ * as well as the site.
  *
  * Three notes on the build:
  *
@@ -21,17 +25,59 @@ import { Type } from "./Type";
  *    Escape, the inert page behind it, top-layer stacking over the fixed
  *    header, and the return of focus to the button that opened it are all the
  *    platform's job. Nothing here re-implements any of them.
- * 2. The dimming is a spotlight, not a resting state. Every line sits at
- *    ink-200 — 14:1 on this ground — and the others recede only while a
- *    pointer is actually on one of them. Nobody reading the menu reads it dim.
- *    See the `.gs-menu` block in globals.css.
- * 3. The mark is drawn at the header's own coordinates, so opening the menu
- *    does not move the logo. The plate arrives behind it.
+ * 2. The dialog itself is the whole screen and has no ground. The sheet is a
+ *    child of it, so a click that lands on the dialog has landed on the
+ *    dimmed page, and closes the menu.
+ * 3. The mark is drawn at the header's own size and coordinates, so opening
+ *    the menu does not move the logo. The sheet arrives behind it.
  */
 
 /** Lead-in before the first row rises, and the gap between rows, in ms. */
-const LEAD_IN = 60;
-const STAGGER = 45;
+const LEAD_IN = 280;
+const STAGGER = 40;
+
+/** Nearest first, the same three that trail under the orange close. */
+const TRAILS = ["#f2875f", "#eedf4e", "#63cdab"] as const;
+
+/** The one piece of work the menu carries. */
+const FEATURED = projects[0];
+
+/**
+ * The two marks, drawn as one family: outline only, one stroke weight, the
+ * same rounded square around both, at a 2px stroke so they carry the same
+ * weight as the Close in the opposite corner. Neither is the platform's own filled
+ * logo — at this size a filled glyph reads as a sticker, and the menu is
+ * set in line, not in badges.
+ */
+const ICON_PROPS = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: "size-5",
+  "aria-hidden": true,
+  focusable: "false",
+} as const;
+
+const SOCIAL_ICON = {
+  instagram: (
+    <svg {...ICON_PROPS}>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+      <circle cx="12" cy="12" r="3.75" />
+      <circle cx="16.9" cy="7.1" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  linkedin: (
+    <svg {...ICON_PROPS}>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+      <path d="M8.5 10.75v5.5" />
+      <circle cx="8.5" cy="7.9" r="1.1" fill="currentColor" stroke="none" />
+      <path d="M11.75 16.25v-5.5M11.75 13.25c0-1.55.95-2.5 2.25-2.5s2.25.95 2.25 2.5v3" />
+    </svg>
+  ),
+} as const;
 
 export interface SiteMenuProps {
   /** Matches the `aria-controls` on the button that opens it. */
@@ -105,69 +151,154 @@ export function SiteMenu({ id, open, onClose }: SiteMenuProps) {
   }, [open]);
 
   return (
-    <dialog ref={dialogRef} id={id} aria-label="Site menu" className="gs-menu">
-      <div className="flex h-full flex-col">
-        <div className="flex h-[var(--gs-header-h)] shrink-0 items-center justify-between gap-8 px-5 sm:px-8 lg:px-10">
-          <Link
-            href="/"
-            onClick={onClose}
-            className="shrink-0"
-            aria-label="Ghost Savvy Studios — home"
-          >
-            <Mark className="size-12 sm:size-14 lg:size-16" decorative />
-          </Link>
+    <dialog
+      ref={dialogRef}
+      id={id}
+      aria-label="Site menu"
+      className="gs-menu"
+      /* The dialog is the dimmed page around the sheet; a click on it is a
+         click outside. */
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="gs-menu-stack">
+        {TRAILS.map((color, index) => (
+          <div
+            key={color}
+            aria-hidden
+            className="gs-menu-layer gs-menu-trail"
+            style={
+              {
+                "--d": index + 1,
+                backgroundColor: color,
+                zIndex: -(index + 1),
+              } as CSSProperties
+            }
+          />
+        ))}
 
-          {/*
-            The visible word is "Back", so the accessible name starts with it:
-            WCAG 2.5.3 asks that what a user says matches what they read. The
-            rest is only there because "Back" on its own says nothing about
-            where.
-          */}
-          <button
-            ref={backRef}
-            type="button"
-            onClick={onClose}
-            className="gs-menu-back inline-flex min-h-11 shrink-0 items-center font-sans text-[1.0625rem] font-bold tracking-[0.06em] uppercase"
-          >
-            Back
-            <span className="sr-only">&nbsp;to the page</span>
-          </button>
-        </div>
+        <div
+          className="gs-menu-layer gs-menu-sheet flex flex-col"
+          style={{ "--d": 0 } as CSSProperties}
+        >
+          <div className="flex h-[var(--gs-header-h)] shrink-0 items-center justify-between gap-8 px-5 sm:px-8 lg:px-12">
+            <Link
+              href="/"
+              onClick={onClose}
+              className="flex h-[var(--gs-header-h)] shrink-0 items-center"
+              aria-label="Ghost Savvy Studios — home"
+            >
+              <Mark className="size-24 shrink-0 lg:size-28" decorative />
+            </Link>
 
-        <nav aria-label="Site" className="min-h-0 flex-1 overflow-y-auto">
-          <ul className="gs-menu-list flex min-h-full flex-col justify-evenly px-5 pb-12 sm:px-8 lg:px-10">
-            {siteNavigation.map((item, index) => (
-              <li
-                key={item.href}
-                className="gs-menu-row"
-                /* The delay is emitted unconditionally; reduced motion zeroes
-                   it in the stylesheet. Deciding it here would mean the
-                   server and the client rendering different attributes. */
-                style={{ transitionDelay: `${LEAD_IN + index * STAGGER}ms` }}
+            {/*
+              The visible word is "Close", so the accessible name starts with
+              it: WCAG 2.5.3 asks that what a user says matches what they read.
+            */}
+            <button
+              ref={backRef}
+              type="button"
+              onClick={onClose}
+              className="gs-menu-back inline-flex min-h-11 shrink-0 items-center gap-2.5 font-sans text-[0.9375rem] leading-none font-medium tracking-[-0.01em]"
+            >
+              Close
+              <span aria-hidden className="relative block size-3.5">
+                <span className="absolute inset-x-0 top-1/2 h-[2.25px] -translate-y-1/2 rotate-45 rounded-full bg-current" />
+                <span className="absolute inset-x-0 top-1/2 h-[2.25px] -translate-y-1/2 -rotate-45 rounded-full bg-current" />
+              </span>
+              <span className="sr-only">&nbsp;the menu</span>
+            </button>
+          </div>
+
+          <div className="grid min-h-0 flex-1 content-start gap-12 overflow-y-auto px-5 pt-10 pb-14 sm:px-8 lg:grid-cols-12 lg:content-stretch lg:gap-12 lg:px-12 lg:pt-14 lg:pb-12">
+            {/* The links at the top of the column and the studio's other
+                addresses at the foot of it, so the bottom edge of the sheet
+                is held at both corners: the elsewhere on the left, the work
+                on the right. */}
+            <div className="flex flex-col gap-12 lg:col-span-7 lg:justify-between">
+              <nav aria-label="Site">
+                <ul className="gs-menu-list flex flex-col gap-1">
+                  {siteNavigation.map((item, index) => (
+                    <li
+                      key={item.href}
+                      className="gs-menu-row"
+                      /* The delay is emitted unconditionally; reduced motion
+                       zeroes it in the stylesheet. Deciding it here would
+                       mean the server and the client rendering different
+                       attributes. */
+                      style={{
+                        transitionDelay: `${LEAD_IN + index * STAGGER}ms`,
+                      }}
+                    >
+                      <a
+                        href={item.href}
+                        onClick={onClose}
+                        className="gs-menu-item inline-flex py-1.5"
+                      >
+                        <span className="gs-menu-word text-[1.75rem] leading-[1.1] font-normal tracking-[-0.04em] lg:text-[2.25rem]">
+                          {item.label}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              <ul
+                aria-label="Ghost Savvy elsewhere"
+                /* The hit areas are 40px but the icons are 20px, so the row
+                   is pulled left by the difference to sit on the links' edge. */
+                className="gs-menu-row -ml-2.5 flex"
+                style={{
+                  transitionDelay: `${LEAD_IN + siteNavigation.length * STAGGER}ms`,
+                }}
               >
-                <a
-                  href={item.href}
-                  onClick={onClose}
-                  className="gs-menu-item grid grid-cols-[auto_minmax(1.5rem,1fr)_auto] items-center gap-4 py-2 sm:gap-8 lg:gap-14"
-                >
-                  <Type role="display-l" as="span" className="gs-menu-word">
-                    {item.label}
-                  </Type>
-                  {/* The leader. Ornament, and named as such. */}
-                  <span aria-hidden className="gs-menu-rule h-px w-full" />
-                  <Type
-                    role="label"
-                    as="span"
-                    className="gs-menu-index"
-                    aria-hidden
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </Type>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+                {social.map((item) => (
+                  <li key={item.id}>
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${item.label} (opens in a new tab)`}
+                      className="grid size-10 place-items-center text-ink-950 transition-colors duration-200 hover:text-ink-500"
+                    >
+                      {SOCIAL_ICON[item.id]}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Off to the bottom-right corner on wide screens: the links own
+                the top of the sheet, and the work sits where the eye lands
+                last, as a postscript rather than a rival. */}
+            <div
+              className="gs-menu-row lg:col-span-4 lg:col-start-9 lg:w-[18rem] lg:self-end lg:justify-self-end"
+              style={{
+                transitionDelay: `${LEAD_IN + siteNavigation.length * STAGGER}ms`,
+              }}
+            >
+              <a
+                href={projectHref(FEATURED.slug)}
+                onClick={onClose}
+                /* The plate carries no words, so the link names itself. */
+                aria-label={`${FEATURED.name} — ${FEATURED.scope}`}
+                className="group block"
+              >
+                <div className="relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-[0.625rem] bg-ink-950 lg:w-full lg:max-w-[18rem]">
+                  <Image
+                    src={FEATURED.image}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1024px) 18rem, 6rem"
+                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                  />
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </dialog>
   );
