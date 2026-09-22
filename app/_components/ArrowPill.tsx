@@ -39,13 +39,17 @@ const SWING = "duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]";
 
 export function ArrowPill({
   href,
+  submit = false,
   children,
   size = "md",
   tone = "ink",
   className = "",
   ariaLabel,
 }: {
-  href: string;
+  /** Where it goes. Leave it off and set `submit` to send a form instead. */
+  href?: string;
+  /** Renders a submit button, for the one control that ends a form. */
+  submit?: boolean;
   children: ReactNode;
   size?: keyof typeof SIZE;
   tone?: keyof typeof TONE;
@@ -54,13 +58,9 @@ export function ArrowPill({
   className?: string;
 }) {
   const spec = SIZE[size];
-
-  return (
-    <a
-      href={href}
-      aria-label={ariaLabel}
-      className={`${TONE[tone]} group relative items-center rounded-pill font-mono leading-none uppercase transition-colors duration-300 ${spec.pill} ${className || "inline-flex"}`}
-    >
+  const classes = `${TONE[tone]} group relative items-center rounded-pill font-mono leading-none uppercase transition-colors duration-300 ${spec.pill} ${className || "inline-flex"}`;
+  const inner = (
+    <>
       <span className={`block transition-[padding] ${SWING} ${spec.label}`}>
         {children}
       </span>
@@ -80,6 +80,16 @@ export function ArrowPill({
           <path d="M3 8h10M9 4l4 4-4 4" />
         </svg>
       </span>
+    </>
+  );
+
+  return submit ? (
+    <button type="submit" aria-label={ariaLabel} className={classes}>
+      {inner}
+    </button>
+  ) : (
+    <a href={href} aria-label={ariaLabel} className={classes}>
+      {inner}
     </a>
   );
 }

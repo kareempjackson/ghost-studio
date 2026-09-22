@@ -33,34 +33,70 @@ const initials = (name: string) =>
     .join("")
     .slice(0, 2);
 
-function Arrow({ flip = false }: { flip?: boolean }) {
+/** Quick out, long settle — the curve every pill on the site opens on. */
+const SWING = "duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]";
+
+/**
+ * Prev and next, as the site's own pill: same ink, same disc, and the same
+ * gesture on hover as every `ArrowPill` — the pill turns over and the disc
+ * travels the length of it to the other end, the label making room as it
+ * goes. The disc starts at whichever end leads, so Prev's runs left to right
+ * and Next's right to left, and the two mirror each other.
+ *
+ * Sizes are `ArrowPill`'s small ones: a 32px disc a 4px gap in from the end,
+ * so the far position is the full width less the disc and both gaps.
+ */
+function StepButton({
+  direction,
+  label,
+  onClick,
+  children,
+}: {
+  direction: "prev" | "next";
+  label: string;
+  onClick: () => void;
+  children: string;
+}) {
+  const prev = direction === "prev";
   return (
-    <span
-      aria-hidden
-      className="gs-pill-disc grid size-8 shrink-0 place-items-center rounded-pill"
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="gs-pill group relative inline-flex h-10 items-center rounded-pill font-mono text-[0.75rem] leading-none tracking-[0.08em] uppercase transition-colors duration-300"
     >
-      <svg
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={`size-3.5 transition-transform duration-300 ease-out ${
-          flip
-            ? "rotate-180 group-hover:-translate-x-0.5"
-            : "group-hover:translate-x-0.5"
+      <span
+        className={`block transition-[padding] ${SWING} ${
+          prev
+            ? "pr-5 pl-11 group-hover:pr-11 group-hover:pl-5"
+            : "pr-11 pl-5 group-hover:pr-5 group-hover:pl-11"
         }`}
       >
-        <path d="M3 8h10M9 4l4 4-4 4" />
-      </svg>
-    </span>
+        {children}
+      </span>
+      <span
+        aria-hidden
+        className={`gs-pill-disc absolute top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-pill ${SWING} ${
+          prev
+            ? "left-1 transition-[left,background-color] group-hover:left-[calc(100%-2.25rem)]"
+            : "right-1 transition-[right,background-color] group-hover:right-[calc(100%-2.25rem)]"
+        }`}
+      >
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.25"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`size-3.5 ${prev ? "rotate-180" : ""}`}
+        >
+          <path d="M3 8h10M9 4l4 4-4 4" />
+        </svg>
+      </span>
+    </button>
   );
 }
-
-/** The pill, as a button: same ink, same disc, arrow at whichever end leads. */
-const STEP_CLASS =
-  "gs-pill group inline-flex h-10 items-center gap-4 rounded-pill font-mono text-[0.75rem] leading-none tracking-[0.08em] uppercase transition-colors duration-200";
 
 /**
  * What clients say, one quote at a time.
@@ -171,24 +207,20 @@ export function Testimonials() {
               {pad(index + 1)} / {pad(ITEMS.length)}
             </p>
             <div className="flex gap-2">
-              <button
-                type="button"
+              <StepButton
+                direction="prev"
+                label="Previous quote"
                 onClick={() => step(-1)}
-                aria-label="Previous quote"
-                className={`${STEP_CLASS} pr-5 pl-1`}
               >
-                <Arrow flip />
                 Prev
-              </button>
-              <button
-                type="button"
+              </StepButton>
+              <StepButton
+                direction="next"
+                label="Next quote"
                 onClick={() => step(1)}
-                aria-label="Next quote"
-                className={`${STEP_CLASS} pr-1 pl-5`}
               >
                 Next
-                <Arrow />
-              </button>
+              </StepButton>
             </div>
           </div>
         </div>

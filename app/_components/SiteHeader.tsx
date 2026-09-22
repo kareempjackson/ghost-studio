@@ -9,64 +9,10 @@ import { Mark } from "./Mark";
 import { SiteMenu } from "./SiteMenu";
 
 /**
- * Below this the row is always shown: the top of the page is not a scroll
- * direction, and a header that hides on the first flick of a short page has
- * nothing to hide for.
- */
-const REVEAL_AT = 96;
-
-/**
- * Movement under this is noise — a trackpad settling, a phone in a hand — and
- * a row that answers noise flickers. The reader has to mean it.
- */
-const DEADZONE = 8;
-
-/**
- * True while the reader is heading down the page past the first screen.
- *
- * Read off a rAF-throttled passive listener: scroll fires far faster than the
- * screen paints, and the only question being asked of it is which way the last
- * meaningful movement went. Nothing here reads layout, so it never forces a
- * synchronous reflow on a scroll frame.
- */
-function useHidingHeader(disabled: boolean) {
-  const [hidden, setHidden] = useState(false);
-  const lastY = useRef(0);
-
-  useEffect(() => {
-    if (disabled) return;
-
-    lastY.current = window.scrollY;
-    let queued = false;
-
-    const read = () => {
-      queued = false;
-      const y = window.scrollY;
-      const delta = y - lastY.current;
-      if (Math.abs(delta) < DEADZONE) return;
-      lastY.current = y;
-      setHidden(y > REVEAL_AT && delta > 0);
-    };
-
-    const onScroll = () => {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(read);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [disabled]);
-
-  return hidden && !disabled;
-}
-
-/**
  * Which ground the row is standing on.
  *
- * The header is fixed and the page scrolls under it, so the ink it needs is a
- * property of whatever happens to be behind the row at the time, not of the
- * page. Any band that needs light ink says so with `data-ground="dark"`, and
+ * The header sits over the top of the page, so the ink it needs is a
+ * property of whatever happens to be behind the row, not of the page. Any band that needs light ink says so with `data-ground="dark"`, and
  * this watches a strip of the viewport exactly as tall as the row: the moment
  * such a band overlaps that strip the header goes transparent and turns white,
  * which lets it take the colour of the band rather than sit on it as a plate.
@@ -157,8 +103,6 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   /* The dialog's own close event calls this, so it has to be stable. */
   const close = useCallback(() => setOpen(false), []);
-  /* The row holds still while the menu is up — the button is in it. */
-  const hidden = useHidingHeader(open);
   const headerRef = useRef<HTMLElement>(null);
   useGroundInk(headerRef);
 
@@ -166,8 +110,7 @@ export function SiteHeader() {
     <>
       <header
         ref={headerRef}
-        data-hidden={hidden}
-        className="gs-header fixed inset-x-0 top-0 z-50"
+        className="gs-header absolute inset-x-0 top-0 z-50"
       >
         <div className="flex h-[var(--gs-header-h)] w-full items-center justify-between gap-8 px-5 sm:px-8 lg:px-12">
           {/*
@@ -194,7 +137,7 @@ export function SiteHeader() {
             />
           </Link>
 
-          <div className="flex items-center gap-4 lg:gap-10 xl:gap-12">
+          <div className="flex items-center gap-3 lg:gap-6 xl:gap-7">
             <nav aria-label="Primary" className="hidden lg:block">
               <ul className="flex items-center gap-8 xl:gap-12">
                 {headerNavigation.map((item) => (
@@ -216,16 +159,23 @@ export function SiteHeader() {
               onClick={() => setOpen(true)}
               aria-expanded={open}
               aria-controls={MENU_ID}
-              className="grid size-11 shrink-0 place-items-center"
+              className="group grid size-11 shrink-0 place-items-center"
             >
               <span className="sr-only">Open menu</span>
+              {/*
+                Three lines with round ends. Hovered, they draw in toward the
+                right edge to three lengths — full, two thirds, one third —
+                one after another, so the mark reads as a list tapering off:
+                a menu, about to open. The width moves rather than a scale,
+                because a scale would squash the round ends into ovals.
+              */}
               <span
                 aria-hidden
                 className="gs-nav-ink flex size-6 flex-col justify-between py-1 text-ink-950"
               >
-                <span className="h-[2.5px] w-full rounded-full bg-current" />
-                <span className="h-[2.5px] w-full rounded-full bg-current" />
-                <span className="h-[2.5px] w-full rounded-full bg-current" />
+                <span className="ml-auto h-[3px] w-full rounded-full bg-current" />
+                <span className="ml-auto h-[3px] w-full rounded-full bg-current transition-[width] delay-[40ms] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-2/3 group-focus-visible:w-2/3" />
+                <span className="ml-auto h-[3px] w-full rounded-full bg-current transition-[width] delay-[80ms] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:w-1/3 group-focus-visible:w-1/3" />
               </span>
             </button>
           </div>
@@ -234,7 +184,7 @@ export function SiteHeader() {
 
       {/*
         Outside the header, because a modal dialog is lifted into the top layer
-        and stacks above the fixed row regardless of where it is written. The
+        and stacks above the row regardless of where it is written. The
         header keeps the button; the plate keeps its own way out.
       */}
       <SiteMenu id={MENU_ID} open={open} onClose={close} />

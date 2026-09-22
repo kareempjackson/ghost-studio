@@ -269,8 +269,8 @@
 /* ---------------------------------------------------------------------------
    Header ink.
 
-   The header is fixed, so for part of the hero sequence the reel is directly
-   behind it. `data-hero-over` is set by the hero from the measured top edge of
+   The header sits over the top of the page, so for part of the hero sequence
+   the reel is directly behind it. `data-hero-over` is set by the hero from the measured top edge of
    the opening — not from a guessed scroll position — so the flip happens
    exactly when the picture arrives under the header and again when it leaves.
 --------------------------------------------------------------------------- */
@@ -279,19 +279,7 @@
   background-color: var(--gs-surface-page);
   transition:
     background-color 240ms var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
-    color 240ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/*
-   Reading is downward. The header leaves while the reader is going that way
-   and comes back the moment they turn around, which is when a way out is what
-   they are looking for. It travels by its own height and no further, so it is
-   never a panel sliding over the page — and `visibility` is left alone, so a
-   keyboard tabbing into a link inside it brings the whole row back.
-*/
-.gs-header[data-hidden="true"] {
-  transform: translateY(-100%);
+    color 240ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .gs-nav-ink {
@@ -561,9 +549,87 @@ button:hover > .gs-nav-muted {
   color: var(--color-signal-700);
 }
 
+/* The menu button, turning into its own way out. Three 3px lines laid out
+   exactly as the header's icon — 24px box, 4px in from top and bottom — so
+   the first frame of the open menu is the button that was just pressed.
+   Once the sheet is shown, the outer two slide to the middle and cross, and
+   the middle one draws in to nothing from both ends. A beat of delay, so
+   the reader sees the lines they clicked before they turn. */
+.gs-burger-line {
+  position: absolute;
+  inset-inline: 0;
+  height: 3px;
+  border-radius: 9999px;
+  background-color: currentColor;
+  transition:
+    translate 450ms var(--ease-signature),
+    rotate 450ms var(--ease-signature),
+    scale 300ms var(--ease-signature),
+    opacity 200ms var(--ease-signature);
+}
+
+.gs-burger-top {
+  top: 4px;
+}
+
+.gs-burger-mid {
+  top: 10.5px;
+}
+
+.gs-burger-bot {
+  top: 17px;
+}
+
+.gs-menu[data-shown="true"] .gs-burger-line {
+  transition-delay: 120ms;
+}
+
+.gs-menu[data-shown="true"] .gs-burger-top {
+  translate: 0 6.5px;
+  rotate: 45deg;
+}
+
+.gs-menu[data-shown="true"] .gs-burger-mid {
+  scale: 0 1;
+  opacity: 0;
+}
+
+.gs-menu[data-shown="true"] .gs-burger-bot {
+  translate: 0 -6.5px;
+  rotate: -45deg;
+}
+
 /* Recessed: only ever the lines the pointer is not on. */
 @media (hover: hover) {
   .gs-menu-list:has(.gs-menu-item:hover)
+    .gs-menu-item:not(:hover):not(:focus-visible)
+    .gs-menu-word {
+    color: var(--color-ink-300);
+  }
+}
+
+/*
+   An open group is exempt: while the pointer is anywhere on it, its label
+   and its routes stay in ink — they are what is being read. Only once the
+   pointer is on one of the routes do the others step back, the same way the
+   main list does.
+*/
+@media (hover: hover) {
+  .gs-menu-list
+    .gs-menu-group:hover
+    > .gs-menu-item:not(:hover):not(:focus-visible)
+    .gs-menu-word,
+  .gs-menu-list
+    .gs-menu-group:hover
+    .gs-menu-sub
+    .gs-menu-item:not(:hover):not(:focus-visible)
+    .gs-menu-word {
+    color: var(--color-ink-950);
+  }
+
+  .gs-menu-list
+    .gs-menu-group:hover
+    .gs-menu-sub:has(.gs-menu-item:hover)
     .gs-menu-item:not(:hover):not(:focus-visible)
     .gs-menu-word {
     color: var(--color-ink-300);

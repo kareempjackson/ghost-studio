@@ -31,34 +31,35 @@ export const contactBand = {
 } as const;
 
 export const footer = {
-  motto: ["Independent minds.", "Shared ambition."],
-  summary: [
-    "Strategy, design and engineering.",
-    "Built together. Built to last.",
-  ],
   explore: {
     label: "Explore",
     links: [
       { label: "Our work", href: "/work" },
       { label: "What we do", href: "/services" },
-      { label: "Journal", href: "/journal" },
+      { label: "Insights", href: "/insights" },
+      { label: "Ghost Labs", href: "/ghost-labs" },
     ],
   },
-  more: {
-    label: "More from Ghost Savvy",
-    links: [
-      { label: "Ghost Labs", href: "/labs" },
-      { label: "Ghost Gives", href: "/gives" },
-      { label: "Ghost U", href: "/u" },
-    ],
+  /* PLACEHOLDER — no mailing list is connected yet. The sign-up hands a
+     pre-written request to the visitor's own mail app, addressed to `email`. */
+  newsletter: {
+    heading: "Notes from the studio, once a month.",
+    placeholder: "Your email address",
+    action: "Subscribe",
+    subject: "Newsletter sign-up",
+    note: {
+      before: "By signing up you agree to our",
+      link: { label: "Privacy Policy", href: "/privacy" },
+      after: "We look after your data. Unsubscribe anytime.",
+    },
+    done: "Your mail app has the request ready. Send it and you're on the list.",
+    invalid: "That doesn't look like an email address yet.",
   },
-  start: {
-    label: "Let’s make a start",
-    links: [
-      { label: "Tell us about your project", href: "/contact" },
-      { label: "Send an email", href: `mailto:${email}` },
-    ],
-  },
-  signoff: "Built to be handed over.",
+  /* PLACEHOLDER — none of these pages exist yet; each link 404s until it does. */
+  legal: [
+    { label: "Privacy", href: "/privacy" },
+    { label: "Cookie policy", href: "/cookies" },
+    { label: "Terms and conditions", href: "/terms" },
+  ],
   top: "Back to top",
 } as const;
