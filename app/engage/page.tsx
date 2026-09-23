@@ -1,11 +1,9 @@
-import { scaffoldPages } from "@/lib/scaffold";
-import { ScaffoldPage, scaffoldMetadata } from "../_components/ScaffoldPage";
+import { engagePage } from "@/lib/engage";
+import { TrackPage, trackMetadata } from "../_components/TrackPage";
 
-/** `/engage` — scaffold with test content; see lib/scaffold.ts. */
-const page = scaffoldPages.engage;
-
-export const metadata = scaffoldMetadata(page);
+/** `/engage` — the scoped project; see lib/engage.ts. */
+export const metadata = trackMetadata(engagePage);
 
 export default function Engage() {
-  return <ScaffoldPage page={page} />;
+  return <TrackPage page={engagePage} />;
 }

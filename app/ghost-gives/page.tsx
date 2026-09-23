@@ -1,11 +1,9 @@
-import { scaffoldPages } from "@/lib/scaffold";
-import { ScaffoldPage, scaffoldMetadata } from "../_components/ScaffoldPage";
+import { givesPage } from "@/lib/family-pages";
+import { FamilyPage, familyMetadata } from "../_components/FamilyPage";
 
-/** `/ghost-gives` — scaffold with test content; see lib/scaffold.ts. */
-const page = scaffoldPages["ghost-gives"];
-
-export const metadata = scaffoldMetadata(page);
+/** `/ghost-gives` — where the studio gives the work away; see lib/family-pages.ts. */
+export const metadata = familyMetadata(givesPage);
 
 export default function GhostGives() {
-  return <ScaffoldPage page={page} />;
+  return <FamilyPage page={givesPage} />;
 }

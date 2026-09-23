@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import { buildPage } from "@/lib/build";
 import { engagement } from "@/lib/engagement";
-import { ChatLauncher } from "../_components/ChatLauncher";
-import { ContactBand } from "../_components/ContactBand";
-import { PageCover } from "../_components/PageCover";
-import { BAND_STYLE, MONO, SectionHead } from "../_components/SectionHead";
-import { SiteFooter } from "../_components/SiteFooter";
-import { SiteHeader } from "../_components/SiteHeader";
-import { LABEL } from "../_components/StudioStrip";
+import type { TrackPageData } from "@/lib/track-page";
+import { ChatLauncher } from "./ChatLauncher";
+import { ContactBand } from "./ContactBand";
+import { PageCover } from "./PageCover";
+import { BAND_STYLE, MONO, SectionHead } from "./SectionHead";
+import { SiteFooter } from "./SiteFooter";
+import { SiteHeader } from "./SiteHeader";
+import { LABEL } from "./StudioStrip";
+import { Questions } from "../build/_components/Questions";
 import { Network } from "../services/_components/Network";
-import { Questions } from "./_components/Questions";
 
-export const metadata: Metadata = {
-  title: buildPage.title,
-  description: buildPage.description,
-};
+/** Metadata for a track page, from its entry in lib/<track>.ts. */
+export function trackMetadata(page: TrackPageData): Metadata {
+  return { title: page.title, description: page.description };
+}
 
 /** 30px at 390 to 44px at 1440, held there. What comes with the team. */
 const SHAPE_STYLE: CSSProperties = {
@@ -50,16 +50,16 @@ const BAND = "px-5 py-24 sm:px-8 lg:px-12 lg:py-36";
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
- * `/build` — the standing team.
+ * A track page: `/engage`, and the shape `/build` is set in.
  *
- * The cover and the plate under it say what Build is; the terms say what it
- * costs, straight after, so no one reads the rest wondering. Then who it is
- * for, what comes with it, how it runs, the questions left over, and the
- * other two ways in for anyone it does not fit.
+ * The cover and the plate under it say what the track is; the terms say
+ * what it costs, straight after, so no one reads the rest wondering. Then
+ * who it is for, what comes with it, how it runs, the questions left over,
+ * and the other two ways in for anyone it does not fit.
  */
-export default function Build() {
-  const { plate, terms, who, shape, process, questions, others } = buildPage;
-  const tracks = engagement.models.filter((model) => model.slug !== "build");
+export function TrackPage({ page }: { page: TrackPageData }) {
+  const { plate, terms, who, shape, process, questions, others } = page;
+  const tracks = engagement.models.filter((model) => model.slug !== page.slug);
 
   return (
     <>
@@ -68,17 +68,19 @@ export default function Build() {
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">
         <PageCover
-          id="build-heading"
-          eyebrow={buildPage.eyebrow}
-          heading={buildPage.heading}
-          summary={buildPage.summary}
-          action={buildPage.action}
+          id="track-heading"
+          eyebrow={page.eyebrow}
+          heading={page.heading}
+          summary={page.summary}
+          action={page.action}
+          size="md"
         />
 
         {/* Edge to edge, the wordmark across it. */}
         <div
           data-ground="dark"
-          className="relative aspect-[4/3] overflow-hidden bg-[#2f3b24] sm:aspect-[16/9] lg:aspect-[1512/760]"
+          style={{ backgroundColor: plate.ground }}
+          className="relative aspect-[4/3] overflow-hidden sm:aspect-[16/9] lg:aspect-[1512/760]"
           {...(plate.src ? {} : { role: "img", "aria-label": plate.alt })}
         >
           {plate.src && (

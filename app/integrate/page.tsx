@@ -1,11 +1,9 @@
-import { scaffoldPages } from "@/lib/scaffold";
-import { ScaffoldPage, scaffoldMetadata } from "../_components/ScaffoldPage";
+import { integratePage } from "@/lib/integrate";
+import { TrackPage, trackMetadata } from "../_components/TrackPage";
 
-/** `/integrate` — scaffold with test content; see lib/scaffold.ts. */
-const page = scaffoldPages.integrate;
-
-export const metadata = scaffoldMetadata(page);
+/** `/integrate` — the operational layer; see lib/integrate.ts. */
+export const metadata = trackMetadata(integratePage);
 
 export default function Integrate() {
-  return <ScaffoldPage page={page} />;
+  return <TrackPage page={integratePage} />;
 }

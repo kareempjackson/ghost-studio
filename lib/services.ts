@@ -10,8 +10,8 @@
  * opens them one at a time, and `/contact` offers the same six as the thing
  * a visitor needs help with. The names have to agree, so they live here.
  *
- * PLACEHOLDER: `promise` and the capability lines beyond Strategy are
- * written to the comp's shape and need confirming.
+ * `promise` is set from the `/services` comp. PLACEHOLDER: the capability
+ * lines beyond Strategy are written to the comp's shape and need confirming.
  */
 
 export interface Service {
@@ -37,7 +37,7 @@ export const services = {
     {
       slug: "strategy",
       name: "Strategy",
-      promise: "Define the problem. Choose a direction.",
+      promise: "Work out what should exist.",
       capabilities: [
         "Discovery & research",
         "Positioning & product direction",
@@ -48,7 +48,7 @@ export const services = {
     {
       slug: "brand",
       name: "Brand",
-      promise: "Make the business recognisable everywhere.",
+      promise: "Give the business a clear identity.",
       capabilities: [
         "Identity & visual systems",
         "Messaging & tone of voice",
@@ -59,7 +59,7 @@ export const services = {
     {
       slug: "design",
       name: "Design",
-      promise: "Turn complexity into a useful experience.",
+      promise: "Make the experience easier to use.",
       capabilities: [
         "Product & interface design",
         "Design systems",
@@ -70,7 +70,7 @@ export const services = {
     {
       slug: "technology",
       name: "Technology",
-      promise: "Build the product and the foundation beneath it.",
+      promise: "Build what the business needs to run.",
       capabilities: [
         "Web & application engineering",
         "Platforms, cloud & integration",
@@ -81,7 +81,7 @@ export const services = {
     {
       slug: "marketing",
       name: "Marketing",
-      promise: "Connect attention to action.",
+      promise: "Help the right people find you.",
       capabilities: [
         "Campaign & channel strategy",
         "Content & lifecycle marketing",
@@ -92,7 +92,7 @@ export const services = {
     {
       slug: "creative-production",
       name: "Creative production",
-      promise: "Give the story a life beyond the page.",
+      promise: "Make the work visible.",
       capabilities: [
         "Art direction & photography",
         "Film, motion & animation",
@@ -111,42 +111,51 @@ export const services = {
 export const servicesPage = {
   title: "Services",
   description:
-    "Strategy, design and engineering under one roof. Ghost Savvy Studios shapes the team around the problem, then builds it with you.",
-  eyebrow: "Our services",
-  heading: ["Clarity first.", "Everything connects."],
-  summary: [
-    "Strategy, design and engineering under one roof.",
-    "We shape the team around the problem, then build it together.",
-  ],
-  action: { label: "Find your starting point", href: "/contact" },
+    "Strategy, brand, design, technology, marketing and creative production under one roof, and three ways to engage Ghost Savvy Studios for them.",
+  eyebrow: "Services",
+  heading: ["Good thinking.", "Made real."],
+  summary: "Everything we do, and the three ways to engage us for it.",
+  action: { label: "Find your fit", href: "#ways-in" },
+
+  ways: {
+    label: "Work with us",
+    heading: "Three ways in.",
+    deck: "Choose the shape of the engagement. We compose the team around the work.",
+  },
 
   disciplines: {
-    heading: "What we bring to the table.",
-    label: "Six connected disciplines",
-  },
-
-  /** The proof: one engagement where every discipline was in the room. */
-  showcase: {
-    label: "What connected looks like",
-    heading: ["One team.", "The whole picture."],
-    copy: "For BPI, a new brand, a multilingual website and internal operations came together in one engagement.",
-    action: {
-      label: "Explore the BPI story",
-      href: "/work/barbados-pharmaceuticals",
-    },
-    /* PLACEHOLDER — the comp sets a collage of the BPI work here. Export it
-       to `public/media/` and drop it in; until then the plate is a ground. */
-    previewLabel: "Project preview / artwork placeholder",
-  },
-
-  models: {
-    heading: "Three ways to work together.",
-    label: "The right shape for the work",
+    label: "What we do",
+    heading: "Depth where you need it.",
+    deck: "A senior core team across six practice areas. Open a discipline to explore its scope.",
   },
 
   method: {
-    label: "Our method / Clarity engineering",
-    heading: ["Good work starts", "with better questions."],
+    label: "Clarity engineering",
+    heading: ["The work", "before the build."],
+    copy: [
+      "We talk to the people responsible for the outcome. We separate the actual problem from the feature requests. Then we write down what should exist and why.",
+      "Every discipline works from that same document.",
+    ],
+    action: { label: "Start a conversation", href: "/contact" },
+    /**
+     * The people in the room, as a chain: each node is one conversation, and
+     * the links run in the order the work is written down. Positions are in
+     * the plate's own 1436 × 756 units, off the comp.
+     *
+     * PLACEHOLDER — the comp sets a portrait in each node. Export them to
+     * `public/images/` and set `src`; until then a node is a ground.
+     */
+    network: {
+      alt: "Six people from one engagement, from the clinic floor to the operating theatre, joined in a single chain.",
+      nodes: [
+        { x: 433, y: 243, r: 90, src: null },
+        { x: 567, y: 538, r: 60, src: null },
+        { x: 728, y: 416, r: 55, src: null },
+        { x: 896, y: 534, r: 55, src: null },
+        { x: 990, y: 290, r: 95, src: null },
+        { x: 730, y: 248, r: 55, src: null },
+      ] as readonly { x: number; y: number; r: number; src: string | null }[],
+    },
   },
 } as const;
 
