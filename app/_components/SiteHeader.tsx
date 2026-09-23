@@ -92,7 +92,7 @@ function useGroundInk(ref: RefObject<HTMLElement | null>) {
  * as an index. The pill beside them is the one thing that asks for anything.
  */
 const NAV_LINK_CLASS =
-  "gs-nav-link block font-mono text-[0.75rem] leading-none tracking-[0.08em] uppercase transition-colors duration-150";
+  "gs-nav-link block font-label text-[0.75rem] leading-none tracking-[0.08em] uppercase transition-colors duration-150";
 
 /** Where the call to action goes. */
 const CTA = { label: "Let’s talk", href: "/contact" } as const;

@@ -160,7 +160,7 @@ export function ChatLauncher() {
         className="group flex h-12 items-center gap-3 rounded-pill bg-[#111] pr-6 pl-2.5 text-white shadow-[0_12px_30px_-12px_rgb(14_13_11/0.6)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.03] lg:h-14 lg:pr-7 lg:pl-3"
       >
         <Bubble />
-        <span className="font-mono text-[0.75rem] leading-none tracking-[0.12em]">
+        <span className="font-label text-[0.75rem] leading-none tracking-[0.12em]">
           {panelOpen ? "Close" : "Let’s talk"}
         </span>
       </motion.button>

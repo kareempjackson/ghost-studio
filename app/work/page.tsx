@@ -71,7 +71,7 @@ export default function Work() {
           aria-labelledby="work-close-heading"
           className="border-t border-edge-subtle px-5 pt-20 pb-28 sm:px-8 lg:px-12 lg:pt-28 lg:pb-40"
         >
-          <p className="font-mono text-[0.6875rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
+          <p className="font-label text-[0.6875rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
             {workPage.close.eyebrow}
           </p>
           <h2

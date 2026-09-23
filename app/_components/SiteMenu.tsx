@@ -323,7 +323,7 @@ export function SiteMenu({ id, open, onClose }: SiteMenuProps) {
                   transitionDelay: `${LEAD_IN + siteNavigation.length * STAGGER}ms`,
                 }}
               >
-                <p className="font-mono text-[0.625rem] leading-none tracking-[0.08em] text-ink-500 uppercase">
+                <p className="font-label text-[0.625rem] leading-none tracking-[0.08em] text-ink-500 uppercase">
                   {ventureNavigation.label}
                 </p>
                 <ul className="gs-menu-list mt-4 flex flex-wrap gap-x-8 gap-y-2">

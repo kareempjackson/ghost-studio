@@ -145,7 +145,7 @@ function Cover() {
 
         <div className="grid gap-px border-t border-ink-800 bg-ink-800 sm:grid-cols-3">
           {[
-            { k: "Typefaces", v: "DM Sans · Space Mono · Hardcover VF" },
+            { k: "Typefaces", v: "DM Sans · Arial · Hardcover VF" },
             { k: "Palette", v: "Ink, signal, acid, slate" },
             { k: "Source", v: "lib/brand — TypeScript" },
           ].map((item) => (
@@ -537,7 +537,7 @@ function Typography() {
       id="typography"
       index="04"
       title="Typography"
-      lead={`DM Sans carries the page and Space Mono sets the labels, both self-hosted from public/fonts through next/font/local. Hardcover VF appears once, served by Adobe Fonts kit ${typekit.id}. Synthetic bold is never an answer.`}
+      lead={`DM Sans carries the page and Arial sets the labels, both self-hosted from public/fonts through next/font/local. Hardcover VF appears once, served by Adobe Fonts kit ${typekit.id}. Synthetic bold is never an answer.`}
     >
       <div className="grid gap-14">
         <Block title="Families">
@@ -605,11 +605,11 @@ function Typography() {
                 <Type role="headline" as="h4">
                   {families.mono.name}
                 </Type>
-                <Pill>Unlicensed — system stack</Pill>
+                <Pill>Self-hosted</Pill>
               </div>
               <Type role="body-s" className="text-secondary" measure>
-                {families.mono.role} Deliberately not a brand face: tokens and
-                code should look like tokens and code.
+                {families.mono.role} Deliberately plain: labels and tokens
+                should read as the system, not as the voice.
               </Type>
               <Mono className="text-tertiary">{families.mono.stack}</Mono>
             </div>
@@ -1201,7 +1201,7 @@ function Tokens() {
 
         <Block title="TypeScript">
           <pre className="overflow-x-auto border border-edge bg-surface-subtle p-5">
-            <code className="font-mono text-[0.8125rem] leading-6 text-primary">
+            <code className="font-label text-[0.8125rem] leading-6 text-primary">
               {USAGE}
             </code>
           </pre>
@@ -1209,7 +1209,7 @@ function Tokens() {
 
         <Block title="Tailwind">
           <pre className="overflow-x-auto border border-edge bg-surface-subtle p-5">
-            <code className="font-mono text-[0.8125rem] leading-6 text-primary">
+            <code className="font-label text-[0.8125rem] leading-6 text-primary">
               {TAILWIND}
             </code>
           </pre>
@@ -1217,10 +1217,10 @@ function Tokens() {
 
         <Block
           title="Loading the faces"
-          note="DM Sans and Space Mono are self-hosted from public/fonts through next/font/local. Hardcover VF is licensed through Adobe Fonts and cannot be self-hosted, so the kit is linked from the root layout with a preconnect. Every fallback stack is ordered to hold metrics, because institutional traffic includes locked desktops where the kit will not load at all."
+          note="DM Sans and Arial are self-hosted from public/fonts through next/font/local. Hardcover VF is licensed through Adobe Fonts and cannot be self-hosted, so the kit is linked from the root layout with a preconnect. Every fallback stack is ordered to hold metrics, because institutional traffic includes locked desktops where the kit will not load at all."
         >
           <pre className="overflow-x-auto border border-edge bg-surface-subtle p-5">
-            <code className="font-mono text-[0.8125rem] leading-6 text-primary">
+            <code className="font-label text-[0.8125rem] leading-6 text-primary">
               {`<link rel="stylesheet" href="${typekit.href}" />`}
             </code>
           </pre>

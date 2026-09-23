@@ -27,7 +27,7 @@ export function Methodology() {
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-6">
         <h2
           id="methodology-heading"
-          className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-500 uppercase lg:col-span-3 lg:pt-3 lg:text-[0.8125rem]"
+          className="font-label text-[0.75rem] leading-none tracking-[0.06em] text-ink-500 uppercase lg:col-span-3 lg:pt-3 lg:text-[0.8125rem]"
         >
           Methodology
         </h2>

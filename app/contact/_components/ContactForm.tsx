@@ -99,7 +99,7 @@ export function ContactForm() {
       aria-labelledby={`${id}-heading`}
       className="rounded-[1rem] bg-surface-subtle p-6 sm:p-8 lg:p-10"
     >
-      <p className="font-mono text-[0.6875rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
+      <p className="font-label text-[0.6875rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
         {form.label}
       </p>
       <h2
@@ -239,7 +239,7 @@ export function ContactForm() {
           site, but it submits rather than navigates. */}
       <button
         type="submit"
-        className="gs-pill gs-pill-signal group relative mt-8 inline-flex h-11 items-center rounded-pill font-mono text-[0.8125rem] leading-none tracking-[0.08em] uppercase transition-colors duration-300"
+        className="gs-pill gs-pill-signal group relative mt-8 inline-flex h-11 items-center rounded-pill font-label text-[0.8125rem] leading-none tracking-[0.08em] uppercase transition-colors duration-300"
       >
         <span className="block pr-12 pl-5 transition-[padding] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:pr-5 group-hover:pl-12">
           {form.action}

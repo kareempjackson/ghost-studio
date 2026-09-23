@@ -56,7 +56,7 @@ export function Engagement() {
       <div className="mx-auto grid max-w-[80rem] gap-4 lg:grid-cols-[minmax(0,0.42fr)_minmax(0,1fr)] lg:gap-5">
         {/* The plate: the studio's own merch, and the lockup under it. */}
         <div className="flex flex-col rounded-[1rem] border border-white/10 bg-black p-5 sm:p-6">
-          <span className="self-start rounded-pill bg-white px-3 py-1.5 font-mono text-[0.6875rem] leading-none tracking-[0.04em] text-ink-950 uppercase">
+          <span className="self-start rounded-pill bg-white px-3 py-1.5 font-label text-[0.6875rem] leading-none tracking-[0.04em] text-ink-950 uppercase">
             {engagement.chip}
           </span>
           <div className="relative mt-4 aspect-[326/347] overflow-hidden rounded-[0.25rem] bg-ink-100 lg:aspect-auto lg:min-h-[24rem] lg:flex-1">
@@ -114,7 +114,7 @@ export function Engagement() {
                 </p>
               </div>
             </div>
-            <span className="hidden rounded-pill bg-ink-200/70 px-3 py-2 font-mono text-[0.75rem] leading-none tracking-[0.04em] uppercase sm:inline-block">
+            <span className="hidden rounded-pill bg-ink-200/70 px-3 py-2 font-label text-[0.75rem] leading-none tracking-[0.04em] uppercase sm:inline-block">
               {model.name}
             </span>
           </div>

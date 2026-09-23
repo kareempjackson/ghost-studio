@@ -89,7 +89,7 @@ export function ShowreelButton({
           plates: mono, quiet, bottom left. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute bottom-4 left-4 font-mono text-[0.625rem] leading-none tracking-[0.08em] text-white/70 uppercase"
+        className="pointer-events-none absolute bottom-4 left-4 font-label text-[0.625rem] leading-none tracking-[0.08em] text-white/70 uppercase"
       >
         Ghostsavvy / Showreel
       </span>
@@ -107,7 +107,7 @@ export function ShowreelButton({
         padding is the disc plus its gap plus the breathing room, and swaps.
       */}
       <span className="pointer-events-none absolute inset-0 grid place-items-center">
-        <span className="relative flex h-12 items-center rounded-pill bg-[#eb5b32] font-mono text-[0.75rem] leading-none tracking-[0.08em] text-ink-950 uppercase transition-colors duration-300 group-hover:bg-ink-950 group-hover:text-white">
+        <span className="relative flex h-12 items-center rounded-pill bg-[#eb5b32] font-label text-[0.75rem] leading-none tracking-[0.08em] text-ink-950 uppercase transition-colors duration-300 group-hover:bg-ink-950 group-hover:text-white">
           <span className="block pr-14 pl-6 transition-[padding] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:pr-6 group-hover:pl-14">
             {label}
           </span>

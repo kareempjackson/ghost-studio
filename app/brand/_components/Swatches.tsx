@@ -61,7 +61,7 @@ export function Ramp({
               </div>
               <div className="grid gap-0.5 pt-2 pb-3">
                 <CopyValue value={hex.toUpperCase()} label={`${name} ${step}`} />
-                <span className="font-mono text-[0.6875rem] leading-4 text-disabled tabular-nums">
+                <span className="font-label text-[0.6875rem] leading-4 text-disabled tabular-nums">
                   {onWhite.toFixed(1)} paper &middot; {onBlack.toFixed(1)} ink
                 </span>
               </div>
@@ -108,7 +108,7 @@ export function SemanticTokens({
                     className="size-6 shrink-0 border border-edge"
                     style={{ backgroundColor: hex, borderColor: ground }}
                   />
-                  <span className="min-w-0 flex-1 truncate font-mono text-[0.75rem] text-secondary">
+                  <span className="min-w-0 flex-1 truncate font-label text-[0.75rem] text-secondary">
                     {group}.{key}
                   </span>
                   <CopyValue
@@ -185,7 +185,7 @@ export function ContrastAudit({
                   </span>
                 </td>
                 <td className="py-4 pr-6">
-                  <span className="font-mono text-[0.8125rem] text-secondary tabular-nums">
+                  <span className="font-label text-[0.8125rem] text-secondary tabular-nums">
                     {reportRatio(ratio)}
                   </span>
                 </td>

@@ -9,7 +9,7 @@ export const BAND_STYLE: CSSProperties = {
 };
 
 export const MONO =
-  "font-mono text-[0.6875rem] leading-none tracking-[0.06em] uppercase";
+  "font-label text-[0.6875rem] leading-none tracking-[0.06em] uppercase";
 
 /**
  * The head of a band: what it is, small, in the margin; what it says, large,

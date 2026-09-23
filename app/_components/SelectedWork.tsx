@@ -63,7 +63,7 @@ export function SelectedWork() {
                 <p className="mt-1 text-[0.9375rem] leading-[1.4] text-secondary lg:text-[1.0625rem]">
                   {project.scope}
                 </p>
-                <span className="mt-5 inline-block bg-ink-100 px-2.5 py-1.5 font-mono text-[0.6875rem] leading-none tracking-[0.04em] text-primary uppercase lg:mt-6">
+                <span className="mt-5 inline-block bg-ink-100 px-2.5 py-1.5 font-label text-[0.6875rem] leading-none tracking-[0.04em] text-primary uppercase lg:mt-6">
                   {selectedWork.tag}
                 </span>
               </a>

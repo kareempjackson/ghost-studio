@@ -52,7 +52,7 @@ export function Claim({
         ))}
       </Type>
 
-      <p className="shrink-0 font-mono text-[0.8125rem] leading-[1.6] tracking-[0.04em] text-primary uppercase sm:text-[0.9375rem] lg:pb-[0.35em] lg:text-right">
+      <p className="shrink-0 font-label text-[0.8125rem] leading-[1.6] tracking-[0.04em] text-primary uppercase sm:text-[0.9375rem] lg:pb-[0.35em] lg:text-right">
         {positioning.motto.map((line) => (
           <span key={line} className="block">
             {line}

@@ -111,7 +111,7 @@ export function Sectors() {
         <div className="px-5 sm:px-8 lg:px-12">
           <h2
             id="sectors-heading"
-            className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-500 uppercase lg:text-[0.8125rem]"
+            className="font-label text-[0.75rem] leading-none tracking-[0.06em] text-ink-500 uppercase lg:text-[0.8125rem]"
           >
             {sectors.eyebrow}
           </h2>
@@ -131,7 +131,7 @@ export function Sectors() {
           <Swap
             active={active}
             reduced={reduced}
-            className="font-mono text-[0.875rem] leading-none text-ink-950 lg:absolute lg:bottom-[calc(50%+1.75rem)] lg:left-[4.25rem]"
+            className="font-label text-[0.875rem] leading-none text-ink-950 lg:absolute lg:bottom-[calc(50%+1.75rem)] lg:left-[4.25rem]"
             render={(_, index) => <span>{pad(index + 1)}</span>}
           />
 

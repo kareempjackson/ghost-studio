@@ -17,7 +17,7 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 const pad = (n: number) => String(n).padStart(2, "0");
 
 const MONO =
-  "font-mono text-[0.6875rem] leading-none tracking-[0.06em] uppercase";
+  "font-label text-[0.6875rem] leading-none tracking-[0.06em] uppercase";
 
 /**
  * The corner arrow: a white disc on the plate, which fills on hover.
@@ -126,7 +126,7 @@ export function WorkGallery() {
   const [lead, ...rest] = shown;
 
   const pill = (active: boolean) =>
-    `rounded-pill px-5 py-3 font-mono text-[0.75rem] leading-none tracking-[0.04em] transition-colors duration-200 ${
+    `rounded-pill px-5 py-3 font-label text-[0.75rem] leading-none tracking-[0.04em] transition-colors duration-200 ${
       active
         ? "bg-ink-950 text-white"
         : "bg-ink-100 text-ink-950 hover:bg-ink-200"

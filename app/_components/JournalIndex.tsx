@@ -81,7 +81,7 @@ export function JournalIndex() {
             className="group block py-7 lg:py-10"
             onPointerEnter={enter(index)}
           >
-            <span className="block font-mono text-[0.625rem] leading-none tracking-[0.04em] text-ink-500 uppercase">
+            <span className="block font-label text-[0.625rem] leading-none tracking-[0.04em] text-ink-500 uppercase">
               {item.category}
             </span>
             <span

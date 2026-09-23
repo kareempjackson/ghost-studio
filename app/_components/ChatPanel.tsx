@@ -55,7 +55,7 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
           >
             A good conversation starts here
           </h2>
-          <p className="mt-3 font-mono text-[0.625rem] leading-none tracking-[0.06em] text-ink-400 uppercase">
+          <p className="mt-3 font-label text-[0.625rem] leading-none tracking-[0.06em] text-ink-400 uppercase">
             Chat preview · Connected
           </p>
         </div>
@@ -87,7 +87,7 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
 
         {sent ? (
           <div className="mt-6">
-            <p className="font-mono text-[0.6875rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
+            <p className="font-label text-[0.6875rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
               Your message, ready to send
             </p>
             <dl className="mt-4 space-y-3 text-[0.9375rem] leading-[1.45] text-ink-950">
@@ -110,7 +110,7 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
             </dl>
             <a
               href={mailtoHref(topic, name, message)}
-              className="mt-6 inline-flex h-12 items-center rounded-pill bg-ink-950 px-6 font-mono text-[0.75rem] leading-none tracking-[0.08em] text-white uppercase transition-colors duration-200 hover:bg-ink-800"
+              className="mt-6 inline-flex h-12 items-center rounded-pill bg-ink-950 px-6 font-label text-[0.75rem] leading-none tracking-[0.08em] text-white uppercase transition-colors duration-200 hover:bg-ink-800"
             >
               Send it as an email
             </a>
@@ -135,7 +135,7 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
                       type="button"
                       onClick={() => setTopic(option)}
                       aria-pressed={on}
-                      className={`rounded-pill border px-3.5 py-2 font-mono text-[0.625rem] leading-none tracking-[0.06em] uppercase transition-colors duration-200 ${
+                      className={`rounded-pill border px-3.5 py-2 font-label text-[0.625rem] leading-none tracking-[0.06em] uppercase transition-colors duration-200 ${
                         on
                           ? "border-ink-950 bg-ink-950 text-white"
                           : "border-ink-300 text-ink-950 hover:border-ink-950"
@@ -197,7 +197,7 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
 
             <button
               type="submit"
-              className="group mt-6 inline-flex h-12 items-center gap-5 rounded-pill bg-ink-950 pr-1 pl-5 font-mono text-[0.75rem] leading-none tracking-[0.08em] text-white uppercase transition-colors duration-200 hover:bg-ink-800"
+              className="group mt-6 inline-flex h-12 items-center gap-5 rounded-pill bg-ink-950 pr-1 pl-5 font-label text-[0.75rem] leading-none tracking-[0.08em] text-white uppercase transition-colors duration-200 hover:bg-ink-800"
             >
               Preview message
               <span
@@ -220,7 +220,7 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
           </form>
         )}
 
-        <p className="mt-6 font-mono text-[0.625rem] leading-[1.6] tracking-[0.04em] text-ink-600 uppercase">
+        <p className="mt-6 font-label text-[0.625rem] leading-[1.6] tracking-[0.04em] text-ink-600 uppercase">
           Demo only. This form doesn&rsquo;t send or store your details.
         </p>
         <a

@@ -7,8 +7,8 @@
  *                    grotesque at 400, 500 and 700, self-hosted from
  *                    public/fonts through next/font/local (`--font-dm-sans`).
  *
- *   Space Mono       Labels, navigation and tokens. 400 and 700, self-hosted
- *                    from public/fonts (`--font-space-mono`).
+ *   Arial            Labels, navigation and tokens. 400 and 700, self-hosted
+ *                    from public/fonts (`--font-arial`).
  *
  *   hardcover-vf     The editorial counterweight, served by Adobe Fonts
  *                    (kit `hsf3srj`). Variable 200–900, roman +
@@ -63,9 +63,8 @@ export const families = {
   },
   mono: {
     id: "mono",
-    name: "Space Mono",
-    stack:
-      'var(--font-space-mono), ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace',
+    name: "Arial",
+    stack: 'var(--font-arial), Arial, "Helvetica Neue", Helvetica, sans-serif',
     role: "Navigation, labels, tokens, code and tabular data.",
     weights: [400, 700],
     variable: false,

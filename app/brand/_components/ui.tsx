@@ -161,7 +161,7 @@ export function Mono({
   className?: string;
 }) {
   return (
-    <span className={`font-mono text-[0.8125rem] leading-6 ${className}`}>
+    <span className={`font-label text-[0.8125rem] leading-6 ${className}`}>
       {children}
     </span>
   );

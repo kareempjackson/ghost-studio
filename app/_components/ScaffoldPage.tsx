@@ -24,7 +24,7 @@ const SECTION_STYLE: CSSProperties = {
 };
 
 const MONO =
-  "font-mono text-[0.6875rem] leading-none tracking-[0.06em] uppercase";
+  "font-label text-[0.6875rem] leading-none tracking-[0.06em] uppercase";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 

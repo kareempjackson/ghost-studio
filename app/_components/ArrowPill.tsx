@@ -58,7 +58,7 @@ export function ArrowPill({
   className?: string;
 }) {
   const spec = SIZE[size];
-  const classes = `${TONE[tone]} group relative items-center rounded-pill font-mono leading-none uppercase transition-colors duration-300 ${spec.pill} ${className || "inline-flex"}`;
+  const classes = `${TONE[tone]} group relative items-center rounded-pill font-label leading-none uppercase transition-colors duration-300 ${spec.pill} ${className || "inline-flex"}`;
   const inner = (
     <>
       <span className={`block transition-[padding] ${SWING} ${spec.label}`}>

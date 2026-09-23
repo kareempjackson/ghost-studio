@@ -28,7 +28,7 @@ export function ContactBand() {
         aria-labelledby="contact-heading"
         className="relative rounded-b-[32px] bg-[#eb5b32] px-5 pt-14 pb-14 text-ink-950 sm:px-8 lg:px-12 lg:pt-16 lg:pb-16"
       >
-        <p className="font-mono text-[0.75rem] leading-none tracking-[0.06em] uppercase">
+        <p className="font-label text-[0.75rem] leading-none tracking-[0.06em] uppercase">
           {contactBand.eyebrow}
         </p>
 
@@ -66,7 +66,7 @@ export function ContactBand() {
             >
               <path d="M3 22 44 10M30 4l14 6-6 14" />
             </svg>
-            <span className="font-mono text-[0.75rem] leading-none tracking-[0.08em] uppercase">
+            <span className="font-label text-[0.75rem] leading-none tracking-[0.08em] uppercase">
               {contactBand.action.label}
             </span>
           </a>

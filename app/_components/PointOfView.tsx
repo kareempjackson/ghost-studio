@@ -60,7 +60,7 @@ export function PointOfView() {
       className="relative z-10 bg-black px-5 pt-16 pb-28 text-white sm:px-8 lg:px-12 lg:pt-24 lg:pb-40"
     >
       <div className="flex items-center justify-between gap-6 border-t border-white/8 pt-8 lg:pt-10">
-        <p className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-300 uppercase sm:text-[0.8125rem]">
+        <p className="font-label text-[0.75rem] leading-none tracking-[0.06em] text-ink-300 uppercase sm:text-[0.8125rem]">
           {pointOfView.eyebrow}
         </p>
         <ArrowPill href={pointOfView.action.href} tone="signal">
@@ -100,7 +100,7 @@ export function PointOfView() {
                 style={{ backgroundColor: card.ground }}
                 className="flex aspect-[0.88] flex-col rounded-[0.625rem] p-6 text-ink-950"
               >
-                <div className="flex items-baseline justify-between border-b border-ink-950/25 pb-3 font-mono text-[0.6875rem] leading-none tracking-[0.04em] uppercase">
+                <div className="flex items-baseline justify-between border-b border-ink-950/25 pb-3 font-label text-[0.6875rem] leading-none tracking-[0.04em] uppercase">
                   <span className="text-ink-950/55">
                     {String(index + 1).padStart(2, "0")}
                   </span>

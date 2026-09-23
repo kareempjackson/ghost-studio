@@ -5,7 +5,7 @@ import { introScript } from "@/lib/intro";
 import "./globals.css";
 
 /**
- * DM Sans carries the page and Space Mono the labels. Both are self-hosted
+ * DM Sans carries the page and Arial the labels. Both are self-hosted
  * from public/fonts through next/font/local, so they are subset, preloaded and
  * served from our own origin. Hardcover VF, the editorial guest, is still
  * served by Adobe Fonts and cannot be self-hosted, so that kit stays linked
@@ -43,20 +43,12 @@ const dmSans = localFont({
   ],
 });
 
-const spaceMono = localFont({
-  variable: "--font-space-mono",
+const arial = localFont({
+  variable: "--font-arial",
   display: "swap",
   src: [
-    {
-      path: "../public/fonts/SpaceMono-Regular.ttf",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/SpaceMono-Bold.ttf",
-      weight: "700",
-      style: "normal",
-    },
+    { path: "../public/fonts/Arial-Regular.ttf", weight: "400", style: "normal" },
+    { path: "../public/fonts/Arial-Bold.ttf", weight: "700", style: "normal" },
   ],
 });
 
@@ -76,7 +68,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       /* The brand ships a dark palette, but the site is a printed sheet:
          white ground, black ink, at every system setting. */
       data-theme="light"
-      className={`${dmSans.variable} ${spaceMono.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${arial.variable} h-full antialiased`}
       /* The intro script may set `data-intro` before React hydrates. */
       suppressHydrationWarning
     >

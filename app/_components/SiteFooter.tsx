@@ -5,7 +5,7 @@ import { NewsletterSignup } from "./NewsletterSignup";
 import { SocialIcon } from "./SocialIcon";
 
 const MONO =
-  "font-mono text-[0.625rem] leading-none tracking-[0.08em] uppercase";
+  "font-label text-[0.625rem] leading-none tracking-[0.08em] uppercase";
 
 /**
  * The footer, lying under the page.

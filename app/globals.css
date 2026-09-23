@@ -70,9 +70,8 @@
     var(--font-dm-sans), "Helvetica Neue", Helvetica, "Segoe UI", Roboto, Arial,
     sans-serif;
   --font-editorial: "hardcover-vf", Georgia, "Times New Roman", serif;
-  --font-mono:
-    var(--font-space-mono), ui-monospace, "SF Mono", SFMono-Regular, Menlo,
-    Consolas, "Liberation Mono", monospace;
+  --font-label:
+    var(--font-arial), Arial, "Helvetica Neue", Helvetica, sans-serif;
 
   /* -- Radius: square by default; pill is the aperture, and is reserved. -- */
   --radius-pill: 9999px;

@@ -60,7 +60,7 @@ function CardBody({ service, index }: { service: Service; index: number }) {
     <div className="flex h-full flex-col p-6 sm:p-8 lg:p-10">
       <div className="grid flex-1 content-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-12">
         <div className="flex items-start gap-5 lg:gap-8">
-          <span className="pt-2 font-mono text-[0.8125rem] leading-none text-ink-600">
+          <span className="pt-2 font-label text-[0.8125rem] leading-none text-ink-600">
             {pad(index + 1)}
           </span>
           <h3 style={TITLE_STYLE}>{service.name}</h3>
@@ -177,7 +177,7 @@ export function Services() {
     <div className="flex items-center justify-between gap-6 border-t border-white/8 pt-8 lg:pt-10">
       <h2
         id="services-heading"
-        className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-300 uppercase sm:text-[0.8125rem]"
+        className="font-label text-[0.75rem] leading-none tracking-[0.06em] text-ink-300 uppercase sm:text-[0.8125rem]"
       >
         {services.eyebrow}
       </h2>

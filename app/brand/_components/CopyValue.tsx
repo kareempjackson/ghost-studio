@@ -38,7 +38,7 @@ export function CopyValue({
     <button
       type="button"
       onClick={copy}
-      className={`group inline-flex min-h-6 items-center gap-2 font-mono text-[0.75rem] leading-5 tracking-tight text-tertiary transition-colors duration-150 hover:text-primary ${className}`}
+      className={`group inline-flex min-h-6 items-center gap-2 font-label text-[0.75rem] leading-5 tracking-tight text-tertiary transition-colors duration-150 hover:text-primary ${className}`}
       aria-label={`Copy ${label ?? value}`}
     >
       <span className="tabular-nums">{value}</span>

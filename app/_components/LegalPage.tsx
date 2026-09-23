@@ -15,7 +15,7 @@ const HEADING_STYLE: CSSProperties = {
 };
 
 const MONO =
-  "font-mono text-[0.6875rem] leading-none tracking-[0.06em] uppercase";
+  "font-label text-[0.6875rem] leading-none tracking-[0.06em] uppercase";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -67,7 +67,7 @@ export function LegalPage({ doc }: { doc: LegalDocument }) {
                       href={`#${section.id}`}
                       className="group flex gap-3 text-[0.9375rem] leading-[1.35] tracking-[-0.01em] text-ink-600 transition-colors duration-200 hover:text-ink-950"
                     >
-                      <span className="font-mono text-[0.6875rem] leading-[1.9] text-ink-400">
+                      <span className="font-label text-[0.6875rem] leading-[1.9] text-ink-400">
                         {pad(index + 1)}
                       </span>
                       {section.title}

@@ -36,7 +36,7 @@ export function Journal() {
       className="relative z-10 bg-surface-page px-5 pt-20 pb-56 sm:px-8 lg:px-12 lg:pt-32 lg:pb-80"
     >
       <div className="border-t border-edge-subtle pt-10 lg:pt-14">
-        <p className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-950 uppercase">
+        <p className="font-label text-[0.75rem] leading-none tracking-[0.06em] text-ink-950 uppercase">
           {journal.eyebrow}
         </p>
         <h2
@@ -61,10 +61,10 @@ export function Journal() {
 
         <div className="flex flex-col justify-center p-6 sm:p-8 lg:px-12 lg:py-12">
           <div className="flex items-center gap-4">
-            <span className="rounded-pill bg-ink-200/70 px-2.5 py-1.5 font-mono text-[0.625rem] leading-none tracking-[0.04em] uppercase">
+            <span className="rounded-pill bg-ink-200/70 px-2.5 py-1.5 font-label text-[0.625rem] leading-none tracking-[0.04em] uppercase">
               {featured.category}
             </span>
-            <span className="font-mono text-[0.625rem] leading-none tracking-[0.04em] text-ink-500 uppercase">
+            <span className="font-label text-[0.625rem] leading-none tracking-[0.04em] text-ink-500 uppercase">
               {featured.label}
             </span>
           </div>

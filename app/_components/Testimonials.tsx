@@ -63,7 +63,7 @@ function StepButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="gs-pill group relative inline-flex h-10 items-center rounded-pill font-mono text-[0.75rem] leading-none tracking-[0.08em] uppercase transition-colors duration-300"
+      className="gs-pill group relative inline-flex h-10 items-center rounded-pill font-label text-[0.75rem] leading-none tracking-[0.08em] uppercase transition-colors duration-300"
     >
       <span
         className={`block transition-[padding] ${SWING} ${
@@ -123,7 +123,7 @@ export function Testimonials() {
     >
       <div className="grid gap-12 border-t border-edge-subtle pt-8 lg:grid-cols-12 lg:gap-6 lg:pt-12">
         <div className="lg:col-span-5">
-          <p className="font-mono text-[0.75rem] leading-none tracking-[0.06em] text-ink-950 uppercase">
+          <p className="font-label text-[0.75rem] leading-none tracking-[0.06em] text-ink-950 uppercase">
             {testimonials.eyebrow}
           </p>
           <h2
@@ -154,7 +154,7 @@ export function Testimonials() {
           aria-label={testimonials.label}
           className="flex flex-col rounded-[1rem] bg-[#f2f2ef] p-6 text-ink-950 sm:p-7 lg:col-span-7 lg:p-8"
         >
-          <p className="font-mono text-[0.75rem] leading-none tracking-[0.06em] uppercase">
+          <p className="font-label text-[0.75rem] leading-none tracking-[0.06em] uppercase">
             {testimonials.label}
           </p>
 
@@ -184,7 +184,7 @@ export function Testimonials() {
                 <div className="flex items-center gap-4">
                   <span
                     aria-hidden
-                    className="grid size-10 shrink-0 place-items-center rounded-full bg-ink-200 font-mono text-[0.6875rem] leading-none"
+                    className="grid size-10 shrink-0 place-items-center rounded-full bg-ink-200 font-label text-[0.6875rem] leading-none"
                   >
                     {initials(item.name)}
                   </span>
@@ -202,7 +202,7 @@ export function Testimonials() {
           </div>
 
           <div className="mt-6 flex items-center justify-between gap-4 border-t border-edge-subtle pt-5">
-            <p className="font-mono text-[0.6875rem] leading-none tracking-[0.04em] whitespace-nowrap">
+            <p className="font-label text-[0.6875rem] leading-none tracking-[0.04em] whitespace-nowrap">
               <span className="sr-only">Quote </span>
               {pad(index + 1)} / {pad(ITEMS.length)}
             </p>

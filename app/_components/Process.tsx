@@ -30,17 +30,17 @@ export function Process() {
           >
             {/* Square at every width: the plate is a tile, not a banner. */}
             <div className="relative flex aspect-square w-full shrink-0 items-center justify-center rounded-[0.625rem] bg-black sm:w-[17.5rem] xl:w-[18rem]">
-              <span className="absolute top-4 left-4 font-mono text-[0.6875rem] leading-none tracking-[0.04em] text-ink-300">
+              <span className="absolute top-4 left-4 font-label text-[0.6875rem] leading-none tracking-[0.04em] text-ink-300">
                 {pad(index + 1)} / {total}
               </span>
               <ProcessIcon name={step.icon} />
-              <span className="absolute bottom-4 left-4 font-mono text-[0.625rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
+              <span className="absolute bottom-4 left-4 font-label text-[0.625rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
                 {process.mark}
               </span>
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col px-5 pt-5 pb-5 sm:px-6">
-              <span className="font-mono text-[0.75rem] leading-none text-ink-500">
+              <span className="font-label text-[0.75rem] leading-none text-ink-500">
                 {pad(index + 1)}
               </span>
               <h3 className="mt-3 text-[1.375rem] leading-[1.15] font-normal tracking-[-0.03em] text-primary">
@@ -56,7 +56,7 @@ export function Process() {
                 </p>
               </div>
 
-              <p className="-mr-6 mt-4 border-t border-edge-subtle pt-4 font-mono text-[0.6875rem] leading-none text-primary">
+              <p className="-mr-6 mt-4 border-t border-edge-subtle pt-4 font-label text-[0.6875rem] leading-none text-primary">
                 {step.outputs.join("  ·  ")}
               </p>
             </div>
