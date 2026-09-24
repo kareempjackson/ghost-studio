@@ -39,7 +39,8 @@ export function PageCover({
   eyebrow: string;
   heading: readonly string[];
   summary: string;
-  action: { readonly label: string; readonly href: string };
+  /** The way on. Leave it off when the page itself is the way on. */
+  action?: { readonly label: string; readonly href: string };
   size?: keyof typeof HEADING_STYLE;
 }) {
   return (
@@ -62,9 +63,11 @@ export function PageCover({
           <p className="max-w-[22rem] text-[1rem] leading-[1.45] tracking-[-0.01em] text-primary lg:text-[1.0625rem]">
             {summary}
           </p>
-          <ArrowPill href={action.href} className="mt-8 inline-flex">
-            {action.label}
-          </ArrowPill>
+          {action && (
+            <ArrowPill href={action.href} className="mt-8 inline-flex">
+              {action.label}
+            </ArrowPill>
+          )}
         </div>
       </div>
     </section>

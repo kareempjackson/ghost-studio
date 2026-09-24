@@ -1,8 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
 
-/** 36px at 390 to 76px at 1440, held there. Every band heading on the page. */
+/** 36px at 390 to 70px at 1440, held there. Every band heading on the page. */
 export const BAND_STYLE: CSSProperties = {
-  fontSize: "clamp(2.25rem, 1.3214rem + 3.81vw, 4.75rem)",
+  fontSize: "clamp(2.25rem, 1.4607rem + 3.238vw, 4.375rem)",
   fontWeight: 500,
   letterSpacing: "-0.045em",
   lineHeight: 1.02,
