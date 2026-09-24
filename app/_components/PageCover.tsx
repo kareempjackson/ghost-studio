@@ -48,7 +48,7 @@ export function PageCover({
       aria-labelledby={id}
       className="px-5 pt-[calc(var(--gs-header-h)+4rem)] pb-16 sm:px-8 lg:px-12 lg:pt-[calc(var(--gs-header-h)+8rem)] lg:pb-36"
     >
-      <p className={`${LABEL} text-ink-950`}>{eyebrow}</p>
+      <p className={`${LABEL} gs-reveal text-ink-950`}>{eyebrow}</p>
 
       <div className="mt-10 grid items-start gap-10 lg:mt-20 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-12">
         <h1 id={id} className="text-primary" style={HEADING_STYLE[size]}>
@@ -60,11 +60,14 @@ export function PageCover({
         </h1>
 
         <div className="lg:pt-2">
-          <p className="max-w-[22rem] text-[1rem] leading-[1.45] tracking-[-0.01em] text-primary lg:text-[1.0625rem]">
+          <p className="gs-reveal max-w-[22rem] text-[1rem] leading-[1.45] tracking-[-0.01em] text-primary [--reveal:3] lg:text-[1.0625rem]">
             {summary}
           </p>
           {action && (
-            <ArrowPill href={action.href} className="mt-8 inline-flex">
+            <ArrowPill
+              href={action.href}
+              className="gs-reveal mt-8 inline-flex [--reveal:4]"
+            >
               {action.label}
             </ArrowPill>
           )}

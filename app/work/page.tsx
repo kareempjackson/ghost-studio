@@ -56,7 +56,7 @@ export default function Work() {
               </span>
             ))}
           </h1>
-          <p className="mt-8 max-w-[34rem] text-[1.0625rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-10 lg:text-[1.25rem]">
+          <p className="gs-reveal mt-8 max-w-[34rem] text-[1.0625rem] leading-[1.5] tracking-[-0.01em] text-secondary [--reveal:3] lg:mt-10 lg:text-[1.25rem]">
             {workPage.summary.map((line) => (
               <span key={line} className="block">
                 {line}

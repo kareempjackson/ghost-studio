@@ -78,7 +78,9 @@ export default function Contact() {
             aria-labelledby="contact-heading"
             className="px-5 pt-[calc(var(--gs-header-h)+4rem)] pb-16 sm:px-8 lg:px-12 lg:pt-[calc(var(--gs-header-h)+7rem)] lg:pb-24"
           >
-            <p className={`${MONO} text-ink-950`}>{contact.eyebrow}</p>
+            <p className={`${MONO} gs-reveal text-ink-950`}>
+              {contact.eyebrow}
+            </p>
             <h1
               id="contact-heading"
               className="mt-10 text-primary lg:mt-14"
@@ -90,7 +92,7 @@ export default function Contact() {
                 </span>
               ))}
             </h1>
-            <p className="mt-10 text-[1.0625rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-12 lg:text-[1.25rem]">
+            <p className="gs-reveal mt-10 text-[1.0625rem] leading-[1.5] tracking-[-0.01em] text-secondary [--reveal:3] lg:mt-12 lg:text-[1.25rem]">
               {contact.summary.map((line) => (
                 <span key={line} className="block">
                   {line}

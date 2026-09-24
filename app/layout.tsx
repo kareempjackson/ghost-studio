@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { typekit } from "@/lib/brand";
 import { introScript } from "@/lib/intro";
+import { PageTransition } from "./_components/PageTransition";
 import "./globals.css";
 
 /**
@@ -47,7 +48,11 @@ const arial = localFont({
   variable: "--font-arial",
   display: "swap",
   src: [
-    { path: "../public/fonts/Arial-Regular.ttf", weight: "400", style: "normal" },
+    {
+      path: "../public/fonts/Arial-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
     { path: "../public/fonts/Arial-Bold.ttf", weight: "700", style: "normal" },
   ],
 });
@@ -85,7 +90,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         ))}
         <link rel="stylesheet" href={typekit.href} />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <PageTransition />
+      </body>
     </html>
   );
 }

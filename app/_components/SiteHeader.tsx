@@ -110,6 +110,7 @@ export function SiteHeader() {
     <>
       <header
         ref={headerRef}
+        data-page-keep
         className="gs-header absolute inset-x-0 top-0 z-50"
       >
         <div className="flex h-[var(--gs-header-h)] w-full items-center justify-between gap-8 px-5 sm:px-8 lg:px-12">

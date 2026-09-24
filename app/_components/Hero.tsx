@@ -292,7 +292,7 @@ export function Hero() {
     <section
       ref={trackRef}
       aria-labelledby="hero-heading"
-      className="relative"
+      className="gs-hero relative"
       /* No pin, no track: reduced motion gets the resting frame, full stop. */
       style={{ height: reduced ? "auto" : `${TRACK_SVH}svh` }}
     >

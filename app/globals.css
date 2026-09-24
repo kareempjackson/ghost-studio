@@ -292,7 +292,7 @@
 }
 
 .gs-nav-link:hover {
-  color: var(--gs-text-secondary);
+  color: var(--gs-accent-signal);
 }
 
 /* The menu button steps back: the header grey from the brand spec. */
@@ -372,11 +372,15 @@ button:hover > .gs-nav-muted {
   color: #ffffff;
 }
 
-[data-hero-over="1"] .gs-nav-link:hover,
 [data-hero-over="1"] .gs-nav-muted,
-.gs-header[data-over-dark="true"] .gs-nav-link:hover,
 .gs-header[data-over-dark="true"] .gs-nav-muted {
   color: rgb(255 255 255 / 0.7);
+}
+
+/* Hovered, a link goes vermilion over the reel as it does on paper. */
+[data-hero-over="1"] .gs-nav-link:hover,
+.gs-header[data-over-dark="true"] .gs-nav-link:hover {
+  color: var(--gs-accent-signal);
 }
 
 /* Over the reel the pill turns over with the row: paper pill, ink type. */
@@ -598,8 +602,12 @@ button:hover > .gs-nav-muted {
   rotate: -45deg;
 }
 
-/* Recessed: only ever the lines the pointer is not on. */
+/* The line under the pointer goes vermilion; the rest recede. */
 @media (hover: hover) {
+  .gs-menu-item:hover .gs-menu-word {
+    color: var(--gs-accent-signal);
+  }
+
   .gs-menu-list:has(.gs-menu-item:hover)
     .gs-menu-item:not(:hover):not(:focus-visible)
     .gs-menu-word {
@@ -828,6 +836,112 @@ html[data-intro="reveal"] .gs-hero-claim {
   transition:
     transform 1000ms cubic-bezier(0.16, 1, 0.3, 1) 120ms,
     opacity 800ms ease 120ms;
+}
+
+/* ---------------------------------------------------------------------------
+   The page transition.
+
+   Driven by PageTransition, which catches clicks on the site's own links and
+   changes the route without a reload, marking <html> as it goes: `leaving`
+   while the old page clears the stage, then `entering` while the new one
+   comes in. The header and the chat button (`data-page-keep`) hold still
+   throughout.
+
+   Leaving, the page fades and drifts up on an ease-in, so it goes rather
+   than lingers. Entering, the page fades up and its cover arrives in order:
+   the eyebrow, then the heading a line at a time, each rising from behind its
+   own mask, then the summary and the way on (`.gs-reveal`, ordered by
+   `--reveal`). Every arrival fills backwards only, so once it has run nothing
+   is left transformed: a lingering transform would unpin the sticky bands.
+   The home hero has its own arrival, so it is left out.
+--------------------------------------------------------------------------- */
+
+:root {
+  --gs-leave: 450ms;
+  --gs-leave-curve: cubic-bezier(0.7, 0, 0.84, 0);
+  --gs-arrive: 900ms;
+  --gs-arrive-curve: cubic-bezier(0.16, 1, 0.3, 1);
+  --gs-arrive-step: 80ms;
+}
+
+html[data-page="leaving"] body > :not([data-page-keep]) {
+  opacity: 0;
+  translate: 0 -24px;
+  pointer-events: none;
+  transition:
+    opacity var(--gs-leave) var(--gs-leave-curve),
+    translate var(--gs-leave) var(--gs-leave-curve);
+}
+
+html[data-page="entering"] body > :not([data-page-keep]) {
+  animation: gs-page-in 500ms ease-out backwards;
+}
+
+/* The footer lies under the page, so fading the page would show it through.
+   While the page changes it is put away, and the page fades on plain paper. */
+html[data-page] [data-page-behind] {
+  visibility: hidden;
+}
+
+/* The heading, a line at a time. A heading set as one piece rises whole. */
+html[data-page="entering"] main > :first-child:not(.gs-hero) h1 > span,
+html[data-page="entering"]
+  main
+  > :first-child:not(.gs-hero)
+  h1:not(:has(> span)) {
+  animation: gs-line-rise var(--gs-arrive) var(--gs-arrive-curve) backwards;
+  animation-delay: var(--gs-arrive-step);
+}
+
+html[data-page="entering"]
+  main
+  > :first-child:not(.gs-hero)
+  h1
+  > span:nth-child(2) {
+  animation-delay: calc(2 * var(--gs-arrive-step));
+}
+
+html[data-page="entering"]
+  main
+  > :first-child:not(.gs-hero)
+  h1
+  > span:nth-child(n + 3) {
+  animation-delay: calc(3 * var(--gs-arrive-step));
+}
+
+html[data-page="entering"] main .gs-reveal {
+  animation: gs-reveal-rise var(--gs-arrive) var(--gs-arrive-curve) backwards;
+  animation-delay: calc(var(--reveal, 0) * var(--gs-arrive-step));
+}
+
+@keyframes gs-page-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/*
+   The mask moves with the line: the clip's bottom edge is pulled up by
+   exactly as much as the line is pushed down, so it stays on the line's
+   resting baseline and the words rise out from behind it. It ends a little
+   wider than the line, so nothing that hangs below it is cut.
+*/
+@keyframes gs-line-rise {
+  from {
+    translate: 0 100%;
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    translate: 0 0;
+    clip-path: inset(-20% -5% -30% -5%);
+  }
+}
+
+@keyframes gs-reveal-rise {
+  from {
+    translate: 0 20px;
+    opacity: 0;
+  }
 }
 
 /* The engagement tabs' timer: the rule over the open tab fills, then the

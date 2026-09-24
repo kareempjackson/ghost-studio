@@ -44,6 +44,7 @@ export function FooterReveal({ children }: { children: ReactNode }) {
     <div
       ref={ref}
       data-reveal={fits ? "true" : "false"}
+      data-page-behind
       className="data-[reveal=true]:sticky data-[reveal=true]:bottom-0 data-[reveal=true]:z-0"
     >
       {children}

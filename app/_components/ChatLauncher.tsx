@@ -125,6 +125,7 @@ export function ChatLauncher() {
   return (
     <div
       ref={rootRef}
+      data-page-keep
       className="fixed right-4 bottom-4 z-50 flex flex-col items-end gap-3 sm:right-6 sm:bottom-6"
     >
       <AnimatePresence>

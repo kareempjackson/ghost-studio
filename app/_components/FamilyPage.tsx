@@ -110,17 +110,22 @@ export function FamilyPage({ page }: { page: FamilyPageData }) {
                 </span>
               ))}
             </h1>
-            <p className="mt-12 max-w-[23rem] text-[1rem] leading-[1.45] tracking-[-0.01em] text-primary lg:mt-24">
+            <p className="gs-reveal mt-12 max-w-[23rem] [--reveal:4] text-[1rem] leading-[1.45] tracking-[-0.01em] text-primary lg:mt-24">
               {cover.summary}
             </p>
-            <ArrowPill href={cover.action.href} className="mt-6 inline-flex">
+            <ArrowPill
+              href={cover.action.href}
+              className="gs-reveal mt-6 inline-flex [--reveal:5]"
+            >
               {cover.action.label}
             </ArrowPill>
           </div>
 
           <div
             className="relative mx-auto mt-16 aspect-[4/3.6] w-[min(16rem,70%)] rotate-[7deg] overflow-hidden border-t-2 border-[#eb5b32] bg-[#5a4a26] shadow-overlay lg:absolute lg:top-[58%] lg:right-[7%] lg:mt-0 lg:w-[16.5vw] lg:max-w-[16rem]"
-            {...(cover.card.src ? {} : { role: "img", "aria-label": cover.card.alt })}
+            {...(cover.card.src
+              ? {}
+              : { role: "img", "aria-label": cover.card.alt })}
           >
             {cover.card.src ? (
               <Image
@@ -142,7 +147,10 @@ export function FamilyPage({ page }: { page: FamilyPageData }) {
             )}
           </div>
 
-          <div aria-hidden className="mt-12 flex justify-center gap-6 lg:hidden">
+          <div
+            aria-hidden
+            className="mt-12 flex justify-center gap-6 lg:hidden"
+          >
             <span
               style={{ backgroundColor: high.ground }}
               className={`${NOTE} h-20 w-28 -rotate-[10deg]`}
@@ -179,7 +187,10 @@ export function FamilyPage({ page }: { page: FamilyPageData }) {
                   style={{ backgroundColor: item.ground }}
                   className={index % 2 ? "aspect-square" : "aspect-[11/10]"}
                 />
-                <h3 className="mt-6 text-primary lg:mt-8" style={EXPERIMENT_STYLE}>
+                <h3
+                  className="mt-6 text-primary lg:mt-8"
+                  style={EXPERIMENT_STYLE}
+                >
                   {item.title}
                 </h3>
                 <p className="mt-3 text-[0.875rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-4">
