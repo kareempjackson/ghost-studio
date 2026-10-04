@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
-import { social } from "@/lib/footer";
-import { siteNavigation, ventureNavigation } from "@/lib/navigation";
+import { email } from "@/lib/footer";
+import {
+  menuContact,
+  menuFeatureLabel,
+  siteNavigation,
+  ventureNavigation,
+} from "@/lib/navigation";
 import { projectHref, projects } from "@/lib/work";
+import { Network } from "../services/_components/Network";
 import { Mark } from "./Mark";
-import { SocialIcon } from "./SocialIcon";
 
 /**
  * The menu, as a white sheet dropped over the top of the page.
@@ -16,9 +20,10 @@ import { SocialIcon } from "./SocialIcon";
  * as it needs to, with the same rounded bottom corners as the orange close,
  * and the page stays dimmed beneath it. On the way down the colours trail
  * out from under its bottom edge, the teal first and the white last, and
- * they fold back under the sheet as it settles. The routes are set small and
- * plain, and one piece of work sits beside them so the menu shows the studio
- * as well as the site.
+ * they fold back under the sheet as it settles. The routes run down the left,
+ * large and plain; one piece of work is pinned on the right as a card, so the
+ * menu shows the studio as well as the site; and the foot holds the studio's
+ * other ventures on the left and the way to write on the right.
  *
  * Three notes on the build:
  *
@@ -42,6 +47,14 @@ const TRAILS = ["#f2875f", "#eedf4e", "#63cdab"] as const;
 
 /** The one piece of work the menu carries. */
 const FEATURED = projects[0];
+
+/** The card's plate: the forest ground the network is set on elsewhere. */
+const FOREST = "#132a28";
+
+/** Everything after the routes arrives with the last of them. */
+const tail = {
+  transitionDelay: `${LEAD_IN + siteNavigation.length * STAGGER}ms`,
+};
 
 export interface SiteMenuProps {
   /** Matches the `aria-controls` on the button that opens it. */
@@ -197,110 +210,125 @@ export function SiteMenu({ id, open, onClose }: SiteMenuProps) {
             </Link>
           </div>
 
-          <div className="grid min-h-0 flex-1 content-start gap-12 overflow-y-auto px-5 pt-10 pb-14 sm:px-8 lg:grid-cols-12 lg:content-stretch lg:gap-12 lg:px-12 lg:pt-14 lg:pb-12">
-            {/* The links at the top of the column and the studio's other
-                addresses at the foot of it, so the bottom edge of the sheet
-                is held at both corners: the elsewhere on the left, the work
-                on the right. */}
-            <div className="flex flex-col gap-12 lg:col-span-7 lg:justify-between">
-              <nav aria-label="Site">
-                <ul className="gs-menu-list flex flex-col gap-1">
-                  {siteNavigation.map((item, index) => {
-                    const delay = {
-                      transitionDelay: `${LEAD_IN + index * STAGGER}ms`,
-                    };
-                    const word =
-                      "gs-menu-word text-[1.75rem] leading-[1.1] font-normal tracking-[-0.04em] lg:text-[2.25rem]";
+          <div className="grid min-h-0 flex-1 content-start gap-12 overflow-y-auto px-5 pt-10 pb-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:grid-rows-[1fr_auto] lg:content-stretch lg:gap-x-12 lg:gap-y-10 lg:px-12 lg:pt-12 lg:pb-9">
+            <nav aria-label="Site">
+              <ul className="gs-menu-list flex flex-col gap-2 lg:gap-7">
+                {siteNavigation.map((item, index) => {
+                  const delay = {
+                    transitionDelay: `${LEAD_IN + index * STAGGER}ms`,
+                  };
+                  const word =
+                    "gs-menu-word text-[2rem] leading-[1.1] font-normal tracking-[-0.045em] lg:text-[2.5rem]";
 
-                    if (!item.children) {
-                      return (
-                        <li
-                          key={item.label}
-                          className="gs-menu-row"
-                          /* The delay is emitted unconditionally; reduced
-                             motion zeroes it in the stylesheet. Deciding it
-                             here would mean the server and the client
-                             rendering different attributes. */
-                          style={delay}
-                        >
-                          <a
-                            href={item.href}
-                            onClick={onClose}
-                            className="gs-menu-item inline-flex py-1.5"
-                          >
-                            <span className={word}>{item.label}</span>
-                          </a>
-                        </li>
-                      );
-                    }
-
-                    /* A group: the label opens its routes rather than
-                       navigating — out to its right on wide screens, where
-                       there is room, and in place under it on narrow ones. */
-                    const isOpen = expanded === item.label;
-                    const panelId = `${groupId}-${index}`;
+                  if (!item.children) {
                     return (
                       <li
                         key={item.label}
-                        className="gs-menu-row gs-menu-group lg:relative lg:w-fit"
+                        className="gs-menu-row"
+                        /* The delay is emitted unconditionally; reduced
+                           motion zeroes it in the stylesheet. Deciding it
+                           here would mean the server and the client
+                           rendering different attributes. */
                         style={delay}
-                        /* Hover opens it for a mouse; touch keeps the tap
-                           toggle, because a tap also fires pointer events
-                           and would open and close it in one go. Focus
-                           arriving anywhere in the group opens it too. */
-                        onPointerEnter={(event) => {
-                          if (event.pointerType === "mouse")
-                            openGroup(item.label);
-                        }}
-                        onPointerLeave={(event) => {
-                          if (event.pointerType === "mouse") foldGroup();
-                        }}
-                        onFocus={() => openGroup(item.label)}
-                        onBlur={(event) => {
-                          if (
-                            !event.currentTarget.contains(event.relatedTarget)
-                          )
-                            foldGroup();
-                        }}
                       >
-                        <button
-                          type="button"
-                          aria-expanded={isOpen}
-                          aria-controls={panelId}
-                          onClick={() =>
-                            isOpen ? setExpanded(null) : openGroup(item.label)
-                          }
-                          className="gs-menu-item inline-flex items-center py-1.5 text-left"
+                        <a
+                          href={item.href}
+                          onClick={onClose}
+                          className="gs-menu-item inline-flex py-1"
                         >
                           <span className={word}>{item.label}</span>
-                        </button>
+                        </a>
+                      </li>
+                    );
+                  }
 
-                        {/* The routes. Narrow: opening in place, the height
-                            travelling as a grid track from 0fr to 1fr so the
-                            browser measures it. Wide: popping out to the
-                            right of the label on hover, sliding in as they
-                            fade up, without moving the list. The gap to the
-                            label is padding, not margin, so the pointer never
-                            leaves the group on its way across. Closed, either way, it is
-                            inert: not in the tab order, not read out. */}
-                        <div
-                          id={panelId}
-                          inert={!isOpen}
-                          className={`grid transition-[grid-template-rows,opacity,translate] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] lg:absolute lg:top-0 lg:left-full lg:grid-rows-[1fr] lg:pl-12 ${
-                            isOpen
-                              ? "grid-rows-[1fr] opacity-100 lg:translate-x-0"
-                              : "grid-rows-[0fr] opacity-0 lg:-translate-x-4"
-                          }`}
-                        >
-                          <ul className="gs-menu-sub min-h-0 overflow-hidden lg:overflow-visible lg:pt-1.5 lg:whitespace-nowrap">
+                  /* A group: its routes open out to the label's right on
+                     wide screens, where there is room, and in place under it
+                     on narrow ones. The label is still a link: with a mouse,
+                     hovering opens the routes and a click goes to the page;
+                     on touch, where there is no hover, a tap opens them. */
+                  const isOpen = expanded === item.label;
+                  const panelId = `${groupId}-${index}`;
+                  return (
+                    <li
+                      key={item.label}
+                      className="gs-menu-row gs-menu-group lg:relative lg:w-fit"
+                      style={delay}
+                      /* Hover opens it for a mouse; touch keeps the tap
+                         toggle, because a tap also fires pointer events
+                         and would open and close it in one go. Focus
+                         arriving anywhere in the group opens it too. */
+                      onPointerEnter={(event) => {
+                        if (event.pointerType === "mouse")
+                          openGroup(item.label);
+                      }}
+                      onPointerLeave={(event) => {
+                        if (event.pointerType === "mouse") foldGroup();
+                      }}
+                      onFocus={() => openGroup(item.label)}
+                      onBlur={(event) => {
+                        if (
+                          !event.currentTarget.contains(event.relatedTarget)
+                        )
+                          foldGroup();
+                      }}
+                    >
+                      <a
+                        href={item.href}
+                        aria-expanded={isOpen}
+                        aria-controls={panelId}
+                        onClick={(event) => {
+                          if (window.matchMedia("(hover: hover)").matches) {
+                            onClose();
+                            return;
+                          }
+                          event.preventDefault();
+                          if (isOpen) setExpanded(null);
+                          else openGroup(item.label);
+                        }}
+                        className="gs-menu-item inline-flex items-center py-1 text-left"
+                      >
+                        <span className={word}>{item.label}</span>
+                      </a>
+
+                      {/* The routes. Narrow: opening in place, the height
+                          travelling as a grid track from 0fr to 1fr so the
+                          browser measures it. Wide: popping out to the
+                          right of the label, centred on it, sliding in as
+                          they fade up, without moving the list. The gap to
+                          the label is padding, not margin, so the pointer
+                          never leaves the group on its way across. Closed,
+                          either way, it is inert: not in the tab order, not
+                          read out. */}
+                      <div
+                        id={panelId}
+                        inert={!isOpen}
+                        className={`grid transition-[grid-template-rows,opacity,translate] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] lg:absolute lg:top-1/2 lg:left-full lg:-translate-y-1/2 lg:grid-rows-[1fr] lg:pl-16 ${
+                          isOpen
+                            ? "grid-rows-[1fr] opacity-100 lg:translate-x-0"
+                            : "grid-rows-[0fr] opacity-0 lg:-translate-x-4"
+                        }`}
+                      >
+                        <div className="min-h-0 overflow-hidden lg:overflow-visible lg:whitespace-nowrap">
+                          {item.intro && (
+                            <div className="hidden pb-5 lg:block">
+                              <p className="font-label text-[0.5625rem] leading-none tracking-[0.04em] text-ink-950 uppercase">
+                                {item.intro.label}
+                              </p>
+                              <p className="mt-2.5 text-[0.75rem] leading-none font-medium tracking-[-0.01em] text-ink-950">
+                                {item.intro.deck}
+                              </p>
+                            </div>
+                          )}
+                          <ul className="gs-menu-sub">
                             {item.children.map((child) => (
                               <li key={child.href}>
                                 <a
                                   href={child.href}
                                   onClick={onClose}
-                                  className="gs-menu-item flex items-center py-1 pl-5 lg:pl-0"
+                                  className="gs-menu-item flex items-center py-1.5 pl-5 lg:py-2.5 lg:pl-0"
                                 >
-                                  <span className="gs-menu-word text-[1.25rem] leading-[1.2] tracking-[-0.03em] lg:text-[1.5rem]">
+                                  <span className="gs-menu-word text-[1.125rem] leading-[1.25] tracking-[-0.02em] capitalize lg:text-[1.1875rem]">
                                     {child.label}
                                   </span>
                                 </a>
@@ -308,91 +336,79 @@ export function SiteMenu({ id, open, onClose }: SiteMenuProps) {
                             ))}
                           </ul>
                         </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </nav>
-
-              {/* The studio's other ventures, set smaller: part of the menu,
-                  but not in competition with the site's own routes. */}
-              <nav
-                aria-label={ventureNavigation.label}
-                className="gs-menu-row -mt-4"
-                style={{
-                  transitionDelay: `${LEAD_IN + siteNavigation.length * STAGGER}ms`,
-                }}
-              >
-                <p className="font-label text-[0.625rem] leading-none tracking-[0.08em] text-ink-500 uppercase">
-                  {ventureNavigation.label}
-                </p>
-                <ul className="gs-menu-list mt-4 flex flex-wrap gap-x-8 gap-y-2">
-                  {ventureNavigation.links.map((link) => (
-                    <li key={link.href}>
-                      <a
-                        href={link.href}
-                        onClick={onClose}
-                        className="gs-menu-item inline-flex py-1"
-                      >
-                        <span className="gs-menu-word text-[1.125rem] leading-[1.2] tracking-[-0.02em] lg:text-[1.25rem]">
-                          {link.label}
-                        </span>
-                      </a>
+                      </div>
                     </li>
-                  ))}
-                </ul>
-              </nav>
-
-              <ul
-                aria-label="Ghost Savvy elsewhere"
-                /* The hit areas are 40px but the icons are 20px, so the row
-                   is pulled left by the difference to sit on the links' edge. */
-                className="gs-menu-row -ml-2.5 flex"
-                style={{
-                  transitionDelay: `${LEAD_IN + siteNavigation.length * STAGGER}ms`,
-                }}
-              >
-                {social.map((item) => (
-                  <li key={item.id}>
-                    <a
-                      href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${item.label} (opens in a new tab)`}
-                      className="grid size-10 place-items-center text-ink-950 transition-colors duration-200 hover:text-ink-500"
-                    >
-                      <SocialIcon id={item.id} />
-                    </a>
-                  </li>
-                ))}
+                  );
+                })}
               </ul>
-            </div>
+            </nav>
 
-            {/* Off to the bottom-right corner on wide screens: the links own
-                the top of the sheet, and the work sits where the eye lands
-                last, as a postscript rather than a rival. */}
+            {/* The one piece of work, pinned to the right of the routes like
+                a card on a wall: off true, in the studio's vermilion, with
+                the client's name on it. Wide screens only: on a phone it
+                would push the foot of the menu off the sheet. */}
             <div
-              className="gs-menu-row lg:col-span-4 lg:col-start-9 lg:w-[18rem] lg:self-end lg:justify-self-end"
-              style={{
-                transitionDelay: `${LEAD_IN + siteNavigation.length * STAGGER}ms`,
-              }}
+              className="gs-menu-row hidden lg:col-start-2 lg:row-start-1 lg:block lg:self-end"
+              style={tail}
             >
               <a
                 href={projectHref(FEATURED.slug)}
                 onClick={onClose}
-                /* The plate carries no words, so the link names itself. */
-                aria-label={`${FEATURED.name} — ${FEATURED.scope}`}
-                className="group block"
+                className="group block w-full rotate-2 rounded-[0.375rem] bg-signal-500 p-3.5 pb-4 shadow-overlay transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:rotate-0 lg:w-full"
               >
-                <div className="relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-[0.625rem] bg-ink-950 lg:w-full lg:max-w-[18rem]">
-                  <Image
-                    src={FEATURED.image}
-                    alt=""
-                    fill
-                    sizes="(min-width: 1024px) 18rem, 6rem"
-                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
-                  />
+                <div
+                  aria-hidden
+                  className="-rotate-1 overflow-hidden rounded-[0.125rem]"
+                >
+                  <Network ground={FOREST} className="aspect-[8/7]" />
                 </div>
+                <p className="mt-4 font-label text-[0.5625rem] leading-none tracking-[0.06em] text-ink-950 uppercase">
+                  {menuFeatureLabel}
+                </p>
+                <p className="mt-1.5 text-[1.125rem] leading-[1.15] tracking-[-0.035em] text-ink-950">
+                  {FEATURED.name}
+                </p>
+              </a>
+            </div>
+
+            {/* The studio's other ventures, as pills at the foot of the
+                routes: part of the menu, not in competition with it. */}
+            <nav
+              aria-label={ventureNavigation.label}
+              className="gs-menu-row lg:col-start-1 lg:row-start-2 lg:self-end"
+              style={tail}
+            >
+              <p className="font-label text-[0.6875rem] leading-none tracking-[0.04em] text-ink-950 uppercase">
+                {ventureNavigation.label}
+              </p>
+              <ul className="mt-4 flex flex-wrap gap-2.5">
+                {ventureNavigation.links.map((link) => (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      onClick={onClose}
+                      style={{ backgroundColor: link.ground, color: link.ink }}
+                      className="inline-flex h-9 items-center rounded-pill px-7 text-[0.9375rem] leading-none tracking-[-0.03em] transition-[translate,filter] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:brightness-95"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <div
+              className="gs-menu-row lg:col-start-2 lg:row-start-2 lg:self-end"
+              style={tail}
+            >
+              <p className="font-label text-[0.625rem] leading-none tracking-[0.04em] text-ink-950 uppercase">
+                {menuContact.label}
+              </p>
+              <a
+                href={`mailto:${email}`}
+                className="mt-2 inline-block text-[1rem] leading-none tracking-[-0.02em] text-ink-950 transition-colors duration-200 hover:text-accent"
+              >
+                {email}
               </a>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
-import { whoWeServePage } from "@/lib/who-we-serve";
+import { audienceSlug, whoWeServePage } from "@/lib/who-we-serve";
 import { ChatLauncher } from "../_components/ChatLauncher";
 import { ContactBand } from "../_components/ContactBand";
 import { PageCover } from "../_components/PageCover";
@@ -65,7 +65,11 @@ export default function WhoWeServe() {
 
           <ol className="mt-16 grid gap-y-14 sm:grid-cols-2 sm:gap-x-5 lg:mt-28 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-20">
             {audiences.items.map((item, index) => (
-              <li key={item.name.join(" ")}>
+              <li
+                key={item.name.join(" ")}
+                id={audienceSlug(item)}
+                className="scroll-mt-[calc(var(--gs-header-h)+2rem)]"
+              >
                 <p className={`${MONO} text-ink-500`}>{pad(index + 1)}</p>
                 <h3 className="mt-6 text-primary lg:mt-9" style={AUDIENCE_STYLE}>
                   {item.name.map((line) => (

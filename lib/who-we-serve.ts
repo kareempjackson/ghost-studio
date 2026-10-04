@@ -14,6 +14,14 @@ export interface Audience {
   readonly body: string;
 }
 
+/** An audience's anchor on the page, from its name: "funded-startups-and-founders". */
+export const audienceSlug = (audience: Audience) =>
+  audience.name
+    .join(" ")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
 export const whoWeServePage = {
   title: "Who we serve",
   description:

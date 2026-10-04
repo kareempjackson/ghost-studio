@@ -2,7 +2,6 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 import { journal, journalHref } from "@/lib/journal";
 import { ArrowPill } from "./ArrowPill";
-import { JournalIndex } from "./JournalIndex";
 
 /** 36px at 390 to 56px at 1440, held there. */
 const HEADING_STYLE: CSSProperties = {
@@ -20,12 +19,21 @@ const FEATURED_STYLE: CSSProperties = {
   lineHeight: 1.05,
 };
 
+/** 22px at 390 to 28px at 1440, held there. A card's title. */
+const ENTRY_STYLE: CSSProperties = {
+  fontSize: "clamp(1.375rem, 1.2357rem + 0.571vw, 1.75rem)",
+  fontWeight: 400,
+  letterSpacing: "-0.035em",
+  lineHeight: 1.12,
+};
+
 /**
- * The journal: one featured piece, then the next three as a ruled index.
+ * The journal: one featured piece, then two more as cards side by side.
  *
  * The featured card is a plate and a leaf, the same construction as the
- * process cards, so it reads as part of the same system. The index below it
- * is a client island: its rows carry a hover preview that follows the cursor.
+ * process cards, so it reads as part of the same system. The two under it
+ * are the same idea at a smaller size: a picture with the way in on its
+ * corner, and the words beside it.
  */
 export function Journal() {
   const { featured } = journal;
@@ -89,7 +97,68 @@ export function Journal() {
         </div>
       </article>
 
-      <JournalIndex />
+      <ul className="mt-12 grid gap-y-10 lg:mt-16 lg:grid-cols-2 lg:gap-x-12">
+        {journal.entries.map((entry) => (
+          <li key={entry.slug}>
+            <a
+              href={journalHref(entry.slug)}
+              className="group grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)] items-start gap-4 sm:grid-cols-[minmax(0,11.5rem)_minmax(0,1fr)] lg:gap-5"
+            >
+              <div
+                style={{ backgroundColor: entry.cover.ground }}
+                className="relative aspect-[6/5] overflow-hidden rounded-[0.5rem]"
+              >
+                {entry.cover.src && (
+                  <Image
+                    src={entry.cover.src}
+                    alt={entry.cover.alt}
+                    fill
+                    sizes="(min-width: 640px) 11.5rem, 8.5rem"
+                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+                  />
+                )}
+                {/* The way in: a white disc on the picture's corner, which
+                    fills on hover. Decorative — the whole card is the link. */}
+                <span
+                  aria-hidden
+                  className="absolute right-2.5 bottom-2.5 grid size-7 place-items-center rounded-full bg-white text-ink-950 transition-colors duration-200 group-hover:bg-ink-950 group-hover:text-white sm:size-8"
+                >
+                  <svg
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="size-3.5 transition-transform duration-300 ease-out group-hover:translate-x-px group-hover:-translate-y-px"
+                  >
+                    <path d="M4.5 11.5l7-7M5.5 4.5h6v6" />
+                  </svg>
+                </span>
+              </div>
+
+              <div className="pt-1">
+                <p className="font-label text-[0.5625rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
+                  {entry.category}
+                </p>
+                <h3
+                  className="mt-3 text-ink-950 transition-colors duration-200 group-hover:text-accent lg:mt-4"
+                  style={ENTRY_STYLE}
+                >
+                  {entry.title.map((line) => (
+                    <span key={line} className="block">
+                      {line}
+                    </span>
+                  ))}
+                </h3>
+                <p className="mt-3 max-w-[17rem] text-[0.8125rem] leading-[1.55] tracking-[-0.01em] text-ink-600 lg:mt-5">
+                  {entry.excerpt}
+                </p>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

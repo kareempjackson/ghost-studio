@@ -481,8 +481,8 @@ button:hover > .gs-nav-muted {
 
 .gs-menu-sheet {
   position: relative;
-  /* Most of the screen, leaving a strip of the dimmed page showing below. */
-  min-height: min(85svh, calc(100svh - 6rem));
+  /* Nearly the whole screen, leaving a sliver of the dimmed page below. */
+  min-height: calc(100svh - 1.5rem);
   max-height: calc(100svh - 1.5rem);
   background-color: #ffffff;
   color: var(--color-ink-950);

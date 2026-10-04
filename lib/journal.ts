@@ -1,24 +1,26 @@
 /**
  * Ghost Savvy Studios — the journal, as the home page shows it.
  *
- * One featured piece at full width, then the three after it as a ruled list.
+ * One featured piece at full width, then two more as cards side by side.
  *
- * PLACEHOLDER: the featured image points at the hero poster, and each entry's
- * hover preview at whichever plate is already in `public/images/`. Export the
+ * PLACEHOLDER: the featured image points at the hero poster. Export the
  * comp's plate (the profile card, browser and app icons on the dark ground)
- * to `public/images/` and change `featured.image`. The entries' excerpts are
- * drafts until the articles are written. Every `href` assumes the
- * article exists; any that does not should come off the list.
+ * to `public/images/` and change `featured.image`. Of the two cards, the
+ * engineering one borrows the intro's laptop still; the design one is its
+ * lilac ground until the comp's render (the purple folded shapes) is
+ * exported. The excerpts are drafts until the articles are written. Every
+ * `href` assumes the article exists; any that does not should come off.
  */
 
 export interface JournalEntry {
   readonly slug: string;
   readonly category: string;
-  readonly title: string;
+  /** One entry per line, as the comp breaks it. */
+  readonly title: readonly string[];
   /** One or two sentences under the title: why the piece is worth opening. */
   readonly excerpt: string;
-  /** Shown under the cursor while the row is hovered. */
-  readonly preview: { src: string; alt: string };
+  /** The card's picture, on its ground; the ground alone until there is one. */
+  readonly cover: { src: string | null; alt: string; ground: string };
 }
 
 export const journal = {
@@ -41,26 +43,18 @@ export const journal = {
     {
       slug: "design-systems-that-grow-with-you",
       category: "Design",
-      title: "Design systems that grow with you",
+      title: ["Design systems that", "grow with you."],
       excerpt:
-        "A system is only as good as the next thing it lets a team build. How we set up components, tokens and rules that hold as a product grows.",
-      preview: { src: "/images/merch.png", alt: "" },
+        "A system is only as good as the next thing it lets a team build. Components, tokens and rules that hold as a product grows.",
+      cover: { src: null, alt: "", ground: "#e6dcf0" },
     },
     {
       slug: "built-to-be-handed-over",
       category: "Engineering",
-      title: "Built to be handed over",
+      title: ["Built to be", "handed over."],
       excerpt:
         "We write code for the team that inherits it. Clear structure, plain documentation and nothing only we can maintain.",
-      preview: { src: "/images/city-hall.png", alt: "" },
-    },
-    {
-      slug: "how-we-work-together",
-      category: "Studio",
-      title: "How we work, together",
-      excerpt:
-        "One connected team from the first conversation to launch. What an engagement with the studio looks like, week by week.",
-      preview: { src: "/media/hero-poster.jpg", alt: "" },
+      cover: { src: "/media/intro-still.jpg", alt: "", ground: "#1a1815" },
     },
   ],
 } as const satisfies {

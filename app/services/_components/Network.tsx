@@ -54,14 +54,21 @@ function ribbon(a: Node, b: Node, bend: number) {
  * Wide, the whole plate shows; narrow, it is cropped from the sides rather
  * than shrunk, so the circles stay big enough to be faces.
  */
-export function Network({ ground }: { ground: string }) {
+export function Network({
+  ground,
+  className = "aspect-[4/3] sm:aspect-[1436/756]",
+}: {
+  ground: string;
+  /** The plate's shape. The picture is cropped to it, never squeezed. */
+  className?: string;
+}) {
   const { nodes, alt } = servicesPage.method.network;
   const links = nodes.slice(1).map((b, i) => ({ a: nodes[i], b, i }));
 
   return (
     <div
       style={{ backgroundColor: ground }}
-      className="aspect-[4/3] overflow-hidden sm:aspect-[1436/756]"
+      className={`overflow-hidden ${className}`}
     >
       <svg
         role="img"
