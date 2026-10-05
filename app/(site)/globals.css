@@ -1,0 +1,1028 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Ghost Savvy Studios — design tokens.
+
+   Mirrors lib/brand/color.ts, lib/brand/layout.ts and lib/brand/typography.ts.
+   Those files are the source of truth; if a value changes there, change it
+   here. The /brand page renders from the TypeScript, so any drift shows up on
+   the page immediately.
+--------------------------------------------------------------------------- */
+
+@theme {
+  /* -- Ink: warm neutral, hue held near 40deg at very low saturation ------ */
+  --color-ink-50: #f7f6f3;
+  --color-ink-100: #edebe7;
+  --color-ink-200: #dedbd4;
+  --color-ink-300: #c2beb6;
+  --color-ink-400: #9a958c;
+  --color-ink-500: #78746c;
+  --color-ink-600: #625e58;
+  --color-ink-700: #45423c;
+  --color-ink-800: #2b2925;
+  --color-ink-900: #1a1815;
+  --color-ink-950: #0e0d0b;
+
+  /* -- Signal: vermilion. One per viewport. ------------------------------ */
+  --color-signal-50: #fdeeeb;
+  --color-signal-100: #fbd8d1;
+  --color-signal-200: #f7b3a6;
+  --color-signal-300: #f28a76;
+  --color-signal-400: #ee6448;
+  --color-signal-500: #e8452b;
+  --color-signal-600: #ce3a21;
+  --color-signal-700: #b4321b;
+  --color-signal-800: #8e2413;
+  --color-signal-900: #6b1b0e;
+  --color-signal-950: #48120a;
+
+  /* -- Acid: chartreuse. Never carries text on a light ground. ----------- */
+  --color-acid-50: #fafce6;
+  --color-acid-100: #f3f8c2;
+  --color-acid-200: #e9f28a;
+  --color-acid-300: #dfe95f;
+  --color-acid-400: #d7e23f;
+  --color-acid-500: #bfcb2e;
+  --color-acid-600: #9ca622;
+  --color-acid-700: #77801a;
+  --color-acid-800: #565c14;
+  --color-acid-900: #3a3e0e;
+  --color-acid-950: #252708;
+
+  /* -- Slate: product chrome and diagrams. ------------------------------- */
+  --color-slate-50: #f2f4f7;
+  --color-slate-100: #e2e7ed;
+  --color-slate-200: #c6cfda;
+  --color-slate-300: #a2afc1;
+  --color-slate-400: #7c8ca4;
+  --color-slate-500: #5b6b84;
+  --color-slate-600: #47556a;
+  --color-slate-700: #374152;
+  --color-slate-800: #262d39;
+  --color-slate-900: #171c23;
+  --color-slate-950: #0d1014;
+
+  /* -- Type ------------------------------------------------------------- */
+  --font-sans:
+    var(--font-dm-sans), "Helvetica Neue", Helvetica, "Segoe UI", Roboto, Arial,
+    sans-serif;
+  --font-grotesk:
+    var(--font-dm-sans), "Helvetica Neue", Helvetica, "Segoe UI", Roboto, Arial,
+    sans-serif;
+  --font-editorial: "hardcover-vf", Georgia, "Times New Roman", serif;
+  --font-label:
+    var(--font-arial), Arial, "Helvetica Neue", Helvetica, sans-serif;
+
+  /* -- Radius: square by default; pill is the aperture, and is reserved. -- */
+  --radius-pill: 9999px;
+
+  /* -- Elevation --------------------------------------------------------- */
+  --shadow-raised:
+    0 1px 2px rgb(14 13 11 / 0.06), 0 2px 8px rgb(14 13 11 / 0.04);
+  --shadow-overlay:
+    0 8px 24px rgb(14 13 11 / 0.12), 0 2px 6px rgb(14 13 11 / 0.08);
+
+  /* -- Motion ------------------------------------------------------------ */
+  --ease-entrance: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-signature: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* -- Layout ------------------------------------------------------------ */
+  --container-field: 90rem; /* 1440px — outer bound of the layout field */
+  --container-prose: 45rem; /* 720px  — long-form reading column */
+}
+
+/* ---------------------------------------------------------------------------
+   Semantic layer. Runtime-switchable, so components never name a raw ramp.
+--------------------------------------------------------------------------- */
+
+:root {
+  /* The header row, locked here so the hero can subtract it. Tight: the row
+     is chrome, and every rem it takes is a rem off the first thing read. */
+  --gs-header-h: 4rem;
+
+  --gs-surface-page: #ffffff;
+  --gs-surface-subtle: #f7f6f3;
+  --gs-surface-raised: #ffffff;
+  --gs-surface-sunken: #edebe7;
+  --gs-surface-inverse: #000000;
+  --gs-surface-accent: #e8452b;
+
+  --gs-text-primary: #0e0d0b;
+  --gs-text-secondary: #625e58;
+  --gs-text-tertiary: #78746c;
+  --gs-text-disabled: #9a958c;
+  --gs-text-inverse: #ffffff;
+  --gs-text-on-accent: #ffffff;
+  --gs-text-accent: #b4321b;
+
+  --gs-border-subtle: #edebe7;
+  --gs-border-default: #dedbd4;
+  --gs-border-strong: #0e0d0b;
+  --gs-border-inverse: #ffffff;
+  --gs-border-focus: #e8452b;
+
+  --gs-accent-signal: #e8452b;
+  --gs-accent-acid: #d7e23f;
+  --gs-accent-slate: #5b6b84;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --gs-surface-page: #000000;
+    --gs-surface-subtle: #0e0d0b;
+    --gs-surface-raised: #1a1815;
+    --gs-surface-sunken: #000000;
+    --gs-surface-inverse: #ffffff;
+    --gs-surface-accent: #e8452b;
+
+    --gs-text-primary: #f7f6f3;
+    --gs-text-secondary: #c2beb6;
+    --gs-text-tertiary: #9a958c;
+    --gs-text-disabled: #625e58;
+    --gs-text-inverse: #0e0d0b;
+    --gs-text-on-accent: #ffffff;
+    --gs-text-accent: #f28a76;
+
+    --gs-border-subtle: #2b2925;
+    --gs-border-default: #45423c;
+    --gs-border-strong: #f7f6f3;
+    --gs-border-inverse: #0e0d0b;
+    --gs-border-focus: #ee6448;
+
+    --gs-accent-signal: #e8452b;
+    --gs-accent-acid: #d7e23f;
+    --gs-accent-slate: #7c8ca4;
+
+    color-scheme: dark;
+  }
+}
+
+/* An explicit choice always wins over the system preference, both ways. */
+:root[data-theme="dark"] {
+  --gs-surface-page: #000000;
+  --gs-surface-subtle: #0e0d0b;
+  --gs-surface-raised: #1a1815;
+  --gs-surface-sunken: #000000;
+  --gs-surface-inverse: #ffffff;
+  --gs-surface-accent: #e8452b;
+
+  --gs-text-primary: #f7f6f3;
+  --gs-text-secondary: #c2beb6;
+  --gs-text-tertiary: #9a958c;
+  --gs-text-disabled: #625e58;
+  --gs-text-inverse: #0e0d0b;
+  --gs-text-on-accent: #ffffff;
+  --gs-text-accent: #f28a76;
+
+  --gs-border-subtle: #2b2925;
+  --gs-border-default: #45423c;
+  --gs-border-strong: #f7f6f3;
+  --gs-border-inverse: #0e0d0b;
+  --gs-border-focus: #ee6448;
+
+  --gs-accent-signal: #e8452b;
+  --gs-accent-acid: #d7e23f;
+  --gs-accent-slate: #7c8ca4;
+
+  color-scheme: dark;
+}
+
+/* The header opens up once there is room for the nav to sit beside the mark. */
+@media (min-width: 1024px) {
+  :root {
+    --gs-header-h: 4.5rem;
+  }
+}
+
+/* Expose the semantic layer as utilities: bg-surface-page, text-secondary… */
+@theme inline {
+  --color-surface-page: var(--gs-surface-page);
+  --color-surface-subtle: var(--gs-surface-subtle);
+  --color-surface-raised: var(--gs-surface-raised);
+  --color-surface-sunken: var(--gs-surface-sunken);
+  --color-surface-inverse: var(--gs-surface-inverse);
+  --color-surface-accent: var(--gs-surface-accent);
+
+  --color-primary: var(--gs-text-primary);
+  --color-secondary: var(--gs-text-secondary);
+  --color-tertiary: var(--gs-text-tertiary);
+  --color-disabled: var(--gs-text-disabled);
+  --color-inverse: var(--gs-text-inverse);
+  --color-on-accent: var(--gs-text-on-accent);
+  --color-accent: var(--gs-text-accent);
+
+  --color-edge-subtle: var(--gs-border-subtle);
+  --color-edge: var(--gs-border-default);
+  --color-edge-strong: var(--gs-border-strong);
+  --color-edge-inverse: var(--gs-border-inverse);
+  --color-focus: var(--gs-border-focus);
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--gs-surface-page);
+    color: var(--gs-text-primary);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem; /* 17px — the `body` role */
+    line-height: 1.6;
+    font-feature-settings:
+      "kern" 1,
+      "liga" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* The focus ring is a brand element. It is never removed, only restyled. */
+  :focus-visible {
+    outline: 2px solid var(--gs-border-focus);
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
+
+  ::selection {
+    background-color: var(--gs-accent-acid);
+    color: #0e0d0b;
+  }
+
+  /* Anchors land clear of any sticky chrome. */
+  :target {
+    scroll-margin-top: 6rem;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--gs-border-default);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Header ink.
+
+   The header sits over the top of the page, so for part of the hero sequence
+   the reel is directly behind it. `data-hero-over` is set by the hero from the measured top edge of
+   the opening — not from a guessed scroll position — so the flip happens
+   exactly when the picture arrives under the header and again when it leaves.
+--------------------------------------------------------------------------- */
+
+.gs-header {
+  background-color: var(--gs-surface-page);
+  transition:
+    background-color 240ms var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    color 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gs-nav-ink {
+  color: var(--gs-text-primary);
+  transition: color 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gs-nav-link {
+  color: var(--gs-text-primary);
+  transition: color 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gs-nav-link:hover {
+  color: var(--gs-accent-signal);
+}
+
+/* The menu button steps back: the header grey from the brand spec. */
+.gs-nav-muted {
+  color: #b8b8b8;
+  transition: color 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover > .gs-nav-muted {
+  color: var(--gs-text-primary);
+}
+
+/*
+   The primary control (ArrowPill).
+
+   Two tones, and one gesture between them: hovered, each turns into the
+   other — ink to vermilion, vermilion to ink — and the arrow's disc takes
+   whichever ink the label has just left. The disc's travel is in the
+   component; only the colour is here.
+*/
+.gs-pill {
+  background-color: var(--color-ink-950);
+  color: #ffffff;
+}
+
+.gs-pill-disc {
+  background-color: #ffffff22;
+}
+
+.gs-pill:hover {
+  background-color: #eb5b32;
+  color: var(--color-ink-950);
+}
+
+.gs-pill:hover .gs-pill-disc {
+  background-color: var(--color-ink-950);
+  color: #ffffff;
+}
+
+/* Signal: the one call to action on a dark band. Ink type, ink disc. */
+.gs-pill-signal {
+  background-color: #eb5b32;
+  color: var(--color-ink-950);
+}
+
+.gs-pill-signal .gs-pill-disc {
+  background-color: var(--color-ink-950);
+  color: #ffffff;
+}
+
+.gs-pill-signal:hover {
+  background-color: var(--color-ink-950);
+  color: #ffffff;
+}
+
+.gs-pill-signal:hover .gs-pill-disc {
+  background-color: #ffffff22;
+  color: #ffffff;
+}
+
+/*
+   Light ink, from either direction: the hero measures its reel against the
+   row's own edge, and every other dark band is found by the row itself. Two
+   ways of answering the same question, so they share one set of rules — the
+   ground goes transparent rather than turning black, which means the header
+   takes whatever colour is behind it instead of naming one.
+*/
+[data-hero-over="1"] .gs-header,
+.gs-header[data-over-dark="true"] {
+  background-color: transparent;
+}
+
+[data-hero-over="1"] .gs-nav-ink,
+[data-hero-over="1"] .gs-nav-link,
+.gs-header[data-over-dark="true"] .gs-nav-ink,
+.gs-header[data-over-dark="true"] .gs-nav-link {
+  color: #ffffff;
+}
+
+[data-hero-over="1"] .gs-nav-muted,
+.gs-header[data-over-dark="true"] .gs-nav-muted {
+  color: rgb(255 255 255 / 0.7);
+}
+
+/* Hovered, a link goes vermilion over the reel as it does on paper. */
+[data-hero-over="1"] .gs-nav-link:hover,
+.gs-header[data-over-dark="true"] .gs-nav-link:hover {
+  color: var(--gs-accent-signal);
+}
+
+/* Over the reel the pill turns over with the row: paper pill, ink type. */
+[data-hero-over="1"] .gs-header .gs-pill,
+.gs-header[data-over-dark="true"] .gs-pill {
+  background-color: #ffffff;
+  color: var(--color-ink-950);
+}
+
+/* Hovered, it turns over the same way it does anywhere else. */
+[data-hero-over="1"] .gs-header .gs-pill:hover,
+.gs-header[data-over-dark="true"] .gs-pill:hover {
+  background-color: #eb5b32;
+  color: var(--color-ink-950);
+}
+
+/* The white pill's disc is its own ink at 13%, the same as anywhere else. */
+[data-hero-over="1"] .gs-header .gs-pill-disc,
+.gs-header[data-over-dark="true"] .gs-pill-disc {
+  background-color: rgb(14 13 11 / 0.13);
+  color: var(--color-ink-950);
+}
+
+/* Hovered it is vermilion, so the disc goes back to ink. */
+[data-hero-over="1"] .gs-header .gs-pill:hover .gs-pill-disc,
+.gs-header[data-over-dark="true"] .gs-pill:hover .gs-pill-disc {
+  background-color: var(--color-ink-950);
+  color: #ffffff;
+}
+
+/* ---------------------------------------------------------------------------
+   The menu.
+
+   A white sheet dropped over the top of the page, with rounded bottom
+   corners and the page dimmed beneath it. The <dialog> is the whole screen
+   and has no ground of its own; the width, height and margin below only undo
+   the UA's fit-content sizing, and the `display` and `overlay` transitions
+   hold it on screen long enough for the sheet to go back up on close.
+
+   The sheet and the three colours under it are layers of one stack, each
+   `--d` deep (the sheet is 0). They all travel the same distance, but the
+   deeper a layer is, the earlier it leaves on the way down and the later it
+   leaves on the way up, so the colours trail out from under the sheet's
+   bottom edge while it moves and fold back under it as it settles.
+
+   The dimming on hover is a spotlight, not a resting state: gated behind
+   hover so a touch device never strands the list dim, and stepping around
+   :focus-visible so a keyboard user is never the one being dimmed.
+--------------------------------------------------------------------------- */
+
+.gs-menu {
+  /* The sheet has to hold every route without scrolling, so the routes, the
+     space between them and the space around them are set off the viewport's
+     height as well as its width. Each is capped at the size the comp sets
+     on a tall screen and gives way only as the screen gets shorter. */
+  --gs-menu-word: clamp(1.25rem, 4svh, 2rem);
+  --gs-menu-gap: clamp(0rem, 1.5svh - 0.375rem, 0.5rem);
+  --gs-menu-space: clamp(0.75rem, 4.5svh - 0.75rem, 2.5rem);
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: transparent;
+  transition:
+    overlay 700ms allow-discrete,
+    display 700ms allow-discrete;
+}
+
+@media (min-width: 64rem) {
+  .gs-menu {
+    --gs-menu-word: clamp(1.5rem, 5svh, 2.5rem);
+    --gs-menu-gap: clamp(0.25rem, 5.4svh - 2rem, 1.75rem);
+    --gs-menu-space: clamp(0.75rem, 3svh, 3rem);
+  }
+}
+
+.gs-menu::backdrop {
+  background-color: rgb(11 11 11 / 0);
+  transition: background-color 500ms var(--ease-exit);
+}
+
+.gs-menu[data-shown="true"]::backdrop {
+  background-color: rgb(11 11 11 / 0.45);
+  transition-timing-function: var(--ease-entrance);
+}
+
+.gs-menu-stack {
+  position: relative;
+  isolation: isolate;
+}
+
+.gs-menu-layer {
+  border-radius: 0 0 32px 32px;
+  translate: 0 -100%;
+  transition: translate 500ms var(--ease-exit);
+  transition-delay: calc(var(--d) * 60ms);
+}
+
+.gs-menu[data-shown="true"] .gs-menu-layer {
+  translate: none;
+  transition: translate 800ms var(--ease-signature);
+  transition-delay: calc((3 - var(--d)) * 70ms);
+}
+
+.gs-menu-trail {
+  position: absolute;
+  inset: 0;
+}
+
+.gs-menu-sheet {
+  position: relative;
+  /* Nearly the whole screen, leaving a sliver of the dimmed page below. */
+  min-height: calc(100svh - 1.5rem);
+  max-height: calc(100svh - 1.5rem);
+  background-color: #ffffff;
+  color: var(--color-ink-950);
+}
+
+/* Rows rise as the sheet lands, on a delay set per row by the component. */
+.gs-menu-row {
+  opacity: 0;
+  translate: 0 0.75rem;
+  transition:
+    opacity 400ms var(--ease-signature),
+    translate 400ms var(--ease-signature);
+}
+
+.gs-menu[data-shown="true"] .gs-menu-row {
+  opacity: 1;
+  translate: none;
+}
+
+/* On the way out the rows go with the sheet, not after it. */
+.gs-menu:not([data-shown="true"]) .gs-menu-row {
+  transition-delay: 0ms !important;
+  transition-duration: 150ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gs-menu-layer,
+  .gs-menu[data-shown="true"] .gs-menu-layer {
+    translate: none;
+    transition: none;
+  }
+
+  .gs-menu-trail {
+    display: none;
+  }
+
+  .gs-menu-sheet {
+    opacity: 0;
+    transition: opacity 200ms var(--ease-entrance);
+  }
+
+  .gs-menu[data-shown="true"] .gs-menu-sheet {
+    opacity: 1;
+  }
+
+  .gs-menu-row {
+    translate: none;
+    transition-delay: 0ms !important;
+  }
+}
+
+/* Resting ink. Colour is the only thing that moves on hover. */
+.gs-menu-word,
+.gs-menu-back {
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gs-menu-word {
+  color: var(--color-ink-950);
+}
+
+.gs-menu-back {
+  color: var(--color-ink-950);
+}
+
+.gs-menu-back:hover {
+  color: var(--color-signal-700);
+}
+
+/* The menu button, turning into its own way out. Three 3px lines laid out
+   exactly as the header's icon — 24px box, 4px in from top and bottom — so
+   the first frame of the open menu is the button that was just pressed.
+   Once the sheet is shown, the outer two slide to the middle and cross, and
+   the middle one draws in to nothing from both ends. A beat of delay, so
+   the reader sees the lines they clicked before they turn. */
+.gs-burger-line {
+  position: absolute;
+  inset-inline: 0;
+  height: 3px;
+  border-radius: 9999px;
+  background-color: currentColor;
+  transition:
+    translate 450ms var(--ease-signature),
+    rotate 450ms var(--ease-signature),
+    scale 300ms var(--ease-signature),
+    opacity 200ms var(--ease-signature);
+}
+
+.gs-burger-top {
+  top: 4px;
+}
+
+.gs-burger-mid {
+  top: 10.5px;
+}
+
+.gs-burger-bot {
+  top: 17px;
+}
+
+.gs-menu[data-shown="true"] .gs-burger-line {
+  transition-delay: 120ms;
+}
+
+.gs-menu[data-shown="true"] .gs-burger-top {
+  translate: 0 6.5px;
+  rotate: 45deg;
+}
+
+.gs-menu[data-shown="true"] .gs-burger-mid {
+  scale: 0 1;
+  opacity: 0;
+}
+
+.gs-menu[data-shown="true"] .gs-burger-bot {
+  translate: 0 -6.5px;
+  rotate: -45deg;
+}
+
+/* The line under the pointer goes vermilion; the rest recede. */
+@media (hover: hover) {
+  .gs-menu-item:hover .gs-menu-word {
+    color: var(--gs-accent-signal);
+  }
+
+  .gs-menu-list:has(.gs-menu-item:hover)
+    .gs-menu-item:not(:hover):not(:focus-visible)
+    .gs-menu-word {
+    color: var(--color-ink-300);
+  }
+}
+
+/*
+   An open group is exempt: while the pointer is anywhere on it, its label
+   and its routes stay in ink — they are what is being read. Only once the
+   pointer is on one of the routes do the others step back, the same way the
+   main list does.
+*/
+@media (hover: hover) {
+  .gs-menu-list
+    .gs-menu-group:hover
+    > .gs-menu-item:not(:hover):not(:focus-visible)
+    .gs-menu-word,
+  .gs-menu-list
+    .gs-menu-group:hover
+    .gs-menu-sub
+    .gs-menu-item:not(:hover):not(:focus-visible)
+    .gs-menu-word {
+    color: var(--color-ink-950);
+  }
+
+  .gs-menu-list
+    .gs-menu-group:hover
+    .gs-menu-sub:has(.gs-menu-item:hover)
+    .gs-menu-item:not(:hover):not(:focus-visible)
+    .gs-menu-word {
+    color: var(--color-ink-300);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The intro.
+
+   Once per page load of the home page, decided before first paint by the
+   script in the root layout, which sets `data-intro="pre"` on <html>. The
+   intro is a layer over the page (IntroOverlay): the logo mark rises as it
+   is drawn, opens on the reel, grows onto the hero's wordmark and greys to
+   match it — at which point it is the cover, and is taken away unseen. It is all keyframes from the first paint; the page
+   holds still under it, and the header and the claim wait for it.
+--------------------------------------------------------------------------- */
+
+.gs-intro {
+  display: none;
+}
+
+html[data-intro] .gs-intro {
+  display: block;
+}
+
+/*
+   The choreography, on one clock, started when the layer is ready to be seen.
+   Each phase begins as the last one lands, so it reads as one continuous
+   move:
+
+     0.15–1.35s  rise   the mark, as drawn, slides up to the middle
+     1.45–2.35s  open   the halves part, and the pill opens with them from a
+                        line at the centre, reaching the letters as they stop
+     2.35–3.45s  grow   the whole mark scales onto the hero's wordmark; the
+                        halves ease a little further apart and the pill grows
+                        with them, on the same curve and clock, so its ends
+                        stay on the letters' edges throughout
+     3.00–3.80s  grey   the ink fades off the grey copy as the grow lands
+     3.80–4.40s         the layer dissolves onto the page (IntroOverlay)
+
+   Distances inside the mark are in `cqw` (a hundredth of its width): open,
+   each half sits 18.469cqw out; grown, 22.521cqw, where the
+   gap is the hero's aperture. The grow's own travel and scale are measured
+   off the hero at load and arrive as custom properties.
+
+   Only transform and opacity move, so the compositor runs all of it and it
+   stays smooth while the page is still loading underneath. The clock is the
+   layer's own: it is held at `pre` until the drawings have decoded, so the
+   intro is never part-run by the time the screen first shows it.
+*/
+.gs-intro-mark {
+  container-type: inline-size;
+}
+
+.gs-intro-stage {
+  transform-origin: var(--gs-grow-origin, 50% 50%);
+}
+
+.gs-intro-left {
+  transform-origin: 100% 50%;
+}
+
+/*
+   The hero's letters are drawn a little larger, against its pill, than the
+   mark's are — G and H by about 2.7%, S and T by about 4.1%. So as the grow
+   lands, each half grows that much more, pivoting on its inner edge where it
+   meets the pill's end, and both finish exactly on the hero's letters, with
+   nothing left to double up when the layer dissolves onto them.
+*/
+.gs-intro-right {
+  transform-origin: 0 50%;
+}
+
+/* Its own layer from the start, so the fade never waits on one being made. */
+.gs-intro-ink {
+  will-change: opacity;
+}
+
+/*
+   Held, until the clock starts: the mark waits below the screen and the pill
+   is shut. This is the first thing painted, and all there is to see until
+   IntroOverlay drops `pre`, so a load that takes its time shows an empty
+   page — never a stray shape, and never a half-run intro.
+*/
+html[data-intro="pre"] .gs-intro-mark {
+  transform: translateY(60vh);
+}
+
+html[data-intro="pre"] .gs-intro-pill {
+  clip-path: inset(0 50% round 9999px);
+}
+
+/*
+   The clock, started by IntroOverlay once the layer's drawings have decoded
+   and it has been on the screen for a frame — so the rise is always seen
+   from its foot, however long the page took to arrive.
+*/
+html[data-intro]:not([data-intro="pre"]) .gs-intro-mark {
+  animation: gs-intro-rise 1200ms cubic-bezier(0.7, 0, 0.2, 1) 150ms both;
+}
+
+html[data-intro]:not([data-intro="pre"]) .gs-intro-stage {
+  animation: gs-intro-grow 1100ms cubic-bezier(0.65, 0, 0.35, 1) 2350ms both;
+}
+
+html[data-intro]:not([data-intro="pre"]) .gs-intro-left {
+  animation: gs-intro-left 2000ms linear 1450ms both;
+}
+
+html[data-intro]:not([data-intro="pre"]) .gs-intro-right {
+  animation: gs-intro-right 2000ms linear 1450ms both;
+}
+
+html[data-intro]:not([data-intro="pre"]) .gs-intro-pill {
+  animation: gs-intro-pill 2000ms linear 1450ms both;
+}
+
+html[data-intro]:not([data-intro="pre"]) .gs-intro-ink {
+  animation: gs-intro-ink 800ms cubic-bezier(0.45, 0, 0.55, 1) 3000ms both;
+}
+
+@keyframes gs-intro-rise {
+  from {
+    transform: translateY(60vh);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes gs-intro-grow {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(var(--gs-grow-x, 0px), var(--gs-grow-y, 0px))
+      scale(var(--gs-grow-scale, 1));
+  }
+}
+
+/* Open (0–45%), then straight on into the grow's share of the spread. */
+@keyframes gs-intro-left {
+  0% {
+    transform: translateX(0) scale(1);
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  45% {
+    transform: translateX(-18.469cqw) scale(1);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  100% {
+    transform: translateX(-22.521cqw) scale(1.043);
+  }
+}
+
+@keyframes gs-intro-right {
+  0% {
+    transform: translateX(0) scale(1);
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  45% {
+    transform: translateX(18.469cqw) scale(1);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  100% {
+    transform: translateX(22.521cqw) scale(1.04139);
+  }
+}
+
+/*
+   The reveal (0–45%): the pill is uncovered from a line at its centre on the
+   halves' own curve and clock, so its edges open with the letters and reach
+   them as they stop — it is never seen behind them. Then (45–100%) it grows
+   with the rest of the mark to the hero aperture's size.
+*/
+@keyframes gs-intro-pill {
+  0% {
+    clip-path: inset(0 50% round 9999px);
+    transform: scale(1);
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  45% {
+    clip-path: inset(0 0% round 9999px);
+    transform: scale(1);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  100% {
+    clip-path: inset(0 0% round 9999px);
+    transform: scale(1.1434);
+  }
+}
+
+/* The hand-off: the layer dissolves onto the page it has become. */
+html[data-intro="reveal"] .gs-intro {
+  opacity: 0;
+  transition: opacity 600ms cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+@keyframes gs-intro-ink {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+html[data-intro] {
+  overflow: hidden;
+}
+
+/* Reveal: the header and the claim hold back until the picture is up. */
+html[data-intro] .gs-header {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+html[data-intro] .gs-hero-claim {
+  transform: translateY(24px);
+  opacity: 0;
+}
+
+html[data-intro="reveal"] .gs-header {
+  transform: translateY(0);
+  opacity: 1;
+  transition:
+    transform 900ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 700ms ease;
+}
+
+html[data-intro="reveal"] .gs-hero-claim {
+  transform: translateY(0);
+  opacity: 1;
+  transition:
+    transform 1000ms cubic-bezier(0.16, 1, 0.3, 1) 120ms,
+    opacity 800ms ease 120ms;
+}
+
+/* ---------------------------------------------------------------------------
+   The page transition.
+
+   Driven by PageTransition, which catches clicks on the site's own links and
+   changes the route without a reload, marking <html> as it goes: `leaving`
+   while the old page clears the stage, then `entering` while the new one
+   comes in. The header and the chat button (`data-page-keep`) hold still
+   throughout.
+
+   Leaving, the page fades and drifts up on an ease-in, so it goes rather
+   than lingers. Entering, the page fades up and its cover arrives in order:
+   the eyebrow, then the heading a line at a time, each rising from behind its
+   own mask, then the summary and the way on (`.gs-reveal`, ordered by
+   `--reveal`). Every arrival fills backwards only, so once it has run nothing
+   is left transformed: a lingering transform would unpin the sticky bands.
+   The home hero has its own arrival, so it is left out.
+--------------------------------------------------------------------------- */
+
+:root {
+  --gs-leave: 450ms;
+  --gs-leave-curve: cubic-bezier(0.7, 0, 0.84, 0);
+  --gs-arrive: 900ms;
+  --gs-arrive-curve: cubic-bezier(0.16, 1, 0.3, 1);
+  --gs-arrive-step: 80ms;
+}
+
+html[data-page="leaving"] body > :not([data-page-keep]) {
+  opacity: 0;
+  translate: 0 -24px;
+  pointer-events: none;
+  transition:
+    opacity var(--gs-leave) var(--gs-leave-curve),
+    translate var(--gs-leave) var(--gs-leave-curve);
+}
+
+html[data-page="entering"] body > :not([data-page-keep]) {
+  animation: gs-page-in 500ms ease-out backwards;
+}
+
+/* The footer lies under the page, so fading the page would show it through.
+   While the page changes it is put away, and the page fades on plain paper. */
+html[data-page] [data-page-behind] {
+  visibility: hidden;
+}
+
+/* The heading, a line at a time. A heading set as one piece rises whole. */
+html[data-page="entering"] main > :first-child:not(.gs-hero) h1 > span,
+html[data-page="entering"]
+  main
+  > :first-child:not(.gs-hero)
+  h1:not(:has(> span)) {
+  animation: gs-line-rise var(--gs-arrive) var(--gs-arrive-curve) backwards;
+  animation-delay: var(--gs-arrive-step);
+}
+
+html[data-page="entering"]
+  main
+  > :first-child:not(.gs-hero)
+  h1
+  > span:nth-child(2) {
+  animation-delay: calc(2 * var(--gs-arrive-step));
+}
+
+html[data-page="entering"]
+  main
+  > :first-child:not(.gs-hero)
+  h1
+  > span:nth-child(n + 3) {
+  animation-delay: calc(3 * var(--gs-arrive-step));
+}
+
+html[data-page="entering"] main .gs-reveal {
+  animation: gs-reveal-rise var(--gs-arrive) var(--gs-arrive-curve) backwards;
+  animation-delay: calc(var(--reveal, 0) * var(--gs-arrive-step));
+}
+
+@keyframes gs-page-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/*
+   The mask moves with the line: the clip's bottom edge is pulled up by
+   exactly as much as the line is pushed down, so it stays on the line's
+   resting baseline and the words rise out from behind it. It ends a little
+   wider than the line, so nothing that hangs below it is cut.
+*/
+@keyframes gs-line-rise {
+  from {
+    translate: 0 100%;
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    translate: 0 0;
+    clip-path: inset(-20% -5% -30% -5%);
+  }
+}
+
+@keyframes gs-reveal-rise {
+  from {
+    translate: 0 20px;
+    opacity: 0;
+  }
+}
+
+/* The engagement tabs' timer: the rule over the open tab fills, then the
+   tabs advance. Paused inline while the card is being read. */
+@keyframes gs-tab-timer {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.gs-tab-timer {
+  animation: gs-tab-timer 7s linear both;
+}
+
+/* Reduce travel, keep feedback. See lib/brand/motion.ts. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    /* A stagger is travel measured in time. Removing the duration without
+       the delay leaves the sequence intact and only makes each step snap. */
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
