@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { projectHref } from "@/lib/links";
-import { Network } from "../services/_components/Network";
+import { Visual } from "./Visual";
 import { useChrome } from "./ChromeProvider";
 import { Mark } from "./Mark";
 
@@ -39,8 +39,6 @@ const STAGGER = 40;
 /** Nearest first, the same three that trail under the orange close. */
 const TRAILS = ["#f2875f", "#eedf4e", "#63cdab"] as const;
 
-/** The card's plate: the forest ground the network is set on elsewhere. */
-const FOREST = "#132a28";
 
 export interface SiteMenuProps {
   /** Matches the `aria-controls` on the button that opens it. */
@@ -360,14 +358,19 @@ export function SiteMenu({ id, open, onClose }: SiteMenuProps) {
                   onClick={onClose}
                   className="group block w-full rotate-2 rounded-[0.375rem] bg-signal-500 p-3.5 pb-4 shadow-overlay transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:rotate-0 lg:w-full"
                 >
+                  {/* The project's own card picture or film, as /work sets
+                      it: filling the plate, or fitted on its colour. */}
                   <div
                     aria-hidden
-                    className="-rotate-1 overflow-hidden rounded-[0.125rem]"
+                    className="relative aspect-[8/7] -rotate-1 overflow-hidden rounded-[0.125rem]"
+                    style={{ backgroundColor: featured.ground }}
                   >
-                    <Network
-                      network={navigation.network}
-                      ground={FOREST}
-                      className="aspect-[8/7]"
+                    <Visual
+                      src={featured.image}
+                      video={featured.imageVideo}
+                      alt=""
+                      sizes="18rem"
+                      className={featured.fit === "contain" ? "object-contain" : "object-cover"}
                     />
                   </div>
                   <p className="mt-4 font-label text-[0.5625rem] leading-none tracking-[0.06em] text-ink-950 uppercase">

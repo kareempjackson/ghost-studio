@@ -11,6 +11,8 @@ import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 import { LABEL } from "./StudioStrip";
 import { UpRight } from "./UpRight";
+import { Visual } from "./Visual";
+import { Rich } from "./Rich";
 
 /** Metadata for a family page, from its document in Sanity. */
 export function familyMetadata(data: FamilyPageData): Metadata {
@@ -116,9 +118,9 @@ export async function FamilyPage({ data }: { data: FamilyPageData }) {
                 </span>
               ))}
             </h1>
-            <p className="gs-reveal mt-12 max-w-[23rem] [--reveal:4] text-[1rem] leading-[1.45] tracking-[-0.01em] text-primary lg:mt-24">
-              {cover.summary}
-            </p>
+            <div className="gs-reveal mt-12 max-w-[23rem] [--reveal:4] text-[1rem] leading-[1.45] tracking-[-0.01em] text-primary lg:mt-24">
+              <Rich value={cover.summary} />
+            </div>
             <ArrowPill
               href={cover.action.href}
               className="gs-reveal mt-6 inline-flex [--reveal:5]"
@@ -133,11 +135,11 @@ export async function FamilyPage({ data }: { data: FamilyPageData }) {
               ? {}
               : { role: "img", "aria-label": cover.card.alt })}
           >
-            {cover.card.src ? (
-              <Image
+            {(cover.card.src || cover.card.video) ? (
+              <Visual
                 src={cover.card.src}
+                video={cover.card.video}
                 alt={cover.card.alt}
-                fill
                 sizes="(min-width: 1024px) 17vw, 70vw"
                 className="object-cover"
               />
@@ -203,9 +205,9 @@ export async function FamilyPage({ data }: { data: FamilyPageData }) {
                 >
                   {item.title}
                 </h3>
-                <p className="mt-3 text-[0.875rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-4">
-                  {item.body}
-                </p>
+                <div className="mt-3 text-[0.875rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-4">
+                  <Rich value={item.body} />
+                </div>
               </li>
             ))}
           </ul>
@@ -224,9 +226,9 @@ export async function FamilyPage({ data }: { data: FamilyPageData }) {
               </span>
             ))}
           </h2>
-          <p className="mt-8 text-[1.0625rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:text-[1.1875rem]">
-            {ask.summary}
-          </p>
+          <div className="mt-8 text-[1.0625rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:text-[1.1875rem]">
+            <Rich value={ask.summary} />
+          </div>
           <ArrowPill href={ask.action.href} className="mt-10 inline-flex">
             {ask.action.label}
           </ArrowPill>

@@ -1,12 +1,12 @@
 "use client";
 
 import { MotionConfig, motion } from "motion/react";
-import Image from "next/image";
 import type { CSSProperties } from "react";
 import { projectHref } from "@/lib/links";
 import type { HomePage } from "@/sanity/types";
 import { Claim } from "./Claim";
 import { COVER_SVH } from "./Hero";
+import { Visual } from "./Visual";
 
 /** Quick out, long settle: the cards arrive, they do not drift in. */
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
@@ -56,17 +56,19 @@ export function SelectedWork({
               <a href={projectHref(project.slug)} className="group block">
                 {/* The project's ground until its picture is in, so a draft
                     added here before its picture never breaks the page. */}
+                {/* No fill behind a picture or film: a dark ground showed as
+                    a hairline round the rounded corners. */}
                 <div
-                  className="relative aspect-[4/3] overflow-hidden rounded-[0.75rem] bg-ink-950"
-                  style={project.image ? undefined : { backgroundColor: project.ground }}
+                  className="relative aspect-[4/3] overflow-hidden rounded-[0.75rem]"
+                  style={(project.image || project.imageVideo) && project.fit !== "contain" ? undefined : { backgroundColor: project.ground }}
                 >
-                  {project.image && (
-                    <Image
+                  {(project.image || project.imageVideo) && (
+                    <Visual
                       src={project.image}
+                      video={project.imageVideo}
                       alt=""
-                      fill
                       sizes="(min-width: 768px) 33vw, 100vw"
-                      className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                      className={`${project.fit === "contain" ? "object-contain" : "object-cover"} transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]`}
                     />
                   )}
                 </div>

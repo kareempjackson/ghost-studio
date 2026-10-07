@@ -14,6 +14,8 @@ import { SiteHeader } from "../../_components/SiteHeader";
 import { Overview } from "../_components/Overview";
 import { PartsBar } from "../_components/PartsBar";
 import { Plate, PlateRows } from "../_components/Plate";
+import { Visual } from "../../_components/Visual";
+import { Rich } from "../../_components/Rich";
 
 /**
  * Every project with a slug, prerendered. With Cache Components the list may
@@ -131,7 +133,7 @@ export default async function ProjectPage({
                 {project.facts.map((fact) => (
                   <div key={fact.label}>
                     <dt className="inline font-semibold">{fact.label}:</dt>{" "}
-                    <dd className="inline">{fact.value}</dd>
+                    <dd className="inline"><Rich value={fact.value} inline /></dd>
                   </div>
                 ))}
               </dl>
@@ -154,7 +156,7 @@ export default async function ProjectPage({
               className={`max-w-[46rem] text-primary ${project.logo.src ? "mt-10 lg:mt-12" : ""}`}
               style={HEADLINE_STYLE}
             >
-              {project.headline}
+              <Rich value={project.headline} inline />
             </h1>
             {project.tags.length > 0 && (
               <ul className="mt-10 flex flex-wrap gap-2 lg:mt-12">
@@ -259,13 +261,11 @@ function Part({ chapter, listHeading }: { chapter: Chapter; listHeading: string 
         <p className={`${MONO} text-ink-500 lg:pt-4`}>{chapter.label}</p>
         <div className="max-w-[45rem]">
           <h2 id={headingId} className="text-primary" style={PART_STYLE}>
-            {chapter.heading}
+            <Rich value={chapter.heading} inline />
           </h2>
           {chapter.body.length > 0 && (
-            <div className="mt-8 space-y-8 text-[1.0625rem] leading-[2] tracking-[-0.01em] text-secondary lg:mt-10 lg:text-[1.125rem] lg:leading-[2.15]">
-              {chapter.body.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
+            <div className="mt-8 text-[1.0625rem] leading-[2] tracking-[-0.01em] text-secondary [--rich-gap:2rem] lg:mt-10 lg:text-[1.125rem] lg:leading-[2.15]">
+              <Rich value={chapter.body} />
             </div>
           )}
           {chapter.items.length > 0 && (
@@ -278,7 +278,7 @@ function Part({ chapter, listHeading }: { chapter: Chapter; listHeading: string 
                   <li key={index} className="pl-1">
                     {item.lead && <strong className="font-semibold">{item.lead}</strong>}
                     {item.lead && ": "}
-                    {item.text}
+                    <Rich value={item.text} inline />
                   </li>
                 ))}
               </ul>
@@ -307,13 +307,13 @@ function MoreCard({ project, previewLabel }: { project: Project; previewLabel: s
         className="relative flex aspect-[10/7] flex-col justify-between overflow-hidden rounded-[0.75rem] p-6 text-ink-950 lg:p-9"
         style={{ backgroundColor: project.ground }}
       >
-        {project.image ? (
-          <Image
+        {(project.image || project.imageVideo) ? (
+          <Visual
             src={project.image}
+            video={project.imageVideo}
             alt={project.imageAlt}
-            fill
             sizes="(min-width: 768px) 50vw, 100vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+            className={`${project.fit === "contain" ? "object-contain" : "object-cover"} transition-transform duration-700 ease-out group-hover:scale-[1.03]`}
           />
         ) : (
           <>

@@ -4,7 +4,7 @@
  */
 
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { colour, lines, para, picture, text } from "../fields";
+import { colour, lines, para, paras, phrase, picture, plain, text } from "../fields";
 
 export const disciplines = ["Brand", "Digital", "Systems"] as const;
 export const topics = ["Strategy", "Design", "Engineering"] as const;
@@ -54,19 +54,16 @@ const body = defineField({
       fields: [
         defineField({ name: "alt", type: "string", title: "Alt text" }),
         defineField({ name: "caption", type: "string" }),
+        defineField({
+          name: "video",
+          type: "r2Video",
+          title: "Film",
+          description: "Optional. An MP4 to play here instead, muted and looped.",
+        }),
       ],
     }),
   ],
 });
-
-/** Lines of text, each its own entry: paragraphs, or the items of a list. */
-const paragraphs = (name: string, o: { title?: string; description?: string; group?: string } = {}) =>
-  defineField({
-    name,
-    type: "array",
-    of: [defineArrayMember({ type: "text", rows: 3 })],
-    ...o,
-  });
 
 const plate = (name: string, o: { title?: string; description?: string; group?: string } = {}) =>
   defineField({ name, type: "media", ...o });
@@ -95,14 +92,31 @@ export const project = defineType({
       validation: (r) => r.min(1),
     }),
     colour("ground", { description: "The card's colour on /work, and behind the picture.", group: "card" }),
-    picture("image", { required: true, description: "Cropped near-square on the cards.", group: "card" }),
-    para("description", { required: false, description: "For search results.", group: "card" }),
+    picture("image", { required: true, description: "The card's picture or film.", group: "card" }),
+    defineField({
+      name: "fit",
+      type: "string",
+      title: "Fit on the card",
+      group: "card",
+      description:
+        "Fill crops the picture or film to the card. Fit shows all of it, scaled down on the card's colour — set the colour to the film's background so it sits seamlessly.",
+      options: {
+        list: [
+          { title: "Fill", value: "cover" },
+          { title: "Fit", value: "contain" },
+        ],
+        layout: "radio",
+        direction: "horizontal",
+      },
+      initialValue: "cover",
+    }),
+    plain("description", { required: false, description: "For search results.", group: "card" }),
 
     /* The case study, at /work/[slug]. Every part is optional: what is
        empty is left out, so a project reads as far as it is written. */
     plate("hero", { group: "story", description: "The plate at the top of the page." }),
-    picture("logo", { description: "The client's mark, set small over the headline.", group: "story" }),
-    para("headline", { required: false, description: "The page's heading. The tagline is used if empty.", group: "story" }),
+    picture("logo", { description: "The client's mark, set small over the headline.", group: "story", video: false }),
+    phrase("headline", { required: false, description: "The page's heading. The tagline is used if empty.", group: "story" }),
     defineField({
       name: "facts",
       type: "array",
@@ -111,7 +125,7 @@ export const project = defineType({
       of: [
         defineArrayMember({
           type: "object",
-          fields: [text("label"), para("value")],
+          fields: [text("label"), phrase("value")],
           preview: { select: { title: "label", subtitle: "value" } },
         }),
       ],
@@ -123,7 +137,7 @@ export const project = defineType({
       description: "The pills under the headline.",
       of: [defineArrayMember({ type: "string" })],
     }),
-    paragraphs("overview", { group: "story", description: "The opening. After the first few lines it folds behind Read more." }),
+    paras("overview", { group: "story", description: "The opening. After the first few lines it folds behind Read more." }),
     defineField({
       name: "website",
       type: "url",
@@ -142,8 +156,8 @@ export const project = defineType({
           name: "chapter",
           fields: [
             text("label", { description: "The stop on the bar, and the label beside the heading." }),
-            para("heading"),
-            paragraphs("body"),
+            phrase("heading"),
+            paras("body"),
             text("listHeading", { required: false, description: "Over the list. What We Did if empty." }),
             defineField({
               name: "items",
@@ -152,7 +166,7 @@ export const project = defineType({
               of: [
                 defineArrayMember({
                   type: "object",
-                  fields: [text("lead", { required: false }), para("text")],
+                  fields: [text("lead", { required: false }), phrase("text")],
                   preview: { select: { title: "text", subtitle: "lead" } },
                 }),
               ],
@@ -205,7 +219,7 @@ export const article = defineType({
         colour("ground", { description: "Shown until there is a picture, and behind it." }),
       ],
     }),
-    para("description", { required: false, description: "For search results. The excerpt is used if empty." }),
+    plain("description", { required: false, description: "For search results. The excerpt is used if empty." }),
     body,
   ],
   preview: {

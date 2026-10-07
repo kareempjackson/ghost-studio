@@ -4,6 +4,7 @@ import { MotionConfig, motion, type Variants } from "motion/react";
 import type { CSSProperties } from "react";
 import type { PointOfView as PointOfViewData } from "@/sanity/types";
 import { ArrowPill } from "./ArrowPill";
+import { Rich } from "./Rich";
 
 /** 40px at 390 to 64px at 1440, held there. */
 const HEADING_STYLE: CSSProperties = {
@@ -111,12 +112,12 @@ export function PointOfView({
                   <span>{card.label}</span>
                 </div>
 
-                <p
-                  className="mt-8 whitespace-pre-line lg:mt-10"
+                <div
+                  className="mt-8 whitespace-pre-line [--rich-gap:0] lg:mt-10"
                   style={STATEMENT_STYLE}
                 >
-                  {card.statement}
-                </p>
+                  <Rich value={card.statement} />
+                </div>
 
                 <div className="mt-auto border-t border-ink-950/25 pt-4">
                   <p className="max-w-[15rem] text-[0.875rem] leading-[1.4]">

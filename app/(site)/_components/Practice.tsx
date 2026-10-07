@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
 import { MONO, SectionHead } from "./SectionHead";
+import type { Rich as RichValue } from "@/sanity/types";
+import { Rich } from "./Rich";
 
 /** 28px at 390 to 38px at 1440, held there. A step in practice. */
 const STEP_STYLE: CSSProperties = {
@@ -29,7 +31,7 @@ export function Practice({
   id: string;
   label: string;
   heading: string | readonly string[];
-  items: readonly { readonly title?: string | null; readonly body: string }[];
+  items: readonly { readonly title?: string | null; readonly body: RichValue | string }[];
 }) {
   return (
     <section
@@ -55,9 +57,9 @@ export function Practice({
             ) : (
               <span aria-hidden className="hidden lg:block" />
             )}
-            <p className="mt-4 max-w-[20rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-6">
-              {step.body}
-            </p>
+            <div className="mt-4 max-w-[20rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-6">
+              <Rich value={step.body} />
+            </div>
           </li>
         ))}
       </ol>

@@ -1,6 +1,5 @@
-import Image from "next/image";
 import type { Media } from "@/sanity/types";
-import { PlateFilm } from "./PlateFilm";
+import { Visual } from "../../_components/Visual";
 
 const ASPECT = {
   landscape: "aspect-[3/2]",
@@ -31,17 +30,13 @@ export function Plate({
       className={`relative overflow-hidden rounded-[0.75rem] ${ASPECT[media.aspect] ?? ASPECT.landscape}`}
       style={{ backgroundColor: media.ground || PAPER }}
     >
-      {media.src && (
-        <Image
-          src={media.src}
-          alt={media.video ? "" : media.alt}
-          fill
-          sizes={sizes}
-          priority={priority}
-          className="object-cover"
-        />
-      )}
-      {media.video && <PlateFilm src={media.video} label={media.alt} />}
+      <Visual
+        src={media.src}
+        video={media.video}
+        alt={media.alt}
+        sizes={sizes}
+        priority={priority}
+      />
     </div>
   );
 }

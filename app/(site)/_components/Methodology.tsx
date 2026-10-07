@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { HomePage, Link } from "@/sanity/types";
 import { ArrowPill } from "./ArrowPill";
+import { Rich } from "./Rich";
 
 /** 24px at 390 to 30px at 1440, held there: a paragraph set as a statement. */
 const STATEMENT_STYLE: CSSProperties = {
@@ -38,12 +39,12 @@ export function Methodology({
           {methodology.heading}
         </h2>
 
-        <p
+        <div
           className="max-w-[40ch] text-primary lg:col-span-6"
           style={STATEMENT_STYLE}
         >
-          {methodology.difference}
-        </p>
+          <Rich value={methodology.difference} />
+        </div>
 
         <div className="lg:col-span-3 lg:justify-self-end">
           <ArrowPill href={action.href}>

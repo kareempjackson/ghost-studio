@@ -3,6 +3,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ArrowPill } from "../../_components/ArrowPill";
 import { MONO } from "../../_components/SectionHead";
+import type { Rich as RichValue } from "@/sanity/types";
+import { Rich, richChunks } from "../../_components/Rich";
 
 /**
  * The opening of a case study. Folded, it shows the first four lines and
@@ -40,7 +42,7 @@ export function Overview({
   website,
 }: {
   label: string;
-  paragraphs: readonly string[];
+  paragraphs: RichValue;
   readMore: string;
   readLess: string;
   visit: string;
@@ -83,10 +85,10 @@ export function Overview({
           maskPosition: folded ? "0 100%" : "0 0",
           WebkitMaskPosition: folded ? "0 100%" : "0 0",
         }}
-        className="mt-6 max-w-[37rem] space-y-6 overflow-hidden text-[1.1875rem] leading-[1.5] tracking-[-0.015em] text-primary [transition:max-height_900ms_var(--gs-reveal-ease),mask-position_900ms_var(--gs-reveal-ease),-webkit-mask-position_900ms_var(--gs-reveal-ease)] [--gs-reveal-ease:cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none lg:mt-8 lg:text-[1.3125rem]"
+        className="mt-6 max-w-[37rem] space-y-6 overflow-hidden [--rich-gap:1.5rem] text-[1.1875rem] leading-[1.5] tracking-[-0.015em] text-primary [transition:max-height_900ms_var(--gs-reveal-ease),mask-position_900ms_var(--gs-reveal-ease),-webkit-mask-position_900ms_var(--gs-reveal-ease)] [--gs-reveal-ease:cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none lg:mt-8 lg:text-[1.3125rem]"
       >
-        {paragraphs.map((paragraph, index) => (
-          <p
+        {richChunks(paragraphs).map((chunk, index) => (
+          <div
             key={index}
             /* The paragraphs past the first rise into place as the text
                opens, one after another; folding, they go together. */
@@ -101,8 +103,8 @@ export function Overview({
             }
             className="transition-[opacity,translate] duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none"
           >
-            {paragraph}
-          </p>
+            <Rich value={chunk} />
+          </div>
         ))}
       </div>
 

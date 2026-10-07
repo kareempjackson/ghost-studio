@@ -20,6 +20,7 @@ const NOT_COPY = new Set([
   "src",
   "video",
   "aspect",
+  "fit",
   "poster",
   "image",
   "portrait",

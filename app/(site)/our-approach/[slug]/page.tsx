@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
@@ -13,6 +12,7 @@ import { SectionHead } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
 import { Network } from "../../services/_components/Network";
+import { Visual } from "../../_components/Visual";
 
 /** Cache Components needs one param to prerender against; `_` is never a phase. */
 export async function generateStaticParams() {
@@ -77,15 +77,15 @@ export default async function PhaseRoute({
         </PageCover>
 
         <div
-          role={plate.src ? undefined : "presentation"}
+          role={(plate.src || plate.video) ? undefined : "presentation"}
           className="relative aspect-[4/3] overflow-hidden sm:aspect-[16/9] lg:aspect-[5/2]"
           style={{ backgroundColor: plate.ground || PAPER }}
         >
-          {plate.src && (
-            <Image
+          {(plate.src || plate.video) && (
+            <Visual
               src={plate.src}
+              video={plate.video}
               alt={plate.alt}
-              fill
               sizes="100vw"
               className="object-cover"
             />

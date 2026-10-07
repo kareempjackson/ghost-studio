@@ -3,6 +3,7 @@
 import { stegaClean } from "next-sanity";
 import { useId, useState, type FormEvent } from "react";
 import type { ContactPage } from "@/sanity/types";
+import { Rich } from "../../_components/Rich";
 
 /**
  * No rule around a field: the white fill is what says where to type, and on
@@ -271,12 +272,12 @@ export function ContactForm({
         </span>
       </button>
 
-      <p
+      <div
         aria-live="polite"
         className="mt-6 text-[0.8125rem] leading-[1.5] text-ink-500"
       >
-        {handed ? `${form.handed} ${form.again}` : form.note}
-      </p>
+        {handed ? `${form.handed} ${form.again}` : <Rich value={form.note} />}
+      </div>
     </form>
   );
 }

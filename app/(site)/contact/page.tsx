@@ -7,6 +7,7 @@ import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
 import { ContactForm } from "./_components/ContactForm";
 import { CopyEmail } from "./_components/CopyEmail";
+import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getContactPage();
@@ -93,13 +94,10 @@ export default async function Contact() {
                 </span>
               ))}
             </h1>
-            <p className="gs-reveal mt-10 text-[1.0625rem] leading-[1.5] tracking-[-0.01em] text-secondary [--reveal:3] lg:mt-12 lg:text-[1.25rem]">
-              {contact.summary.map((line) => (
-                <span key={line} className="block">
-                  {line}
-                </span>
-              ))}
-            </p>
+            {/* One line per paragraph, as the cover set them. */}
+            <div className="gs-reveal mt-10 text-[1.0625rem] leading-[1.5] tracking-[-0.01em] text-secondary [--reveal:3] [--rich-gap:0] lg:mt-12 lg:text-[1.25rem]">
+              <Rich value={contact.summary} />
+            </div>
           </section>
 
           <div className="grid gap-16 px-5 pb-28 sm:px-8 lg:grid-cols-2 lg:gap-12 lg:px-12 lg:pb-40">

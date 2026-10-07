@@ -1,8 +1,9 @@
-import Image from "next/image";
 import type { CSSProperties } from "react";
 import { journalHref } from "@/lib/links";
 import type { JournalSection } from "@/sanity/types";
 import { ArrowPill } from "./ArrowPill";
+import { Visual } from "./Visual";
+import { Rich } from "./Rich";
 
 /** 36px at 390 to 56px at 1440, held there. */
 const HEADING_STYLE: CSSProperties = {
@@ -59,11 +60,11 @@ export function Journal({ journal }: { journal: JournalSection }) {
 
       <article className="mt-14 grid overflow-hidden rounded-[0.75rem] bg-[#f0efed] text-ink-950 lg:mt-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)]">
         <div className="relative aspect-[16/11] bg-[#16151b] lg:aspect-auto lg:min-h-[26rem]">
-          {featured.image.src && (
-            <Image
+          {(featured.image.src || featured.image.video) && (
+            <Visual
               src={featured.image.src}
+              video={featured.image.video}
               alt={featured.image.alt}
-              fill
               sizes="(min-width: 1024px) 48vw, 100vw"
               className="object-cover"
             />
@@ -86,9 +87,9 @@ export function Journal({ journal }: { journal: JournalSection }) {
               </span>
             ))}
           </h3>
-          <p className="mt-5 max-w-[28rem] text-[0.9375rem] leading-[1.6] tracking-[-0.01em] text-ink-600 lg:mt-6">
-            {featured.summary}
-          </p>
+          <div className="mt-5 max-w-[28rem] text-[0.9375rem] leading-[1.6] tracking-[-0.01em] text-ink-600 lg:mt-6">
+            <Rich value={featured.summary} />
+          </div>
           <ArrowPill
             href={journalHref(featured.slug)}
             tone="signal"
@@ -111,11 +112,11 @@ export function Journal({ journal }: { journal: JournalSection }) {
                 style={{ backgroundColor: entry.cover.ground }}
                 className="relative aspect-[6/5] overflow-hidden rounded-[0.5rem]"
               >
-                {entry.cover.src && (
-                  <Image
+                {(entry.cover.src || entry.cover.video) && (
+                  <Visual
                     src={entry.cover.src}
+                    video={entry.cover.video}
                     alt={entry.cover.alt}
-                    fill
                     sizes="(min-width: 640px) 11.5rem, 8.5rem"
                     className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
                   />
@@ -154,9 +155,9 @@ export function Journal({ journal }: { journal: JournalSection }) {
                     </span>
                   ))}
                 </h3>
-                <p className="mt-3 max-w-[17rem] text-[0.8125rem] leading-[1.55] tracking-[-0.01em] text-ink-600 lg:mt-5">
-                  {entry.excerpt}
-                </p>
+                <div className="mt-3 max-w-[17rem] text-[0.8125rem] leading-[1.55] tracking-[-0.01em] text-ink-600 lg:mt-5">
+                  <Rich value={entry.excerpt} linkless />
+                </div>
               </div>
             </a>
           </li>

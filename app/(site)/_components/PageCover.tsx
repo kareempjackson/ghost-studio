@@ -1,6 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
 import { ArrowPill } from "./ArrowPill";
 import { LABEL } from "./StudioStrip";
+import type { Rich as RichValue } from "@/sanity/types";
+import { Rich } from "./Rich";
 
 /**
  * The claim on the cover. `lg`: 52px at 390 to 128px at 1440, held there.
@@ -46,7 +48,7 @@ export function PageCover({
   heading: readonly string[];
   /** A line over the summary, at the same size: who the page is for. */
   lead?: string;
-  summary: string;
+  summary: RichValue | string;
   /** The way on. Leave it off when the page itself is the way on. */
   action?: { readonly label: string; readonly href: string };
   size?: keyof typeof HEADING_STYLE;
@@ -76,9 +78,9 @@ export function PageCover({
               {lead}
             </p>
           )}
-          <p className="gs-reveal max-w-[22rem] text-[1rem] leading-[1.45] tracking-[-0.01em] text-primary [--reveal:3] lg:text-[1.0625rem]">
-            {summary}
-          </p>
+          <div className="gs-reveal max-w-[22rem] text-[1rem] leading-[1.45] tracking-[-0.01em] text-primary [--reveal:3] lg:text-[1.0625rem]">
+            <Rich value={summary} />
+          </div>
           {action && (
             <ArrowPill
               href={action.href}

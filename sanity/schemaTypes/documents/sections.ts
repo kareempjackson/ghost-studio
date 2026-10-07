@@ -13,6 +13,7 @@ import {
   object,
   para,
   picture,
+  plain,
   text,
 } from "../fields";
 
@@ -26,11 +27,10 @@ export const homePage = defineType({
     object("hero", [
       defineField({
         name: "video",
-        type: "file",
-        options: { accept: "video/mp4" },
+        type: "r2Video",
         description: "The reel. MP4, muted and looped.",
       }),
-      picture("poster", { description: "Shown before the reel plays." }),
+      picture("poster", { description: "Shown before the reel plays.", video: false }),
       text("showreelLabel", { title: "Showreel button" }),
       text("showreelMark", { title: "Showreel caption" }),
     ]),
@@ -86,7 +86,7 @@ export const pointOfView = defineType({
       "cards",
       [
         text("label"),
-        para("statement", { description: "Each new line here is a line break on the card." }),
+        para("statement", { description: "Each paragraph, or Shift+Enter, is a line break on the card." }),
         text("action"),
         colour(),
         num("tilt", { description: "Resting tilt, in degrees." }),
@@ -195,7 +195,7 @@ export const sectors = defineType({
         text("name"),
         para("work"),
         picture("image", { required: true, description: "Decorative: the row's text carries the meaning." }),
-        para("art", { required: false, description: "What the picture should show. Not on the site." }),
+        plain("art", { required: false, description: "What the picture should show. Not on the site." }),
       ],
       { preview: { select: { title: "name", subtitle: "work", media: "image" } } },
     ),

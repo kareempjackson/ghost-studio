@@ -1,4 +1,5 @@
 import type { ServicesPage } from "@/sanity/types";
+import { Film } from "../../_components/Film";
 
 /** The plate's own units, off the comp. */
 const W = 1436;
@@ -116,7 +117,7 @@ export function Network({
 
         {nodes.map((node, i) => (
           <g key={i}>
-            {node.src ? (
+            {node.video ? null : node.src ? (
               <image
                 href={node.src}
                 x={node.x - node.r}
@@ -133,6 +134,19 @@ export function Network({
                 r={node.r}
                 fill="url(#gs-net-ground)"
               />
+            )}
+            {/* A film in the portrait's place, clipped to the same circle;
+                the picture is its poster rather than a layer under it. */}
+            {node.video && (
+              <foreignObject
+                x={node.x - node.r}
+                y={node.y - node.r}
+                width={node.r * 2}
+                height={node.r * 2}
+                clipPath={`url(#gs-net-clip-${i})`}
+              >
+                <Film src={node.video} poster={node.src} className="block size-full object-cover" />
+              </foreignObject>
             )}
             <circle
               cx={node.x}

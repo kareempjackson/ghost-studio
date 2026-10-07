@@ -1,11 +1,12 @@
 "use client";
 
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import Image from "next/image";
 import { useState } from "react";
 import { journalHref } from "@/lib/links";
 import type { ArticleCard as Article, Topic } from "@/sanity/types";
 import { LABEL } from "../../_components/StudioStrip";
+import { Visual } from "../../_components/Visual";
+import { Rich } from "../../_components/Rich";
 
 /** What the pieces are about, and the filter on `/insights`. */
 const topics: readonly Topic[] = ["Strategy", "Design", "Engineering"];
@@ -29,11 +30,11 @@ function ArticleCard({
         style={{ backgroundColor: article.cover.ground }}
         className="relative aspect-[9/10] overflow-hidden rounded-[0.75rem] bg-[#ececec]"
       >
-        {article.cover.src && (
-          <Image
+        {(article.cover.src || article.cover.video) && (
+          <Visual
             src={article.cover.src}
+            video={article.cover.video}
             alt={article.cover.alt}
-            fill
             sizes="(min-width: 1024px) 31vw, (min-width: 768px) 50vw, 100vw"
             className="object-cover"
           />
@@ -46,9 +47,9 @@ function ArticleCard({
       <h3 className="mt-4 text-[1.625rem] leading-[1.15] font-normal tracking-[-0.035em] text-primary transition-colors duration-200 group-hover:text-accent lg:mt-5 lg:text-[2.125rem]">
         {article.title.join(" ")}
       </h3>
-      <p className="mt-3 max-w-[28rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-4">
-        {article.excerpt}
-      </p>
+      <div className="mt-3 max-w-[28rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-4">
+        <Rich value={article.excerpt} linkless />
+      </div>
     </a>
   );
 }

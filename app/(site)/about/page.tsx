@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import type { CSSProperties } from "react";
 import { getAboutPage, getStudioStrip } from "@/sanity/content";
 import { ChatLauncher } from "../_components/ChatLauncher";
@@ -10,6 +9,8 @@ import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
 import { LABEL, StudioStrip } from "../_components/StudioStrip";
 import { UpRight } from "../_components/UpRight";
+import { Visual } from "../_components/Visual";
+import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getAboutPage();
@@ -73,10 +74,8 @@ export default async function About() {
             heading={who.heading}
             deck={who.deck}
           >
-            <div className="mt-14 max-w-[42rem] space-y-6 text-[1.0625rem] leading-[1.7] tracking-[-0.01em] text-primary lg:mt-24 lg:text-[1.1875rem]">
-              {who.body.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
+            <div className="mt-14 max-w-[42rem] text-[1.0625rem] leading-[1.7] tracking-[-0.01em] text-primary [--rich-gap:1.5rem] lg:mt-24 lg:text-[1.1875rem]">
+              <Rich value={who.body} />
             </div>
           </SectionHead>
         </section>
@@ -100,11 +99,11 @@ export default async function About() {
                   style={{ backgroundColor: member.ground }}
                   className="relative aspect-square overflow-hidden"
                 >
-                  {member.portrait ? (
-                    <Image
+                  {(member.portrait || member.portraitVideo) ? (
+                    <Visual
                       src={member.portrait}
+                      video={member.portraitVideo}
                       alt={member.name}
-                      fill
                       sizes="(min-width: 1024px) 31vw, 50vw"
                       className="object-cover"
                     />
@@ -140,9 +139,9 @@ export default async function About() {
                 <h3 className="mt-6 text-primary lg:mt-8" style={EXPECT_STYLE}>
                   {item.title}
                 </h3>
-                <p className="mt-4 max-w-[30rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-6 lg:text-[1.0625rem]">
-                  {item.body}
-                </p>
+                <div className="mt-4 max-w-[30rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-6 lg:text-[1.0625rem]">
+                  <Rich value={item.body} />
+                </div>
               </li>
             ))}
           </ol>

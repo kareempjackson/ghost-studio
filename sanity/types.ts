@@ -14,9 +14,31 @@ export interface Link {
 
 export type Lines = readonly string[];
 
+/**
+ * Copy from the rich text editor, as Portable Text: one block per paragraph,
+ * heading, quote or list item, its words in spans, bold, italic and the rest
+ * as marks, links as mark definitions. Rendered by
+ * app/(site)/_components/Rich.tsx.
+ */
+export interface RichBlock {
+  readonly _type: "block";
+  readonly _key: string;
+  readonly style?: "normal" | "h2" | "h3" | "h4" | "blockquote";
+  readonly listItem?: "bullet" | "number";
+  readonly level?: number;
+  readonly children: readonly { readonly _type: string; readonly _key: string; readonly text?: string; readonly marks?: readonly string[] }[];
+  readonly markDefs?: readonly { readonly _type: string; readonly _key: string; readonly href?: string }[];
+}
+
+export type Rich = readonly RichBlock[];
+
+/** A film URL where one is uploaded to play in a picture's place. */
+export type Film = string | null;
+
 export interface Picture {
   readonly src: string | null;
   readonly alt: string;
+  readonly video: Film;
 }
 
 /* ---- Site ---------------------------------------------------------------- */
@@ -46,10 +68,8 @@ export interface Navigation {
   readonly contactLabel: string;
   readonly featureLabel: string;
   readonly openLabel: string;
-  /** The one piece of work the menu carries: the first selected project. */
+  /** The one piece of work the menu carries: the chosen project, or the first selected. */
   readonly feature: Project | null;
-  /** The chain of people the menu's feature card sets, from the services page. */
-  readonly network: ServicesPage["method"]["network"];
 }
 
 export interface Footer {
@@ -73,7 +93,7 @@ export interface Chat {
   readonly launcher: { readonly open: string; readonly close: string; readonly label: string };
   readonly heading: string;
   readonly status: string;
-  readonly intro: string;
+  readonly intro: Rich;
   readonly topics: Lines;
   readonly topicsLabel: string;
   readonly name: { readonly label: string; readonly placeholder: string };
@@ -117,6 +137,9 @@ export interface Project {
   readonly ground: string;
   /** Null until the picture is uploaded: a draft can exist without one. */
   readonly image: string | null;
+  readonly imageVideo: Film;
+  /** Fill crops to the card; fit shows the whole picture on the card's ground. */
+  readonly fit: "cover" | "contain";
   readonly imageAlt: string;
 }
 
@@ -126,8 +149,8 @@ export interface ArticleCard {
   readonly slug: string;
   readonly topic: Topic;
   readonly title: Lines;
-  readonly excerpt: string;
-  readonly cover: { readonly src: string | null; readonly alt: string; readonly ground: string };
+  readonly excerpt: Rich;
+  readonly cover: { readonly src: string | null; readonly alt: string; readonly video: Film; readonly ground: string };
 }
 
 /** Portable Text, as stored. Rendered by app/(site)/_components/RichText.tsx. */
@@ -148,10 +171,10 @@ export interface Chapter {
   /** The anchor, from the label: "brand-identity". */
   readonly id: string;
   readonly label: string;
-  readonly heading: string;
-  readonly body: Lines;
+  readonly heading: Rich;
+  readonly body: Rich;
   readonly listHeading: string | null;
-  readonly items: readonly { readonly lead: string | null; readonly text: string }[];
+  readonly items: readonly { readonly lead: string | null; readonly text: Rich }[];
   readonly media: readonly (readonly Media[])[];
 }
 
@@ -160,10 +183,10 @@ export interface ProjectDetail extends Project {
   readonly description: string | null;
   readonly hero: Media | null;
   readonly logo: Picture;
-  readonly headline: string;
-  readonly facts: readonly { readonly label: string; readonly value: string }[];
+  readonly headline: Rich;
+  readonly facts: readonly { readonly label: string; readonly value: Rich }[];
   readonly tags: Lines;
-  readonly overview: Lines;
+  readonly overview: Rich;
   readonly website: string | null;
   readonly feature: Media | null;
   readonly chapters: readonly Chapter[];
@@ -186,16 +209,16 @@ export interface JournalSection {
     readonly category: string;
     readonly label: string;
     readonly title: Lines;
-    readonly summary: string;
+    readonly summary: Rich;
     readonly action: string;
-    readonly image: { readonly src: string | null; readonly alt: string };
+    readonly image: { readonly src: string | null; readonly alt: string; readonly video: Film };
   };
   readonly entries: readonly {
     readonly slug: string;
     readonly category: string;
     readonly title: Lines;
-    readonly excerpt: string;
-    readonly cover: { readonly src: string | null; readonly alt: string; readonly ground: string };
+    readonly excerpt: Rich;
+    readonly cover: { readonly src: string | null; readonly alt: string; readonly video: Film; readonly ground: string };
   }[];
 }
 
@@ -207,7 +230,7 @@ export interface HomePage {
     readonly showreelMark: string;
   };
   readonly claim: { readonly cover: Lines; readonly motto: Lines };
-  readonly methodology: { readonly heading: string; readonly difference: string };
+  readonly methodology: { readonly heading: string; readonly difference: Rich };
   readonly selectedWork: {
     readonly tag: string;
     readonly items: readonly Project[];
@@ -218,7 +241,7 @@ export interface HomePage {
 
 export interface ViewCard {
   readonly label: string;
-  readonly statement: string;
+  readonly statement: Rich;
   readonly action: string;
   readonly ground: string;
   readonly tilt: number;
@@ -238,7 +261,7 @@ export interface ProcessStep {
   readonly title: string;
   readonly short: string;
   readonly question: string;
-  readonly body: string;
+  readonly body: Rich;
   readonly outputs: Lines;
   readonly icon: ProcessIconName;
 }
@@ -266,8 +289,8 @@ export interface EngagementModel {
   readonly slug: string;
   readonly name: string;
   readonly kind: string;
-  readonly copy: string;
-  readonly audience: string;
+  readonly copy: Rich;
+  readonly audience: Rich;
   readonly terms: string;
   readonly action: Link;
 }
@@ -276,15 +299,16 @@ export interface Engagement {
   readonly chip: string;
   readonly title: string;
   readonly subtitle: string;
-  readonly image: { readonly src: string; readonly width: number; readonly height: number; readonly alt: string };
+  readonly image: { readonly src: string; readonly video: Film; readonly width: number; readonly height: number; readonly alt: string };
   readonly models: readonly EngagementModel[];
 }
 
 export interface Sector {
   readonly slug: string;
   readonly name: string;
-  readonly work: string;
+  readonly work: Rich;
   readonly image: string;
+  readonly imageVideo: Film;
 }
 
 export interface Sectors {
@@ -293,7 +317,7 @@ export interface Sectors {
 }
 
 export interface Testimonial {
-  readonly quote: string;
+  readonly quote: Rich;
   readonly name: string;
   readonly role: string;
   readonly company: string;
@@ -330,24 +354,25 @@ interface Seo {
 interface Cover {
   readonly eyebrow: string;
   readonly heading: Lines;
-  readonly summary: string;
+  readonly summary: Rich;
   readonly action: Link;
 }
 
 export interface Step {
   readonly title: string;
-  readonly body: string;
+  readonly body: Rich;
 }
 
 export interface Question {
   readonly question: string;
-  readonly answer: string;
+  readonly answer: Rich;
 }
 
 export interface TeamMember {
   readonly name: string;
   readonly role: string;
   readonly portrait: string | null;
+  readonly portraitVideo: Film;
   readonly ground: string;
 }
 
@@ -358,11 +383,11 @@ export interface FamilyMember {
 }
 
 export interface AboutPage extends Seo, Cover {
-  readonly who: { readonly label: string; readonly heading: string; readonly deck: string; readonly body: Lines };
+  readonly who: { readonly label: string; readonly heading: string; readonly deck: Rich; readonly body: Rich };
   readonly team: {
     readonly label: string;
     readonly heading: Lines;
-    readonly deck: string;
+    readonly deck: Rich;
     readonly portraitLabel: string;
     readonly members: readonly TeamMember[];
   };
@@ -371,16 +396,16 @@ export interface AboutPage extends Seo, Cover {
 }
 
 export interface ServicesPage extends Seo, Cover {
-  readonly ways: { readonly label: string; readonly heading: string; readonly deck: string };
-  readonly disciplines: { readonly label: string; readonly heading: string; readonly deck: string };
+  readonly ways: { readonly label: string; readonly heading: string; readonly deck: Rich };
+  readonly disciplines: { readonly label: string; readonly heading: string; readonly deck: Rich };
   readonly method: {
     readonly label: string;
     readonly heading: Lines;
-    readonly copy: Lines;
+    readonly copy: Rich;
     readonly action: Link;
     readonly network: {
       readonly alt: string;
-      readonly nodes: readonly { readonly x: number; readonly y: number; readonly r: number; readonly src: string | null }[];
+      readonly nodes: readonly { readonly x: number; readonly y: number; readonly r: number; readonly src: string | null; readonly video: Film }[];
     };
   };
 }
@@ -388,7 +413,7 @@ export interface ServicesPage extends Seo, Cover {
 export interface Audience {
   readonly slug: string;
   readonly name: Lines;
-  readonly body: string;
+  readonly body: Rich;
   /** True once the audience has its own page at /who-we-serve/[slug]. */
   readonly hasPage: boolean;
 }
@@ -397,7 +422,7 @@ export interface WhoWeServePage extends Seo, Cover {
   readonly audiences: {
     readonly label: string;
     readonly heading: Lines;
-    readonly deck: string;
+    readonly deck: Rich;
     readonly items: readonly Audience[];
   };
 }
@@ -428,7 +453,7 @@ export interface CaseStudyLabels {
 export interface InsightsPage extends Seo {
   readonly eyebrow: string;
   readonly heading: Lines;
-  readonly summary: string;
+  readonly summary: Rich;
   readonly status: string | null;
   readonly all: string;
   readonly filterLabel: string;
@@ -444,7 +469,7 @@ interface FormField {
 export interface ContactPage extends Seo {
   readonly eyebrow: string;
   readonly heading: Lines;
-  readonly summary: Lines;
+  readonly summary: Rich;
   readonly start: { readonly label: string; readonly email: string; readonly copy: string; readonly copied: string };
   readonly base: { readonly label: string; readonly lines: Lines };
   readonly next: { readonly label: string; readonly steps: Lines };
@@ -460,7 +485,7 @@ export interface ContactPage extends Seo {
     readonly budget: { readonly label: string; readonly placeholder: string; readonly options: Lines };
     readonly timing: FormField;
     readonly action: string;
-    readonly note: string;
+    readonly note: Rich;
     readonly handed: string;
     readonly again: string;
   };
@@ -468,9 +493,9 @@ export interface ContactPage extends Seo {
 
 export interface TrackPageData extends Seo, Cover {
   readonly slug: string;
-  readonly plate: { readonly src: string | null; readonly alt: string; readonly ground: string | null };
+  readonly plate: { readonly src: string | null; readonly video: Film; readonly alt: string; readonly ground: string | null };
   readonly terms: { readonly price: string; readonly minimum: string; readonly compare: Link };
-  readonly who: { readonly label: string; readonly heading: Lines; readonly deck: string };
+  readonly who: { readonly label: string; readonly heading: Lines; readonly deck: Rich };
   readonly shape: { readonly label: string; readonly heading: string; readonly items: readonly Step[] };
   readonly process: { readonly label: string; readonly heading: Lines; readonly items: readonly Step[] };
   readonly questions: { readonly label: string; readonly heading: string; readonly items: readonly Question[] };
@@ -484,7 +509,7 @@ export interface Note {
 
 export interface Experiment {
   readonly title: string;
-  readonly body: string;
+  readonly body: Rich;
   readonly ground: string;
 }
 
@@ -492,27 +517,27 @@ export interface FamilyPageData extends Seo {
   readonly href: string;
   readonly cover: {
     readonly heading: Lines;
-    readonly summary: string;
+    readonly summary: Rich;
     readonly action: Link;
     readonly notes: readonly Note[];
     readonly card: Picture;
   };
-  readonly archive: { readonly label: string; readonly heading: Lines; readonly deck: string; readonly items: readonly Experiment[] };
-  readonly ask: { readonly label: string; readonly heading: Lines; readonly summary: string; readonly action: Link };
+  readonly archive: { readonly label: string; readonly heading: Lines; readonly deck: Rich; readonly items: readonly Experiment[] };
+  readonly ask: { readonly label: string; readonly heading: Lines; readonly summary: Rich; readonly action: Link };
   readonly family: { readonly label: string; readonly heading: Lines };
 }
 
 export interface LegalSection {
   readonly id: string;
   readonly title: string;
-  readonly paragraphs: Lines;
-  readonly list?: Lines | null;
+  readonly paragraphs: Rich;
+  readonly list?: Rich | null;
 }
 
 export interface LegalDocument extends Seo {
   readonly slug: string;
   readonly updated: string;
-  readonly intro: string;
+  readonly intro: Rich;
   readonly contentsLabel: string;
   readonly sections: readonly LegalSection[];
 }
@@ -527,8 +552,8 @@ export interface ApproachPhase {
 }
 
 export interface ApproachPage extends Seo, Cover {
-  readonly plate: { readonly src: string | null; readonly alt: string; readonly ground: string | null };
-  readonly start: { readonly label: string; readonly heading: string; readonly deck: string; readonly body: string };
+  readonly plate: { readonly src: string | null; readonly video: Film; readonly alt: string; readonly ground: string | null };
+  readonly start: { readonly label: string; readonly heading: string; readonly deck: Rich; readonly body: Rich };
   readonly phases: { readonly label: string; readonly heading: Lines; readonly itemLabel: string; readonly pageEyebrow: string; readonly items: readonly ApproachPhase[] };
   /** The chain of people that closes the page, off the /services document. */
   readonly network: ServicesPage["method"]["network"];
@@ -542,8 +567,8 @@ export interface PhasePage extends Seo {
   readonly heading: Lines;
   readonly question: string;
   readonly action: Link | null;
-  readonly plate: { readonly src: string | null; readonly alt: string; readonly ground: string | null };
-  readonly purpose: { readonly label: string; readonly heading: string; readonly deck: string | null };
+  readonly plate: { readonly src: string | null; readonly video: Film; readonly alt: string; readonly ground: string | null };
+  readonly purpose: { readonly label: string; readonly heading: Rich; readonly deck: Rich | null };
   readonly practice: {
     readonly label: string;
     readonly heading: string;
@@ -566,14 +591,14 @@ export interface AudiencePage extends Seo {
   readonly eyebrow: string;
   readonly name: Lines;
   readonly heading: Lines;
-  readonly summary: string;
+  readonly summary: Rich;
   readonly action: Link | null;
-  readonly plate: { readonly src: string | null; readonly alt: string; readonly ground: string | null };
-  readonly challenge: { readonly label: string; readonly heading: Lines; readonly deck: string | null };
+  readonly plate: { readonly src: string | null; readonly video: Film; readonly alt: string; readonly ground: string | null };
+  readonly challenge: { readonly label: string; readonly heading: Lines; readonly deck: Rich | null };
   readonly practice: {
     readonly label: string;
     readonly heading: Lines;
-    readonly items: readonly { readonly title: string | null; readonly body: string }[];
+    readonly items: readonly { readonly title: string | null; readonly body: Rich }[];
   } | null;
   readonly outputs: { readonly label: string; readonly heading: Lines; readonly items: Lines } | null;
   readonly network: ServicesPage["method"]["network"];

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Visual } from "./Visual";
 import { PortableText, stegaClean, type PortableTextComponents } from "next-sanity";
 import type { RichText as RichTextValue } from "@/sanity/types";
 import { MONO } from "./SectionHead";
@@ -6,6 +7,8 @@ import { MONO } from "./SectionHead";
 /** An image block, as the project and article queries project it. */
 interface ImageBlock {
   readonly src?: string | null;
+  /** A film to play in the picture's place. */
+  readonly video?: string | null;
   readonly width?: number | null;
   readonly height?: number | null;
   readonly alt?: string | null;
@@ -86,17 +89,35 @@ const components: PortableTextComponents = {
   },
   types: {
     image: ({ value }: { value: ImageBlock }) => {
-      if (!value.src) return null;
+      if (!value.src && !value.video) return null;
       return (
         <figure className="my-12 lg:my-16">
+          {value.video ? (
+            /* A film, in a box the picture's shape, or wide without one. */
+            <div
+              className="relative w-full overflow-hidden rounded-[0.75rem]"
+              style={{
+                aspectRatio:
+                  value.width && value.height ? `${value.width} / ${value.height}` : "16 / 9",
+              }}
+            >
+              <Visual
+                src={value.src}
+                video={value.video}
+                alt={value.alt ?? ""}
+                sizes="(min-width: 1024px) 42rem, 100vw"
+              />
+            </div>
+          ) : (
           <Image
-            src={value.src}
+            src={value.src as string}
             alt={value.alt ?? ""}
             width={value.width ?? 1600}
             height={value.height ?? 1000}
             sizes="(min-width: 1024px) 42rem, 100vw"
             className="h-auto w-full rounded-[0.75rem]"
           />
+          )}
           {value.caption && (
             <figcaption className={`${MONO} mt-4 text-ink-500`}>
               {value.caption}

@@ -48,8 +48,19 @@ import type {
 /* ---- Projections ----------------------------------------------------------- */
 
 const url = (field: string) => `${field}.asset->url`;
-const pic = (field: string) => `{"src": ${url(field)}, "alt": coalesce(${field}.alt, "")}`;
+/**
+ * A film's URL on R2. The asset-> fallback reads films still in Sanity's
+ * store until `npm run migrate:films` has moved them; drop it after.
+ */
+const film = (path: string) => `coalesce(${path}.url, ${path}.asset->url)`;
+/** A picture's film, where one is uploaded to play in its place. */
+const vid = (field: string) => film(`${field}.video`);
+const pic = (field: string) =>
+  `{"src": ${url(field)}, "alt": coalesce(${field}.alt, ""), "video": ${vid(field)}}`;
 const link = `{label, href}`;
+/** A plain string as one paragraph of rich text, where a rich field falls back to one. */
+const asRich = (field: string) =>
+  `[{"_type": "block", "_key": "plain", "style": "normal", "markDefs": [], "children": [{"_type": "span", "_key": "plain0", "text": ${field}, "marks": []}]}]`;
 
 /* Reference lists skip anything unpublished or deleted
    (`[defined(@->slug.current)]`), so a page never renders a null. */
@@ -59,18 +70,20 @@ const PROJECT = `{
   "disciplines": coalesce(disciplines, []),
   ground,
   "image": ${url("image")},
+  "imageVideo": ${vid("image")},
+  "fit": coalesce(fit, "cover"),
   "imageAlt": coalesce(image.alt, "")
 }`;
 
 const ARTICLE = `{
   "slug": slug.current,
   topic, title, excerpt,
-  "cover": {"src": ${url("cover.image")}, "alt": coalesce(cover.image.alt, ""), "ground": coalesce(cover.ground, "#e7e6e1")}
+  "cover": {"src": ${url("cover.image")}, "alt": coalesce(cover.image.alt, ""), "video": ${vid("cover.image")}, "ground": coalesce(cover.ground, "#e7e6e1")}
 }`;
 
 const PHASE = `{
   "slug": slug.current, title, question,
-  "image": {"src": image.asset->url, "alt": coalesce(image.alt, "")},
+  "image": {"src": image.asset->url, "alt": coalesce(image.alt, ""), "video": ${vid("image")}},
   "hasPage": defined(purpose.heading)
 }`;
 
@@ -82,7 +95,7 @@ const AUDIENCE = `{
 const MEDIA = `{
   "src": image.asset->url,
   "alt": coalesce(image.alt, ""),
-  "video": video.asset->url,
+  "video": ${film("video")},
   ground,
   "aspect": coalesce(aspect, "landscape")
 }`;
@@ -125,11 +138,13 @@ export async function getNavigation(): Promise<Navigation> {
       items[]{label, href, "inHeader": coalesce(inHeader, false), audiences, "intro": select(defined(intro.label) => intro{label, deck}), "children": children[]${link}},
       ventures{label, links[]{label, href, ground, ink}},
       contactLabel, featureLabel, openLabel,
-      "feature": *[_id == "homePage"][0].selectedWork.projects[defined(@->slug.current)][0]->${PROJECT},
-      "network": *[_id == "servicesPage"][0].method.network{alt, "nodes": coalesce(nodes[]{x, y, r, "src": ${url("image")}}, [])},
+      "feature": coalesce(
+        select(defined(feature->slug.current) => feature->${PROJECT}),
+        *[_id == "homePage"][0].selectedWork.projects[defined(@->slug.current)][0]->${PROJECT}
+      ),
       "audiences": coalesce(*[_id == "whoWeServePage"][0].audiences.items[defined(@->slug.current)]->${AUDIENCE}, [])
     }`,
-    ["homePage", "whoWeServePage", "audience", "servicesPage", "project"],
+    ["homePage", "whoWeServePage", "audience", "project"],
   );
 
   const { audiences, items, ...rest } = data;
@@ -188,7 +203,7 @@ export const getHomePage = () =>
   single<HomePage>(
     "homePage",
     `{
-      hero{"video": video.asset->url, "poster": ${url("poster")}, showreelLabel, showreelMark},
+      hero{"video": ${film("video")}, "poster": ${url("poster")}, showreelLabel, showreelMark},
       claim{cover, motto},
       methodology{heading, difference},
       selectedWork{tag, "items": projects[defined(@->slug.current)]->${PROJECT}, action${link}},
@@ -199,12 +214,13 @@ export const getHomePage = () =>
           ...article->{"slug": slug.current, "category": topic, title, "summary": excerpt},
           "image": {
             "src": coalesce(${url("image")}, ${url("article->cover.image")}),
+            "video": coalesce(${vid("image")}, ${vid("article->cover.image")}),
             "alt": coalesce(image.alt, article->cover.image.alt, "")
           }
         },
         "entries": entries[defined(@->slug.current)]->{
           "slug": slug.current, "category": topic, title, excerpt,
-          "cover": {"src": ${url("cover.image")}, "alt": coalesce(cover.image.alt, ""), "ground": coalesce(cover.ground, "#e7e6e1")}
+          "cover": {"src": ${url("cover.image")}, "alt": coalesce(cover.image.alt, ""), "video": ${vid("cover.image")}, "ground": coalesce(cover.ground, "#e7e6e1")}
         }
       }
     }`,
@@ -239,6 +255,7 @@ export const getEngagement = () =>
       chip, title, subtitle,
       "image": {
         "src": ${url("image")},
+        "video": ${vid("image")},
         "width": image.asset->metadata.dimensions.width,
         "height": image.asset->metadata.dimensions.height,
         "alt": coalesce(image.alt, "")
@@ -251,7 +268,7 @@ export const getEngagement = () =>
 export const getSectors = () =>
   single<Sectors>(
     "sectors",
-    `{eyebrow, items[]{slug, name, work, "image": ${url("image")}}}`,
+    `{eyebrow, items[]{slug, name, work, "image": ${url("image")}, "imageVideo": ${vid("image")}}}`,
     [],
   );
 
@@ -277,7 +294,7 @@ export const getAboutPage = () =>
     `{
       ${SEO}, ${COVER},
       who{label, heading, deck, body},
-      team{label, heading, deck, portraitLabel, members[]{name, role, "portrait": ${url("portrait")}, ground}},
+      team{label, heading, deck, portraitLabel, members[]{name, role, "portrait": ${url("portrait")}, "portraitVideo": ${vid("portrait")}, ground}},
       expect{label, heading, ${STEPS}},
       family{label, heading, members[]{name, statement, href}}
     }`,
@@ -291,7 +308,7 @@ export const getServicesPage = () =>
       ${SEO}, ${COVER},
       ways{label, heading, deck},
       disciplines{label, heading, deck},
-      method{label, heading, copy, action${link}, network{alt, nodes[]{x, y, r, "src": ${url("image")}}}}
+      method{label, heading, copy, action${link}, network{alt, nodes[]{x, y, r, "src": ${url("image")}, "video": ${vid("image")}}}}
     }`,
     [],
   );
@@ -347,10 +364,10 @@ export const getApproachPage = () =>
     "approachPage",
     `{
       ${SEO}, ${COVER},
-      "plate": {"src": ${url("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
+      "plate": {"src": ${url("plate.image")}, "video": ${vid("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
       start{label, heading, deck, body},
       phases{label, heading, itemLabel, pageEyebrow, "items": items[defined(@->slug.current)]->${PHASE}},
-      "network": *[_id == "servicesPage"][0].method.network{alt, "nodes": coalesce(nodes[]{x, y, r, "src": ${url("image")}}, [])}
+      "network": *[_id == "servicesPage"][0].method.network{alt, "nodes": coalesce(nodes[]{x, y, r, "src": ${url("image")}, "video": ${vid("image")}}, [])}
     }`,
     ["servicesPage", "phase"],
   );
@@ -381,12 +398,12 @@ export async function getPhasePage(slug: string): Promise<PhasePage | null> {
         "heading": coalesce(heading, [title]),
         question,
         "action": select(defined(action.href) => action${link}),
-        "plate": {"src": ${url("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
+        "plate": {"src": ${url("plate.image")}, "video": ${vid("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
         purpose{label, heading, deck},
         "practice": select(count(practice.items) > 0 => practice{label, heading, "items": items[]{title, body}}),
         "outputs": select(count(outputs.items) > 0 => outputs{label, heading, deck, items})
       },
-      "network": *[_id == "servicesPage"][0].method.network{alt, "nodes": coalesce(nodes[]{x, y, r, "src": ${url("image")}}, [])}
+      "network": *[_id == "servicesPage"][0].method.network{alt, "nodes": coalesce(nodes[]{x, y, r, "src": ${url("image")}, "video": ${vid("image")}}, [])}
     }`,
     params: { slug },
     tags: ["approachPage", "phase", "servicesPage"],
@@ -424,17 +441,17 @@ export async function getAudiencePage(slug: string): Promise<AudiencePage | null
     query: `*[_type == "audience" && slug.current == $slug && defined(challenge.heading)][0]{
       "slug": slug.current,
       "title": array::join(name, " "),
-      "description": coalesce(description, summary, body),
+      "description": coalesce(description, pt::text(summary), pt::text(body)),
       "eyebrow": *[_id == "whoWeServePage"][0].eyebrow,
       name,
       "heading": coalesce(heading, name),
       "summary": coalesce(summary, body),
       "action": select(defined(action.href) => action${link}),
-      "plate": {"src": ${url("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
+      "plate": {"src": ${url("plate.image")}, "video": ${vid("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
       challenge{label, heading, deck},
       "practice": select(count(practice.items) > 0 => practice{label, heading, "items": items[]{"title": title, body}}),
       "outputs": select(count(outputs.items) > 0 => outputs{label, heading, items}),
-      "network": *[_id == "servicesPage"][0].method.network{alt, "nodes": coalesce(nodes[]{x, y, r, "src": ${url("image")}}, [])}
+      "network": *[_id == "servicesPage"][0].method.network{alt, "nodes": coalesce(nodes[]{x, y, r, "src": ${url("image")}, "video": ${vid("image")}}, [])}
     }`,
     params: { slug },
     tags: ["audience", "whoWeServePage", "servicesPage"],
@@ -451,7 +468,7 @@ export const getTrackPage = (slug: string) =>
     slug,
     `{
       slug, ${SEO}, ${COVER},
-      "plate": {"src": ${url("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
+      "plate": {"src": ${url("plate.image")}, "video": ${vid("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
       terms{price, minimum, compare${link}},
       who{label, heading, deck},
       shape{label, heading, ${STEPS}},
@@ -503,7 +520,7 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
         description,
         "hero": select(defined(hero) => hero${MEDIA}),
         "logo": ${pic("logo")},
-        "headline": coalesce(headline, tagline),
+        "headline": coalesce(headline, ${asRich("tagline")}),
         "facts": coalesce(facts[]{label, value}, []),
         "tags": coalesce(tags, []),
         "overview": coalesce(overview, []),
@@ -572,7 +589,7 @@ export async function getArticle(slug: string): Promise<ArticleDetail | null> {
       ...@${ARTICLE},
       publishedAt,
       description,
-      body[]{..., _type == "image" => {..., "src": asset->url, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}
+      body[]{..., _type == "image" => {..., "src": asset->url, "video": ${film("video")}, "width": asset->metadata.dimensions.width, "height": asset->metadata.dimensions.height}}
     }`,
     params: { slug },
     tags: ["article"],

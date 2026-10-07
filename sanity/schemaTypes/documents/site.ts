@@ -12,6 +12,7 @@ import {
   list,
   object,
   para,
+  plain,
   text,
 } from "../fields";
 
@@ -23,7 +24,7 @@ export const siteSettings = defineType({
   type: "document",
   fields: [
     text("title", { description: "The site's name, after every page title." }),
-    para("description", { description: "The default description for search results." }),
+    plain("description", { description: "The default description for search results." }),
     defineField({
       name: "email",
       type: "string",
@@ -101,6 +102,14 @@ export const navigation = defineType({
     ]),
     text("contactLabel", { description: "The menu's bottom corner." }),
     text("featureLabel", { description: "Over the one piece of work the menu carries." }),
+    defineField({
+      name: "feature",
+      type: "reference",
+      title: "Featured project",
+      to: [{ type: "project" }],
+      description:
+        "The project on the menu's card, shown with its card picture or film. The first project in the home page's Selected work if empty.",
+    }),
     text("openLabel", { description: "The menu button, for screen readers." }),
   ],
   preview: { prepare: () => ({ title: "Navigation" }) },

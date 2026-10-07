@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { Question } from "@/sanity/types";
 import { Toggle } from "../../_components/Toggle";
 import { usePrefersReducedMotion } from "../../_components/usePrefersReducedMotion";
+import { Rich } from "../../_components/Rich";
 
 /** Quick out, long settle — the same curve the rest of the site opens on. */
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
@@ -51,9 +52,9 @@ export function Questions({ items }: { items: readonly Question[] }) {
                   transition={{ duration: 0.45, ease: EASE_OUT }}
                   className="overflow-hidden"
                 >
-                  <p className="max-w-[34rem] pb-8 text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:text-[1.0625rem]">
-                    {item.answer}
-                  </p>
+                  <div className="max-w-[34rem] pb-8 text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:text-[1.0625rem]">
+                    <Rich value={item.answer} />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

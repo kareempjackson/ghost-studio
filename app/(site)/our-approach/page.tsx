@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { getApproachPage } from "@/sanity/content";
@@ -10,6 +9,8 @@ import { MONO, SectionHead } from "../_components/SectionHead";
 import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
 import { Network } from "../services/_components/Network";
+import { Visual } from "../_components/Visual";
+import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getApproachPage();
@@ -61,15 +62,15 @@ export default async function OurApproach() {
         />
 
         <div
-          role={plate.src ? undefined : "presentation"}
+          role={(plate.src || plate.video) ? undefined : "presentation"}
           className="relative aspect-[4/3] overflow-hidden sm:aspect-[16/9] lg:aspect-[5/2]"
           style={{ backgroundColor: plate.ground || PAPER }}
         >
-          {plate.src && (
-            <Image
+          {(plate.src || plate.video) && (
+            <Visual
               src={plate.src}
+              video={plate.video}
               alt={plate.alt}
-              fill
               sizes="100vw"
               className="object-cover"
             />
@@ -86,9 +87,9 @@ export default async function OurApproach() {
             heading={start.heading}
             deck={start.deck}
           >
-            <p className="mt-10 max-w-[34rem] text-[1.0625rem] leading-[1.6] tracking-[-0.01em] text-primary lg:mt-14 lg:text-[1.1875rem]">
-              {start.body}
-            </p>
+            <div className="mt-10 max-w-[34rem] text-[1.0625rem] leading-[1.6] tracking-[-0.01em] text-primary lg:mt-14 lg:text-[1.1875rem]">
+              <Rich value={start.body} />
+            </div>
           </SectionHead>
         </section>
 
@@ -113,11 +114,11 @@ export default async function OurApproach() {
                     className="relative aspect-[4/3] overflow-hidden rounded-[0.5rem]"
                     style={{ backgroundColor: FOREST }}
                   >
-                    {phase.image.src && (
-                      <Image
+                    {(phase.image.src || phase.image.video) && (
+                      <Visual
                         src={phase.image.src}
+                        video={phase.image.video}
                         alt={phase.image.alt}
-                        fill
                         sizes="(min-width: 640px) 50vw, 100vw"
                         className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                       />

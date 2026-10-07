@@ -12,6 +12,8 @@ import { SiteHeader } from "./SiteHeader";
 import { LABEL } from "./StudioStrip";
 import { Questions } from "../build/_components/Questions";
 import { Network } from "../services/_components/Network";
+import { Visual } from "./Visual";
+import { Rich } from "./Rich";
 
 /** Metadata for a track page, from its document in Sanity. */
 export function trackMetadata(data: TrackPageData): Metadata {
@@ -97,13 +99,13 @@ export async function TrackPage({
           data-ground="dark"
           style={{ backgroundColor: plate.ground || PLATE }}
           className="relative aspect-[4/3] overflow-hidden sm:aspect-[16/9] lg:aspect-[1512/760]"
-          {...(plate.src ? {} : { role: "img", "aria-label": plate.alt })}
+          {...(plate.src || plate.video ? {} : { role: "img", "aria-label": plate.alt })}
         >
-          {plate.src && (
-            <Image
+          {(plate.src || plate.video) && (
+            <Visual
               src={plate.src}
+              video={plate.video}
               alt={plate.alt}
-              fill
               sizes="100vw"
               className="object-cover"
             />
@@ -156,9 +158,9 @@ export async function TrackPage({
                 <h3 className="mt-6 max-w-[16rem] text-primary lg:mt-10" style={SHAPE_STYLE}>
                   {item.title}
                 </h3>
-                <p className="mt-4 max-w-[20rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-5 lg:text-[1.0625rem]">
-                  {item.body}
-                </p>
+                <div className="mt-4 max-w-[20rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-5 lg:text-[1.0625rem]">
+                  <Rich value={item.body} />
+                </div>
               </li>
             ))}
           </ol>
@@ -183,9 +185,9 @@ export async function TrackPage({
                 <h3 className="mt-6 text-[1.5rem] leading-none font-medium tracking-[-0.04em] text-primary uppercase lg:mt-8 lg:text-[1.75rem]">
                   {item.title}
                 </h3>
-                <p className="mt-4 max-w-[15rem] text-[0.9375rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-5">
-                  {item.body}
-                </p>
+                <div className="mt-4 max-w-[15rem] text-[0.9375rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-5">
+                  <Rich value={item.body} />
+                </div>
               </li>
             ))}
           </ol>

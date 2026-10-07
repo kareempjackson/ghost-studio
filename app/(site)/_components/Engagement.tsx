@@ -6,6 +6,8 @@ import type { CSSProperties, KeyboardEvent } from "react";
 import { useRef, useState } from "react";
 import type { Engagement as EngagementData } from "@/sanity/types";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+import { Visual } from "./Visual";
+import { Rich } from "./Rich";
 
 /** 22px at 390 to 30px at 1440, held there. */
 const COPY_STYLE: CSSProperties = {
@@ -59,10 +61,10 @@ export function Engagement({ engagement }: { engagement: EngagementData }) {
             {engagement.chip}
           </span>
           <div className="relative mt-4 aspect-[326/347] overflow-hidden rounded-[0.25rem] bg-ink-100 lg:aspect-auto lg:min-h-[24rem] lg:flex-1">
-            <Image
+            <Visual
               src={engagement.image.src}
+              video={engagement.image.video}
               alt={engagement.image.alt}
-              fill
               sizes="(min-width: 1024px) 30vw, 100vw"
               className="object-cover"
             />
@@ -133,7 +135,7 @@ export function Engagement({ engagement }: { engagement: EngagementData }) {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               >
-                <p style={COPY_STYLE}>{model.copy}</p>
+                <div style={COPY_STYLE}><Rich value={model.copy} /></div>
                 <a
                   href={model.action.href}
                   className="group mt-7 inline-flex items-center gap-4 border-b border-ink-950 pb-1.5 text-[1rem] leading-none tracking-[-0.01em] lg:text-[1.0625rem]"

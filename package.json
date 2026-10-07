@@ -7,11 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "tsx --env-file=.env.local sanity/seed/seed.ts"
+    "seed": "tsx --env-file=.env.local sanity/seed/seed.ts",
+    "seed:projects": "tsx --env-file=.env.local sanity/seed/projects.ts",
+    "migrate:films": "tsx --env-file=.env.local sanity/migrate/films-to-r2.ts",
+    "migrate:rich": "tsx --env-file=.env.local sanity/migrate/text-to-rich.ts"
   },
   "dependencies": {
+    "@sanity/icons": "^5.2.3",
     "@sanity/image-url": "^2.1.1",
+    "@sanity/ui": "^4.3.1",
     "@sanity/vision": "^6.17.0",
+    "aws4fetch": "^1.0.20",
     "motion": "^13.1.1",
     "next": "16.3.2",
     "next-sanity": "^13.3.4",

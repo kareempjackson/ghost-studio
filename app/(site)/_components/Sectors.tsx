@@ -8,11 +8,12 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import Image from "next/image";
 import type { CSSProperties, ReactNode } from "react";
 import { useRef, useState } from "react";
 import type { Sector, Sectors as SectorsData } from "@/sanity/types";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+import { Visual } from "./Visual";
+import { Rich } from "./Rich";
 
 /** Scroll distance for the band, in svh: the pin plus about 80svh a sector. */
 const trackSvh = (count: number) => 100 + count * 80;
@@ -170,10 +171,10 @@ function Plate({
       style={{ zIndex: index, clipPath }}
     >
       <motion.div className="absolute inset-0" style={{ scale }}>
-        <Image
+        <Visual
           src={sector.image}
+          video={sector.imageVideo}
           alt=""
-          fill
           sizes="(min-width: 1024px) 46rem, 100vw"
           className="object-cover"
         />
@@ -278,10 +279,10 @@ export function Sectors({ sectors }: { sectors: SectorsData }) {
             className="relative mt-6 aspect-[12/7] w-full overflow-hidden rounded-[0.625rem] bg-ink-100 lg:absolute lg:top-1/2 lg:left-1/2 lg:mt-0 lg:w-[min(40vw,46rem)] lg:-translate-x-1/2 lg:-translate-y-[55%]"
           >
             {reduced ? (
-              <Image
+              <Visual
                 src={sectors.items[active].image}
+                video={sectors.items[active].imageVideo}
                 alt=""
-                fill
                 sizes="(min-width: 1024px) 46rem, 100vw"
                 className="object-cover"
               />
@@ -305,7 +306,7 @@ export function Sectors({ sectors }: { sectors: SectorsData }) {
             reduced={reduced}
             lag={STAGGER * 2}
             className="mt-5 lg:absolute lg:top-[calc(50%+1.5rem)] lg:right-12 lg:mt-0 lg:w-[min(26rem,23vw)]"
-            render={(sector) => <p style={LINE_STYLE}>{sector.work}</p>}
+            render={(sector) => <div style={LINE_STYLE}><Rich value={sector.work} /></div>}
           />
         </div>
       </div>

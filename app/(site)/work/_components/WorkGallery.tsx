@@ -3,6 +3,7 @@
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { useState } from "react";
 import { projectHref } from "@/lib/links";
+import { Visual } from "../../_components/Visual";
 import type { Discipline, Project } from "@/sanity/types";
 
 /** The three trades the studio sells, and the filter on `/work`. */
@@ -62,26 +63,41 @@ function ProjectCard({
   previewLabel: string;
   featured?: boolean;
 }) {
+  /* The project's picture or film fills the plate once there is one; until
+     then the plate is its ground, with the name and a note that the
+     artwork is to come. */
+  const media = Boolean(project.image || project.imageVideo);
   return (
     <a href={projectHref(project.slug)} className="group block">
       <div
-        style={{ backgroundColor: project.ground }}
-        className={`flex flex-col justify-between overflow-hidden rounded-[0.75rem] p-5 text-ink-950 sm:p-6 ${
+        style={media && project.fit !== "contain" ? undefined : { backgroundColor: project.ground }}
+        className={`relative flex flex-col justify-between overflow-hidden rounded-[0.75rem] p-5 text-ink-950 sm:p-6 ${
           featured ? "aspect-[16/10] lg:aspect-[21/9]" : "aspect-[4/3]"
         }`}
       >
+        {media && (
+          <Visual
+            src={project.image}
+            video={project.imageVideo}
+            alt={project.imageAlt}
+            sizes={featured ? "100vw" : "(min-width: 768px) 50vw, 100vw"}
+            priority={featured}
+            className={`${project.fit === "contain" ? "object-contain" : "object-cover"} transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]`}
+          />
+        )}
+
         {featured ? (
           <span
-            className={`inline-flex self-start rounded-pill bg-white px-4 py-2.5 ${MONO}`}
+            className={`relative inline-flex self-start rounded-pill bg-white px-4 py-2.5 ${MONO}`}
           >
             {project.disciplines.join(" · ")}
           </span>
         ) : (
-          <span className={MONO}>{project.name}</span>
+          <span className={`relative ${MONO} ${media ? "invisible" : ""}`}>{project.name}</span>
         )}
 
-        <div className="flex items-end justify-between gap-6">
-          <span className={`${MONO} text-ink-950/70`}>
+        <div className="relative flex items-end justify-between gap-6">
+          <span className={`${MONO} text-ink-950/70 ${media ? "invisible" : ""}`}>
             {previewLabel}
           </span>
           <CornerArrow />

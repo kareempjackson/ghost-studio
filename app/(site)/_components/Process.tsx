@@ -1,5 +1,6 @@
 import type { Process as ProcessData } from "@/sanity/types";
 import { ProcessIcon } from "./ProcessIcon";
+import { Rich } from "./Rich";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -51,9 +52,9 @@ export function Process({ process }: { process: ProcessData }) {
                 <p className="text-[0.9375rem] leading-[1.35] font-medium tracking-[-0.01em] text-primary">
                   {step.question}
                 </p>
-                <p className="mt-1.5 max-w-[26rem] text-[0.875rem] leading-[1.5] text-ink-600">
-                  {step.body}
-                </p>
+                <div className="mt-1.5 max-w-[26rem] text-[0.875rem] leading-[1.5] text-ink-600">
+                  <Rich value={step.body} />
+                </div>
               </div>
 
               <p className="-mr-6 mt-4 border-t border-edge-subtle pt-4 font-label text-[0.6875rem] leading-none text-primary">

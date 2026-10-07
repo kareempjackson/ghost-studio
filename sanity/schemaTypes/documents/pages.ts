@@ -16,6 +16,8 @@ import {
   para,
   paras,
   picture,
+  phrase,
+  plain,
   seo,
   text,
 } from "../fields";
@@ -83,7 +85,7 @@ export const servicesPage = defineType({
       paras("copy"),
       action(),
       object("network", [
-        para("alt"),
+        plain("alt"),
         list(
           "nodes",
           [
@@ -145,7 +147,7 @@ export const audience = defineType({
       validation: (r) => r.required(),
     }),
     para("body", { description: "The line on the card." }),
-    para("description", { required: false, description: "For search results. The summary is used if empty." }),
+    plain("description", { required: false, description: "For search results. The summary is used if empty." }),
     lines("heading", { required: false, description: "The page's cover, one entry per line." }),
     para("summary", { required: false, description: "Under the audience's name, beside the cover." }),
     action("action", { required: false, description: "The way on from the cover." }),
@@ -351,7 +353,7 @@ export const legalPage = defineType({
         }),
         text("title"),
         paras("paragraphs"),
-        paras("list", { description: "Optional bullet points after the paragraphs." }),
+        paras("list", { description: "Optional bullet points after the paragraphs, one per paragraph." }),
       ],
       { preview: { select: { title: "title", subtitle: "id" } } },
     ),
@@ -410,7 +412,7 @@ export const phase = defineType({
     }),
     text("question", { description: "The question the phase exists to answer." }),
     picture("image", { description: "The card's picture on /our-approach." }),
-    para("description", { required: false, description: "For search results. The question is used if empty." }),
+    plain("description", { required: false, description: "For search results. The question is used if empty." }),
     lines("heading", {
       required: false,
       description: "The page's cover, one entry per line. The title is used if empty.",
@@ -421,7 +423,7 @@ export const phase = defineType({
     }),
     object(
       "purpose",
-      [text("label", { required: false }), para("heading", { required: false }), para("deck", { required: false })],
+      [text("label", { required: false }), phrase("heading", { required: false }), para("deck", { required: false })],
       { description: "Fill this in to publish the phase's page." },
     ),
     object("practice", [

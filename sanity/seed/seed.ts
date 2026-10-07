@@ -4,19 +4,25 @@
  *   npm run seed
  *
  * Reads the typed content in sanity/seed/content/ (the files that used to be
- * lib/*.ts), uploads the pictures and the reel from public/, and writes one
- * document per page and band at a fixed id. Every write is createOrReplace,
+ * lib/*.ts), uploads the pictures from public/ to Sanity and the reel to R2,
+ * and writes one document per page and band at a fixed id. Every write is createOrReplace,
  * so running it again resets those documents to this content: run it once
  * to start, not after editors have begun.
  *
  * Needs NEXT_PUBLIC_SANITY_PROJECT_ID, NEXT_PUBLIC_SANITY_DATASET and an
- * Editor token in SANITY_API_WRITE_TOKEN, read from .env.local.
+ * Editor token in SANITY_API_WRITE_TOKEN, and the R2_ values, read from
+ * .env.local.
  */
 
 import { createReadStream } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { createClient } from "next-sanity";
 import { positioning } from "../../lib/brand/voice";
+import { put, videoKey } from "../../lib/r2";
+import { richify } from "../lib/rich";
+import { caseStudy, keyed } from "./shape";
+import { schemaTypes } from "../schemaTypes";
 import { audienceSlug } from "../../lib/links";
 import { aboutPage } from "./content/about";
 import { approachPage, phases as approachPhases } from "./content/approach";
@@ -46,8 +52,6 @@ import {
   selectedWork,
   workAction,
   workPage,
-  type CaseStudySeed,
-  type PlateSeed,
 } from "./content/work";
 
 /** `npm run seed -- --dry` prints the documents instead of writing them. */
@@ -73,36 +77,17 @@ const client = createClient({
 
 /* ---- Helpers --------------------------------------------------------------- */
 
-type Json = string | number | boolean | null | undefined | Json[] | { [key: string]: Json };
-
-/** Sanity needs a _key on every object in an array. Strip readonly as we go. */
-function keyed(value: unknown): Json {
-  if (Array.isArray(value)) {
-    return value.map((item, i) =>
-      item && typeof item === "object" && !Array.isArray(item)
-        ? { _key: `k${i}`, ...(keyed(item) as Record<string, Json>) }
-        : keyed(item),
-    );
-  }
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value).map(([k, v]) => [k, keyed(v)]),
-    );
-  }
-  return value as Json;
-}
-
 const uploads = new Map<string, Promise<string>>();
 
-/** Uploads a file from public/ once, however many documents use it. */
-function upload(src: string, kind: "image" | "file" = "image") {
+/** Uploads a picture from public/ once, however many documents use it. */
+function upload(src: string) {
   const path = src.replace(/^\//, "");
-  if (dry) return Promise.resolve(`${kind}-dry-${path}`);
+  if (dry) return Promise.resolve(`image-dry-${path}`);
   if (!uploads.has(path)) {
     uploads.set(
       path,
       client.assets
-        .upload(kind, createReadStream(join("public", path)), { filename: basename(path) })
+        .upload("image", createReadStream(join("public", path)), { filename: basename(path) })
         .then((asset) => {
           console.log(`  uploaded ${path}`);
           return asset._id;
@@ -110,6 +95,17 @@ function upload(src: string, kind: "image" | "file" = "image") {
     );
   }
   return uploads.get(path)!;
+}
+
+/** A film field: the MP4 from public/, put on R2. */
+async function film(src: string) {
+  const path = src.replace(/^\//, "");
+  const filename = basename(path);
+  const key = videoKey(filename);
+  const body = await readFile(join("public", path));
+  const url = dry ? `r2-dry/${key}` : await put(key, body, "video/mp4");
+  if (!dry) console.log(`  uploaded ${path} to R2`);
+  return { _type: "r2Video", url, key, filename, mimeType: "video/mp4", size: body.byteLength };
 }
 
 /** A picture field: the upload if there is one, and the alt text either way. */
@@ -123,25 +119,6 @@ async function image(src: string | null | undefined, alt = "") {
 
 const ref = (id: string) => ({ _type: "reference", _ref: id, _key: id });
 
-/** A plate, until its picture is in: the ground and the shape. */
-const media = (plate: PlateSeed) => ({ _type: "media", ...plate });
-
-/** A project's case study, in the shape the project document stores it. */
-function caseStudy(study: CaseStudySeed | undefined) {
-  if (!study) return {};
-  const { hero, feature, chapters, ...fields } = study;
-  return {
-    ...fields,
-    ...(hero ? { hero: media(hero) } : {}),
-    ...(feature ? { feature: media(feature) } : {}),
-    chapters: chapters.map(({ media: rows, ...chapter }) => ({
-      _type: "chapter",
-      ...chapter,
-      media: rows.map((row) => ({ _type: "mediaRow", items: row.map(media) })),
-    })),
-  };
-}
-
 const projectId_ = (slug: string) => `project-${slug}`;
 const articleId = (slug: string) => `article-${slug}`;
 
@@ -149,8 +126,10 @@ const articleId = (slug: string) => `article-${slug}`;
 
 async function documents() {
   const docs: Record<string, unknown>[] = [];
+  /* The copy is written below as plain strings; the rich text fields get
+     it as blocks, one per paragraph. */
   const add = (_id: string, _type: string, fields: Record<string, unknown>) =>
-    docs.push({ _id, _type, ...(keyed(fields) as object) });
+    docs.push(richify({ _id, _type, ...(keyed(fields) as object) }, schemaTypes as never));
 
   /* Site */
   add("siteSettings", "siteSettings", {
@@ -242,10 +221,7 @@ async function documents() {
   /* Bands */
   add("homePage", "homePage", {
     hero: {
-      video: {
-        _type: "file",
-        asset: { _type: "reference", _ref: await upload("media/hero.mp4", "file") },
-      },
+      video: await film("media/hero.mp4"),
       poster: await image("media/hero-poster.jpg", ""),
       showreelLabel: "Play showreel",
       showreelMark: "Ghostsavvy / Showreel",

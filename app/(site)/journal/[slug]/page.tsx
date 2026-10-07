@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
 import { journalHref } from "@/lib/links";
 import { getArticle, getArticleSlugs, getMoreArticles } from "@/sanity/content";
+import { toPlain } from "@/sanity/lib/rich";
 import { ChatLauncher } from "../../_components/ChatLauncher";
 import { ContactBand } from "../../_components/ContactBand";
 import { RichText } from "../../_components/RichText";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
 import { LABEL } from "../../_components/StudioStrip";
+import { Visual } from "../../_components/Visual";
+import { Rich } from "../../_components/Rich";
 
 /**
  * Every article with a slug, prerendered. With Cache Components the list may
@@ -28,7 +30,7 @@ export async function generateMetadata({
   if (!article) return {};
   return {
     title: article.title.join(" "),
-    description: article.description ?? article.excerpt,
+    description: article.description ?? toPlain(article.excerpt),
   };
 }
 
@@ -88,9 +90,9 @@ export default async function ArticlePage({
               ))}
             </h1>
 
-            <p className="gs-reveal mt-10 max-w-[38rem] text-[1.1875rem] leading-[1.5] tracking-[-0.015em] text-secondary [--reveal:3] lg:mt-14 lg:text-[1.375rem]">
-              {article.excerpt}
-            </p>
+            <div className="gs-reveal mt-10 max-w-[38rem] text-[1.1875rem] leading-[1.5] tracking-[-0.015em] text-secondary [--reveal:3] lg:mt-14 lg:text-[1.375rem]">
+              <Rich value={article.excerpt} />
+            </div>
           </header>
 
           {/* Edge to edge: the cover, or its ground until there is one. */}
@@ -103,14 +105,12 @@ export default async function ArticlePage({
                 ? { role: "img", "aria-label": article.cover.alt }
                 : { "aria-hidden": true })}
           >
-            {article.cover.src && (
-              <Image
+            {(article.cover.src || article.cover.video) && (
+              <Visual
                 src={article.cover.src}
+                video={article.cover.video}
                 alt={article.cover.alt}
-                fill
-                priority
-                sizes="100vw"
-                className="object-cover"
+                priority sizes="100vw" className="object-cover"
               />
             )}
           </div>
@@ -143,11 +143,11 @@ export default async function ArticlePage({
                       style={{ backgroundColor: entry.cover.ground }}
                       className="relative aspect-[9/10] overflow-hidden rounded-[0.75rem] sm:aspect-[4/3]"
                     >
-                      {entry.cover.src && (
-                        <Image
+                      {(entry.cover.src || entry.cover.video) && (
+                        <Visual
                           src={entry.cover.src}
+                          video={entry.cover.video}
                           alt={entry.cover.alt}
-                          fill
                           sizes="(min-width: 768px) 50vw, 100vw"
                           className="object-cover"
                         />
@@ -159,9 +159,9 @@ export default async function ArticlePage({
                     <h3 className="mt-4 text-[1.625rem] leading-[1.15] font-normal tracking-[-0.035em] text-primary transition-colors duration-200 group-hover:text-accent lg:mt-5 lg:text-[2.125rem]">
                       {entry.title.join(" ")}
                     </h3>
-                    <p className="mt-3 max-w-[28rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-4">
-                      {entry.excerpt}
-                    </p>
+                    <div className="mt-3 max-w-[28rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-4">
+                      <Rich value={entry.excerpt} linkless />
+                    </div>
                   </a>
                 </li>
               ))}

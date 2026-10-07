@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { serviceEnquiryHref } from "@/lib/links";
-import type { Service } from "@/sanity/types";
+import type { Rich as RichValue, Service } from "@/sanity/types";
 import { usePrefersReducedMotion } from "../../_components/usePrefersReducedMotion";
 import { MONO, SectionHead } from "../../_components/SectionHead";
 import { Toggle } from "../../_components/Toggle";
@@ -45,7 +45,7 @@ export function Disciplines({
 }: {
   label: string;
   heading: string;
-  deck: string;
+  deck: RichValue;
   services: readonly Service[];
 }) {
   const [open, setOpen] = useState<string | null>(null);

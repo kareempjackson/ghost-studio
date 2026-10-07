@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { Link, Testimonials as TestimonialsData } from "@/sanity/types";
 import { ArrowPill } from "./ArrowPill";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+import { Rich } from "./Rich";
 
 /** 36px at 390 to 56px at 1440, held there. */
 const HEADING_STYLE: CSSProperties = {
@@ -186,7 +187,7 @@ export function Testimonials({
                 transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                 className="flex flex-col justify-between gap-7"
               >
-                <blockquote style={QUOTE_STYLE}>{item.quote}</blockquote>
+                <blockquote style={QUOTE_STYLE}><Rich value={item.quote} /></blockquote>
                 <div className="flex items-center gap-4">
                   <span
                     aria-hidden

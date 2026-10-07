@@ -5,6 +5,7 @@ import { ChatLauncher } from "./ChatLauncher";
 import { ContactBand } from "./ContactBand";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
+import { Rich, richKey } from "./Rich";
 
 /** 44px at 390 to 72px at 1440, held there. */
 const HEADING_STYLE: CSSProperties = {
@@ -79,9 +80,9 @@ export function LegalPage({ data: doc }: { data: LegalDocument }) {
           </nav>
 
           <article className="max-w-[42rem] lg:col-span-7 lg:col-start-5">
-            <p className="text-[1.1875rem] leading-[1.55] tracking-[-0.015em] text-ink-950 lg:text-[1.3125rem]">
-              {doc.intro}
-            </p>
+            <div className="text-[1.1875rem] leading-[1.55] tracking-[-0.015em] text-ink-950 lg:text-[1.3125rem]">
+              <Rich value={doc.intro} />
+            </div>
 
             {doc.sections.map((section, index) => (
               <section
@@ -97,26 +98,23 @@ export function LegalPage({ data: doc }: { data: LegalDocument }) {
                 >
                   {section.title}
                 </h2>
-                {section.paragraphs.map((paragraph) => (
-                  <p
-                    key={paragraph}
-                    className="mt-4 text-[1rem] leading-[1.7] tracking-[-0.005em] text-ink-600 lg:text-[1.0625rem]"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+                <div className="mt-4 text-[1rem] leading-[1.7] tracking-[-0.005em] text-ink-600 [--rich-gap:1rem] lg:text-[1.0625rem]">
+                  <Rich value={section.paragraphs} />
+                </div>
                 {section.list && (
                   <ul className="mt-4 space-y-2.5">
-                    {section.list.map((item) => (
+                    {section.list.map((item, index) => (
                       <li
-                        key={item}
+                        key={richKey(item, index)}
                         className="flex gap-3 text-[1rem] leading-[1.6] tracking-[-0.005em] text-ink-600 lg:text-[1.0625rem]"
                       >
                         <span
                           aria-hidden
                           className="mt-[0.7em] size-1.5 shrink-0 rounded-full bg-ink-400"
                         />
-                        {item}
+                        <span>
+                          <Rich value={item} inline />
+                        </span>
                       </li>
                     ))}
                   </ul>

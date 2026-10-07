@@ -9,6 +9,7 @@ import { MONO, SectionHead } from "../_components/SectionHead";
 import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
 import { Network } from "../services/_components/Network";
+import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getWhoWeServePage();
@@ -97,9 +98,9 @@ export default async function WhoWeServe() {
                   ) : (
                     name
                   )}
-                  <p className="mt-4 max-w-[20rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-6 lg:text-[1.0625rem]">
-                    {item.body}
-                  </p>
+                  <div className="mt-4 max-w-[20rem] text-[1rem] leading-[1.6] tracking-[-0.01em] text-secondary lg:mt-6 lg:text-[1.0625rem]">
+                    <Rich value={item.body} />
+                  </div>
                 </li>
               );
             })}

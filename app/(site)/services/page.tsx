@@ -16,6 +16,7 @@ import { SiteHeader } from "../_components/SiteHeader";
 import { LABEL, StudioStrip } from "../_components/StudioStrip";
 import { Disciplines } from "./_components/Disciplines";
 import { Network } from "./_components/Network";
+import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getServicesPage();
@@ -102,9 +103,9 @@ export default async function Services() {
                     </a>
                   </h3>
                 </div>
-                <p className="max-w-[19rem] text-[1rem] leading-[1.45] tracking-[-0.01em] text-primary lg:mt-[4.25rem] lg:text-[1.0625rem]">
-                  {model.audience}
-                </p>
+                <div className="max-w-[19rem] text-[1rem] leading-[1.45] tracking-[-0.01em] text-primary lg:mt-[4.25rem] lg:text-[1.0625rem]">
+                  <Rich value={model.audience} />
+                </div>
                 <p className="max-w-[14rem] text-[0.8125rem] leading-[1.45] text-primary lg:mt-[4.5rem]">
                   {model.terms}
                 </p>
@@ -132,10 +133,8 @@ export default async function Services() {
               </span>
             ))}
           </h2>
-          <div className="mt-10 max-w-[32rem] space-y-4 text-[1rem] leading-[1.65] tracking-[-0.01em] text-secondary lg:mt-14 lg:text-[1.0625rem]">
-            {method.copy.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
+          <div className="mt-10 max-w-[32rem] text-[1rem] leading-[1.65] tracking-[-0.01em] text-secondary [--rich-gap:1rem] lg:mt-14 lg:text-[1.0625rem]">
+            <Rich value={method.copy} />
           </div>
           <ArrowPill href={method.action.href} className="mt-10 inline-flex">
             {method.action.label}

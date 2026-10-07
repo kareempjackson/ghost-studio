@@ -1,6 +1,6 @@
-import Image from "next/image";
 import type { CSSProperties } from "react";
 import type { StudioStrip as StudioStripData } from "@/sanity/types";
+import { Visual } from "./Visual";
 
 /** 40px at 390 to 64px at 1440, held there. The line on the principle. */
 const PRINCIPLE_STYLE: CSSProperties = {
@@ -34,13 +34,13 @@ export function StudioStrip({ strip }: { strip: StudioStripData }) {
     >
       <div
         className="relative aspect-[4/3] overflow-hidden bg-ink-100 sm:col-span-2 lg:col-span-1 lg:aspect-auto"
-        {...(tee.src ? {} : { role: "img", "aria-label": tee.alt })}
+        {...(tee.src || tee.video ? {} : { role: "img", "aria-label": tee.alt })}
       >
-        {tee.src && (
-          <Image
+        {(tee.src || tee.video) && (
+          <Visual
             src={tee.src}
+            video={tee.video}
             alt={tee.alt}
-            fill
             sizes="(min-width: 1024px) 41vw, 100vw"
             className="object-cover"
           />
@@ -64,14 +64,14 @@ export function StudioStrip({ strip }: { strip: StudioStripData }) {
 
       <div
         className="relative aspect-square overflow-hidden bg-[#1a1111] sm:aspect-auto sm:min-h-[20rem] lg:min-h-0"
-        {...(tote.src ? {} : { role: "img", "aria-label": tote.alt })}
+        {...(tote.src || tote.video ? {} : { role: "img", "aria-label": tote.alt })}
       >
         {/* PLACEHOLDER — the comp sets the “Work over noise” tote here. */}
-        {tote.src && (
-          <Image
+        {(tote.src || tote.video) && (
+          <Visual
             src={tote.src}
+            video={tote.video}
             alt={tote.alt}
-            fill
             sizes="(min-width: 1024px) 31vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover"
           />

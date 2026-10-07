@@ -3,6 +3,7 @@
 import { stegaClean } from "next-sanity";
 import { useId, useRef, useState, type FormEvent } from "react";
 import { useChrome } from "./ChromeProvider";
+import { Rich } from "./Rich";
 
 const FIELD =
   "w-full rounded-[0.625rem] bg-ink-200/70 px-4 py-3 text-[0.9375rem] leading-[1.4] tracking-[-0.01em] text-ink-950 placeholder:text-ink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-950";
@@ -87,9 +88,9 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
       </header>
 
       <div className="flex-1 overflow-y-auto px-5 py-5">
-        <p className="rounded-[0.625rem] bg-ink-200/70 px-4 py-3.5 text-[0.9375rem] leading-[1.45] tracking-[-0.01em] text-ink-950">
-          {chat.intro}
-        </p>
+        <div className="rounded-[0.625rem] bg-ink-200/70 px-4 py-3.5 text-[0.9375rem] leading-[1.45] tracking-[-0.01em] text-ink-950">
+          <Rich value={chat.intro} />
+        </div>
 
         {sent ? (
           <div className="mt-6">
