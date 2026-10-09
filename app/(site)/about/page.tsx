@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { getAboutPage, getStudioStrip } from "@/sanity/content";
@@ -14,7 +15,7 @@ import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getAboutPage();
-  return { title, description };
+  return pageMetadata({ title, description, path: "/about" });
 }
 
 /** 26px at 390 to 36px at 1440, held there. One expectation, as a claim. */

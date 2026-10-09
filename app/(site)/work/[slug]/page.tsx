@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,12 +31,14 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/work/[slug]">): Promise<Metadata> {
-  const project = await getProject((await params).slug);
+  const { slug } = await params;
+  const project = await getProject(slug);
   if (!project) return {};
-  return {
+  return pageMetadata({
     title: project.name,
     description: project.description ?? project.tagline,
-  };
+    path: `/work/${slug}`,
+  });
 }
 
 /** 40px at 390 to 68px at 1440, held there. What the studio did, in a sentence. */

@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { journalHref } from "@/lib/links";
+import { insightHref } from "@/lib/links";
 import type { JournalSection } from "@/sanity/types";
 import { ArrowPill } from "./ArrowPill";
 import { Visual } from "./Visual";
@@ -91,7 +91,7 @@ export function Journal({ journal }: { journal: JournalSection }) {
             <Rich value={featured.summary} />
           </div>
           <ArrowPill
-            href={journalHref(featured.slug)}
+            href={insightHref(featured.slug)}
             tone="signal"
             className="mt-7 inline-flex self-start lg:mt-8"
             ariaLabel={`${featured.action}: ${featured.title.join(" ")}`}
@@ -105,12 +105,14 @@ export function Journal({ journal }: { journal: JournalSection }) {
         {journal.entries.map((entry) => (
           <li key={entry.slug}>
             <a
-              href={journalHref(entry.slug)}
+              href={insightHref(entry.slug)}
               className="group grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)] items-start gap-4 sm:grid-cols-[minmax(0,11.5rem)_minmax(0,1fr)] lg:gap-5"
             >
+              {/* A square plate, the column's width, so every entry's is the
+                  same size whatever its text runs to. */}
               <div
                 style={{ backgroundColor: entry.cover.ground }}
-                className="relative aspect-[6/5] overflow-hidden rounded-[0.5rem]"
+                className="relative aspect-square overflow-hidden rounded-[0.5rem]"
               >
                 {(entry.cover.src || entry.cover.video) && (
                   <Visual
@@ -141,22 +143,24 @@ export function Journal({ journal }: { journal: JournalSection }) {
                 </span>
               </div>
 
-              <div className="pt-1">
-                <p className="font-label text-[0.5625rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
-                  {entry.category}
-                </p>
-                <h3
-                  className="mt-3 text-ink-950 transition-colors duration-200 group-hover:text-accent lg:mt-4"
-                  style={ENTRY_STYLE}
-                >
-                  {entry.title.map((line) => (
-                    <span key={line} className="block">
-                      {line}
-                    </span>
-                  ))}
-                </h3>
-                <div className="mt-3 max-w-[17rem] text-[0.8125rem] leading-[1.55] tracking-[-0.01em] text-ink-600 lg:mt-5">
-                  <Rich value={entry.excerpt} linkless />
+              {/* The text is the square's height, never more: it is laid out
+                  over the cell rather than in it, so only the square sets the
+                  row. The title holds two lines and the excerpt, at the
+                  square's foot, two or three; longer ones end in an ellipsis. */}
+              <div className="relative self-stretch">
+                <div className="absolute inset-0 flex flex-col overflow-hidden pt-1">
+                  <p className="font-label text-[0.5625rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
+                    {entry.category}
+                  </p>
+                  <h3
+                    className="mt-3 line-clamp-2 text-ink-950 transition-colors duration-200 group-hover:text-accent lg:mt-4"
+                    style={ENTRY_STYLE}
+                  >
+                    {entry.title.join(" ")}
+                  </h3>
+                  <p className="mt-auto line-clamp-2 max-w-[17rem] pt-3 text-[0.8125rem] leading-[1.55] tracking-[-0.01em] text-ink-600 sm:line-clamp-3 lg:pt-4">
+                    <Rich value={entry.excerpt} inline linkless />
+                  </p>
                 </div>
               </div>
             </a>

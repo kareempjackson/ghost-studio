@@ -1,15 +1,13 @@
 "use client";
 
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
+import { stegaClean } from "next-sanity";
 import { useState } from "react";
-import { journalHref } from "@/lib/links";
+import { insightHref } from "@/lib/links";
 import type { ArticleCard as Article, Topic } from "@/sanity/types";
 import { LABEL } from "../../_components/StudioStrip";
 import { Visual } from "../../_components/Visual";
 import { Rich } from "../../_components/Rich";
-
-/** What the pieces are about, and the filter on `/insights`. */
-const topics: readonly Topic[] = ["Strategy", "Design", "Engineering"];
 
 /** Quick out, long settle: the cards arrive, they do not drift in. */
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
@@ -25,7 +23,7 @@ function ArticleCard({
   status: string | null;
 }) {
   return (
-    <a href={journalHref(article.slug)} className="group block">
+    <a href={insightHref(article.slug)} className="group block">
       <div
         style={{ backgroundColor: article.cover.ground }}
         className="relative aspect-[9/10] overflow-hidden rounded-[0.75rem] bg-[#ececec]"
@@ -62,12 +60,15 @@ function ArticleCard({
  */
 export function ArticleGrid({
   articles,
+  topics,
   status,
   all,
   filterLabel,
   empty,
 }: {
   articles: readonly Article[];
+  /** The filter's pills, from the topics in Sanity. */
+  topics: readonly Topic[];
   /** Set after the topic on every card while the pieces are samples. */
   status: string | null;
   all: string;
@@ -75,8 +76,10 @@ export function ArticleGrid({
   empty: string;
 }) {
   const [filter, setFilter] = useState<Topic | null>(null);
+  /* Compared clean: in draft mode each copy of a name carries its own
+     edit marks. */
   const shown = filter
-    ? articles.filter((article) => article.topic === filter)
+    ? articles.filter((article) => stegaClean(article.topic) === stegaClean(filter))
     : articles;
 
   const pill = (active: boolean) =>

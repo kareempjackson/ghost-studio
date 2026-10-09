@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -65,11 +66,14 @@ import {
   Type,
 } from "./_components/ui";
 
-export const metadata: Metadata = {
-  title: "Brand system",
-  description:
-    "The Ghost Savvy Studios brand system: the mark, the palette, the type scale, and the rules that keep them honest.",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata({
+    title: "Brand system",
+    description:
+      "The Ghost Savvy Studios brand system: the mark, the palette, the type scale, and the rules that keep them honest.",
+    path: "/brand",
+  });
+}
 
 const VERSION = "v1.0 — August 2026";
 

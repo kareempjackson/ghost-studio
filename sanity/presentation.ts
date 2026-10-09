@@ -25,7 +25,7 @@ export const resolve: PresentationPluginOptions["resolve"] = {
     { route: "/our-approach/:slug", filter: `_type == "phase" && slug.current == $slug` },
     { route: "/who-we-serve/:slug", filter: `_type == "audience" && slug.current == $slug` },
     { route: "/work/:slug", filter: `_type == "project" && slug.current == $slug` },
-    { route: "/journal/:slug", filter: `_type == "article" && slug.current == $slug` },
+    { route: "/insights/:slug", filter: `_type == "article" && slug.current == $slug` },
     { route: "/:slug", filter: `_type in ["trackPage", "familyPage", "legalPage"] && slug == $slug` },
   ]),
   locations: {
@@ -96,7 +96,7 @@ export const resolve: PresentationPluginOptions["resolve"] = {
       select: { title: "title.0", slug: "slug.current" },
       resolve: (doc) => ({
         locations: [
-          { title: doc?.title || "Article", href: `/journal/${doc?.slug}` },
+          { title: doc?.title || "Insight", href: `/insights/${doc?.slug}` },
           { title: "Insights", href: "/insights" },
         ],
       }),

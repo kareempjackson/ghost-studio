@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { stegaClean } from "next-sanity";
+import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { getAboutPage } from "@/sanity/content";
@@ -15,8 +17,8 @@ import { Visual } from "./Visual";
 import { Rich } from "./Rich";
 
 /** Metadata for a family page, from its document in Sanity. */
-export function familyMetadata(data: FamilyPageData): Metadata {
-  return { title: data.title, description: data.description };
+export function familyMetadata(data: FamilyPageData): Promise<Metadata> {
+  return pageMetadata({ title: data.title, description: data.description, path: stegaClean(data.href) });
 }
 
 /** 56px at 390 to 136px at 1440, held there. The claim, set solid. */

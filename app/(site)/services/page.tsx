@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import {
@@ -20,7 +21,7 @@ import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getServicesPage();
-  return { title, description };
+  return pageMetadata({ title, description, path: "/services" });
 }
 
 /** 44px at 390 to 104px at 1440, held there. A model's name, in capitals. */

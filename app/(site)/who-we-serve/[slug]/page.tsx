@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
@@ -21,8 +22,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/who-we-serve/[slug]">): Promise<Metadata> {
-  const page = await getAudiencePage((await params).slug);
-  return page ? { title: page.title, description: page.description } : {};
+  const { slug } = await params;
+  const page = await getAudiencePage(slug);
+  return page
+    ? pageMetadata({ title: page.title, description: page.description, path: `/who-we-serve/${slug}` })
+    : {};
 }
 
 /** 24px at 390 to 32px at 1440, held there. The outputs' own heading, set small. */

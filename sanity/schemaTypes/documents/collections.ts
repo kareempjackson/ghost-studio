@@ -1,13 +1,12 @@
 /**
  * The two things the studio publishes more of over time: projects and
- * articles. Each has a page of its own, at /work/[slug] and /journal/[slug].
+ * insights. Each has a page of its own, at /work/[slug] and /insights/[slug].
  */
 
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { colour, lines, para, paras, phrase, picture, plain, text } from "../fields";
+import { colour, lines, num, para, paras, phrase, picture, plain, text } from "../fields";
 
 export const disciplines = ["Brand", "Digital", "Systems"] as const;
-export const topics = ["Strategy", "Design", "Engineering"] as const;
 
 const slug = (source: string | ((doc: Record<string, unknown>) => string)) =>
   defineField({
@@ -196,37 +195,114 @@ export const project = defineType({
   preview: { select: { title: "name", subtitle: "scope", media: "image" } },
 });
 
-export const article = defineType({
-  name: "article",
-  title: "Article",
+/**
+ * What an insight is about: a pill in the filter on /insights and the label
+ * on its card. Editors add them as they need them; the filter shows the ones
+ * with at least one insight, in this order.
+ */
+export const insightTopic = defineType({
+  name: "insightTopic",
+  title: "Topic",
   type: "document",
   fields: [
-    lines("title", { description: "One entry per line, as the cards break it." }),
-    slug((doc) => ((doc.title as string[] | undefined) ?? []).join(" ")),
+    text("title", { description: "As the filter and the cards show it, e.g. Strategy." }),
+    num("order", {
+      required: false,
+      description: "Where the pill sits in the filter: lower comes first. Alphabetical when equal or empty.",
+    }),
+  ],
+  orderings: [
+    {
+      title: "Filter order",
+      name: "filterOrder",
+      by: [
+        { field: "order", direction: "asc" },
+        { field: "title", direction: "asc" },
+      ],
+    },
+  ],
+  preview: {
+    select: { title: "title", order: "order" },
+    prepare: ({ title, order }) => ({
+      title,
+      subtitle: order === undefined ? undefined : `Position ${order}`,
+    }),
+  },
+});
+
+/**
+ * One insight: its card on /insights and the home page's journal band, and
+ * its own page at /insights/[slug]. Publishing one is all it takes for both
+ * to appear; nothing on the site lists them by hand except the home band.
+ *
+ * Stored as `article`, the type's name since before it was called Insight:
+ * a document's type cannot be renamed in place.
+ */
+export const article = defineType({
+  name: "article",
+  title: "Insight",
+  type: "document",
+  groups: [
+    { name: "content", title: "Content", default: true },
+    { name: "seo", title: "SEO" },
+  ],
+  fields: [
+    lines("title", { description: "One entry per line, as the cards break it.", group: "content" }),
+    { ...slug((doc) => ((doc.title as string[] | undefined) ?? []).join(" ")), group: "content" },
     defineField({
       name: "topic",
-      type: "string",
-      options: { list: [...topics], layout: "radio" },
+      type: "reference",
+      to: [{ type: "insightTopic" }],
+      group: "content",
+      description: "Add a new one under Insights → Topics.",
       validation: (r) => r.required(),
     }),
-    defineField({ name: "publishedAt", type: "datetime" }),
-    para("excerpt", { description: "One or two sentences: why the piece is worth opening." }),
+    defineField({
+      name: "publishedAt",
+      title: "Published",
+      type: "datetime",
+      group: "content",
+      description: "Newest first on /insights.",
+      initialValue: () => new Date().toISOString(),
+      validation: (r) => r.required(),
+    }),
+    para("excerpt", {
+      description: "One or two sentences: why the piece is worth opening. Set under the title, and on its card.",
+      group: "content",
+    }),
     defineField({
       name: "cover",
       type: "object",
+      group: "content",
       fields: [
         picture("image"),
         colour("ground", { description: "Shown until there is a picture, and behind it." }),
       ],
+      initialValue: { ground: "#e7e6e1" },
     }),
-    plain("description", { required: false, description: "For search results. The excerpt is used if empty." }),
-    body,
+    { ...body, group: "content" },
+    defineField({ name: "seo", type: "seo", title: "SEO", group: "seo" }),
+  ],
+  orderings: [
+    {
+      title: "Newest first",
+      name: "publishedDesc",
+      by: [{ field: "publishedAt", direction: "desc" }],
+    },
   ],
   preview: {
-    select: { line1: "title.0", line2: "title.1", subtitle: "topic", media: "cover.image" },
-    prepare: ({ line1, line2, subtitle, media }) => ({
+    select: {
+      line1: "title.0",
+      line2: "title.1",
+      topic: "topic.title",
+      publishedAt: "publishedAt",
+      media: "cover.image",
+    },
+    prepare: ({ line1, line2, topic, publishedAt, media }) => ({
       title: [line1, line2].filter(Boolean).join(" "),
-      subtitle,
+      subtitle: [topic, publishedAt && new Date(publishedAt).toLocaleDateString("en-GB", { dateStyle: "medium" })]
+        .filter(Boolean)
+        .join(" · "),
       media,
     }),
   },

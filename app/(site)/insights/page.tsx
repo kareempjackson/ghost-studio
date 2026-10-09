@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { getInsightsPage } from "@/sanity/content";
 import { ChatLauncher } from "../_components/ChatLauncher";
@@ -9,14 +10,15 @@ import { ArticleGrid } from "./_components/ArticleGrid";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getInsightsPage();
-  return { title, description };
+  return pageMetadata({ title, description, path: "/insights" });
 }
 
 /**
- * `/insights` — the journal's index.
+ * `/insights` — every insight, newest first.
  *
  * The cover says what the pieces are about; the grid under it is every
- * piece, filtered by topic. No action on the cover: the grid is the way on.
+ * piece, filtered by topic. Each one opens at /insights/[slug]. No action on
+ * the cover: the grid is the way on.
  */
 export default async function Insights() {
   const insightsPage = await getInsightsPage();
@@ -36,6 +38,7 @@ export default async function Insights() {
         />
         <ArticleGrid
           articles={insightsPage.articles}
+          topics={insightsPage.topics}
           status={insightsPage.status}
           all={insightsPage.all}
           filterLabel={insightsPage.filterLabel}

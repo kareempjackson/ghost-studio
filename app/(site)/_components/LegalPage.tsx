@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { stegaClean } from "next-sanity";
+import { pageMetadata } from "@/lib/seo";
 import type { CSSProperties } from "react";
 import type { LegalDocument } from "@/sanity/types";
 import { ChatLauncher } from "./ChatLauncher";
@@ -21,8 +23,8 @@ const MONO =
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Metadata for a legal route, from its document in Sanity. */
-export function legalMetadata(doc: LegalDocument): Metadata {
-  return { title: doc.title, description: doc.description };
+export function legalMetadata(doc: LegalDocument): Promise<Metadata> {
+  return pageMetadata({ title: doc.title, description: doc.description, path: `/${stegaClean(doc.slug)}` });
 }
 
 /**

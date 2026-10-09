@@ -89,6 +89,12 @@ const words: PortableTextComponents = {
   marks,
 };
 
+/** The words, for a line inside a link: its own links set as their words. */
+const linklessWords: PortableTextComponents = {
+  ...words,
+  marks: { ...marks, link: ({ children }) => <>{children}</> },
+};
+
 const isBlock = (value: RichValue | RichBlock): value is RichBlock => !Array.isArray(value);
 
 /** A paragraph still stored as a plain string, as a block, so it sets the same way. */
@@ -161,7 +167,7 @@ export function Rich({
       {i > 0 && <br />}
       <PortableText
         value={{ ...block, style: "normal", listItem: undefined, level: undefined } as never}
-        components={words}
+        components={linkless ? linklessWords : words}
       />
     </Fragment>
   ));

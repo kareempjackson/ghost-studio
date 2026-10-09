@@ -143,7 +143,8 @@ export interface Project {
   readonly imageAlt: string;
 }
 
-export type Topic = "Strategy" | "Design" | "Engineering";
+/** An insight's topic, by name: the topics are documents editors add. */
+export type Topic = string;
 
 export interface ArticleCard {
   readonly slug: string;
@@ -193,10 +194,21 @@ export interface ProjectDetail extends Project {
   readonly more: readonly Project[];
 }
 
+/** What search engines and share cards show for an insight: its SEO tab. */
+export interface SearchMeta {
+  /** As the editor wrote it: set as the whole title, the site's name not added. */
+  readonly title: string | null;
+  readonly description: string | null;
+  readonly keyword: string | null;
+}
+
 export interface ArticleDetail extends ArticleCard {
   readonly publishedAt: string | null;
-  readonly description: string | null;
+  readonly updatedAt: string;
   readonly body: RichText | null;
+  /** Minutes, at 225 words a minute; at least one. */
+  readonly readingMinutes: number;
+  readonly seo: SearchMeta;
 }
 
 /* ---- Bands ----------------------------------------------------------------- */
@@ -459,6 +471,8 @@ export interface InsightsPage extends Seo {
   readonly filterLabel: string;
   readonly empty: string;
   readonly articles: readonly ArticleCard[];
+  /** The filter's pills: the topics with an insight under them, in order. */
+  readonly topics: readonly Topic[];
 }
 
 interface FormField {

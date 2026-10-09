@@ -21,7 +21,7 @@ import { createClient } from "next-sanity";
 import { positioning } from "../../lib/brand/voice";
 import { put, videoKey } from "../../lib/r2";
 import { richify } from "../lib/rich";
-import { caseStudy, keyed } from "./shape";
+import { caseStudy, keyed, topicId } from "./shape";
 import { schemaTypes } from "../schemaTypes";
 import { audienceSlug } from "../../lib/links";
 import { aboutPage } from "./content/about";
@@ -32,7 +32,7 @@ import { engagePage } from "./content/engage";
 import { engagement } from "./content/engagement";
 import { ghostUPage, givesPage, labsPage, type FamilyPageData } from "./content/family-pages";
 import { contactBand, email, footer, social } from "./content/footer";
-import { articles, insightsPage } from "./content/insights";
+import { articles, insightsPage, topics } from "./content/insights";
 import { integratePage } from "./content/integrate";
 import { journal } from "./content/journal";
 import { legalDocuments } from "./content/legal";
@@ -197,6 +197,11 @@ async function documents() {
     });
   }
 
+  /* The topics, in the order the filter had them. */
+  for (const [order, title] of topics.entries()) {
+    add(topicId(title), "insightTopic", { title, order });
+  }
+
   /* The journal (home) and the insights index wrote the same three pieces
      twice. One article each now: the home page's line breaks and covers,
      the index's excerpts. */
@@ -207,7 +212,7 @@ async function documents() {
     add(articleId(article.slug), "article", {
       title: piece?.title ?? [article.title],
       slug: { _type: "slug", current: article.slug },
-      topic: article.topic,
+      topic: { _type: "reference", _ref: topicId(article.topic) },
       /* Newest first on /insights, in the order the index had them. */
       publishedAt: new Date(Date.UTC(2026, 8, 1 - i)).toISOString(),
       excerpt: article.excerpt,

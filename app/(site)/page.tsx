@@ -1,6 +1,10 @@
+import type { Metadata } from "next";
+import { stegaClean } from "next-sanity";
+import { SITE_URL, absoluteUrl } from "@/lib/site";
 import {
   getEngagement,
   getHomePage,
+  getSettings,
   getPointOfView,
   getProcess,
   getSectors,
@@ -24,8 +28,15 @@ import { SiteFooter } from "./_components/SiteFooter";
 import { SiteHeader } from "./_components/SiteHeader";
 import { Testimonials } from "./_components/Testimonials";
 
+/**
+ * The home page carries the site's own title and description, from the
+ * layout; its share image is ./opengraph-image.png, the brand card.
+ */
+export const metadata: Metadata = { alternates: { canonical: "/" } };
+
 export default async function Home() {
   const [
+    settings,
     home,
     pointOfView,
     process,
@@ -34,6 +45,7 @@ export default async function Home() {
     sectors,
     testimonials,
   ] = await Promise.all([
+    getSettings(),
     getHomePage(),
     getPointOfView(),
     getProcess(),
@@ -43,8 +55,41 @@ export default async function Home() {
     getTestimonials(),
   ]);
 
+  /* Who the site belongs to, for search engines: the studio, its address,
+     its mark and where else it is. */
+  const name = stegaClean(settings.title);
+  const structured = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name,
+        url: absoluteUrl("/"),
+        /* Files in public/, at addresses that never change: the app's
+           own icon and share card are served under hashed names. */
+        logo: absoluteUrl("/logo.png"),
+        image: absoluteUrl("/og.png"),
+        description: stegaClean(settings.description),
+        email: stegaClean(settings.email),
+        sameAs: settings.social.map((link) => stegaClean(link.href)),
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        name,
+        url: absoluteUrl("/"),
+        publisher: { "@id": `${SITE_URL}/#organization` },
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }}
+      />
       <SiteHeader />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}

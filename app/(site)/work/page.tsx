@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { getWorkPage } from "@/sanity/content";
@@ -10,7 +11,7 @@ import { WorkGallery } from "./_components/WorkGallery";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getWorkPage();
-  return { title, description };
+  return pageMetadata({ title, description, path: "/work" });
 }
 
 /** 44px at 390 to 88px at 1440, held there. The cover of the page. */

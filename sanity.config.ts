@@ -25,10 +25,21 @@ export default defineConfig({
   schema: {
     types: schemaTypes,
     /* No "new" button for a page that exists once, or once per fixed route. */
-    templates: (templates) =>
-      templates.filter(
+    templates: (templates) => [
+      ...templates.filter(
         ({ schemaType }) => !singletonTypes.has(schemaType) && !fixedTypes.has(schemaType),
       ),
+      /* An insight started from a topic's list, already filed under it. */
+      {
+        id: "insight-by-topic",
+        title: "Insight in this topic",
+        schemaType: "article",
+        parameters: [{ name: "topicId", type: "string" }],
+        value: ({ topicId }: { topicId: string }) => ({
+          topic: { _type: "reference", _ref: topicId },
+        }),
+      },
+    ],
   },
   document: {
     /* A singleton can be edited and published, never duplicated or deleted. */

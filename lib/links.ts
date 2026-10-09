@@ -5,7 +5,8 @@
 
 export const projectHref = (slug: string) => `/work/${slug}`;
 
-export const journalHref = (slug: string) => `/journal/${slug}`;
+/** An insight's own page. The journal band on the home page links here too. */
+export const insightHref = (slug: string) => `/insights/${slug}`;
 
 /** The anchor on /services a discipline's card opens onto. */
 export const serviceHref = (slug: string) => `/services#${slug}`;

@@ -5,6 +5,7 @@ import { introScript } from "@/lib/intro";
 import { Suspense } from "react";
 import { draftMode } from "next/headers";
 import { VisualEditing } from "next-sanity/visual-editing";
+import { SITE_URL } from "@/lib/site";
 import { getChrome, getSettings } from "@/sanity/content";
 import { SanityLive } from "@/sanity/lib/live";
 import { ChromeProvider } from "./_components/ChromeProvider";
@@ -66,8 +67,13 @@ const arial = localFont({
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getSettings();
   return {
+    /* Where canonical and share-card addresses point: lib/site.ts. */
+    metadataBase: new URL(SITE_URL),
     title: { default: title, template: `%s — ${title}` },
     description,
+    /* A page without its own share fields still carries the site's. */
+    openGraph: { type: "website", siteName: title, title, description },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 

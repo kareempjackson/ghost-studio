@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { CSSProperties } from "react";
@@ -14,7 +15,7 @@ import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getApproachPage();
-  return { title, description };
+  return pageMetadata({ title, description, path: "/our-approach" });
 }
 
 /** 28px at 390 to 40px at 1440, held there. A phase's name. */

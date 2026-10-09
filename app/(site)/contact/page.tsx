@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { getContactPage } from "@/sanity/content";
@@ -11,7 +12,7 @@ import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getContactPage();
-  return { title, description };
+  return pageMetadata({ title, description, path: "/contact" });
 }
 
 /** 48px at 390 to 96px at 1440, held there. The question, asked once. */

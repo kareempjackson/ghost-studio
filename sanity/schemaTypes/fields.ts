@@ -181,4 +181,12 @@ export const list = (
 export const seo = () => [
   text("title", { description: "The browser tab and search title." }),
   plain("description", { description: "One or two sentences for search results." }),
+  defineField({
+    name: "ogImage",
+    type: "image",
+    title: "Social image",
+    description:
+      "Optional. The picture on share cards: LinkedIn, X, Slack, iMessage. Cropped to 1200 × 630 around the hotspot. Empty, the page's own picture or the brand card with its heading is used.",
+    options: { hotspot: true },
+  }),
 ];

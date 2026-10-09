@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { CSSProperties } from "react";
@@ -13,7 +14,7 @@ import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getWhoWeServePage();
-  return { title, description };
+  return pageMetadata({ title, description, path: "/who-we-serve" });
 }
 
 /** 28px at 390 to 38px at 1440, held there. Who the client is. */

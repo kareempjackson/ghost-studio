@@ -72,4 +72,4 @@ export const journal = {
   entries: readonly JournalEntry[];
 };
 
-export const journalHref = (slug: string) => `/journal/${slug}`;
+export const insightHref = (slug: string) => `/insights/${slug}`;

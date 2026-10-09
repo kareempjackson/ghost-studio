@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { stegaClean } from "next-sanity";
+import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { getEngagement, getServicesPage } from "@/sanity/content";
@@ -16,8 +18,8 @@ import { Visual } from "./Visual";
 import { Rich } from "./Rich";
 
 /** Metadata for a track page, from its document in Sanity. */
-export function trackMetadata(data: TrackPageData): Metadata {
-  return { title: data.title, description: data.description };
+export function trackMetadata(data: TrackPageData): Promise<Metadata> {
+  return pageMetadata({ title: data.title, description: data.description, path: `/${stegaClean(data.slug)}` });
 }
 
 /** 30px at 390 to 44px at 1440, held there. What comes with the team. */

@@ -1,5 +1,5 @@
 import { objectTypes } from "./objects";
-import { article, project } from "./documents/collections";
+import { article, insightTopic, project } from "./documents/collections";
 import {
   aboutPage,
   approachPage,
@@ -54,6 +54,7 @@ export const schemaTypes = [
   audience,
   project,
   article,
+  insightTopic,
 ];
 
 /** One document each, at a fixed id: the Studio lists them, never creates more. */

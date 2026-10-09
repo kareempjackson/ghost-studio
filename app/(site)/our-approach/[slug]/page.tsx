@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -23,8 +24,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/our-approach/[slug]">): Promise<Metadata> {
-  const page = await getPhasePage((await params).slug);
-  return page ? { title: page.title, description: page.description } : {};
+  const { slug } = await params;
+  const page = await getPhasePage(slug);
+  return page
+    ? pageMetadata({ title: page.title, description: page.description, path: `/our-approach/${slug}` })
+    : {};
 }
 
 /** 22px at 390 to 30px at 1440, held there. One thing the team leaves with. */

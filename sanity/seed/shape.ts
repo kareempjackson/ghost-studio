@@ -42,3 +42,7 @@ export function caseStudy(study: CaseStudySeed | undefined) {
     })),
   };
 }
+
+/** A topic's document, at a fixed id from its name: "Strategy" → insightTopic-strategy. */
+export const topicId = (name: string) =>
+  `insightTopic-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;

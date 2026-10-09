@@ -75,6 +75,65 @@ export const inlineTextType = defineType({
   ],
 });
 
+/**
+ * What search engines and link previews show for a page: its own title and
+ * description, the phrase it is written for, and the picture a share card
+ * carries. Every field falls back to the page's own content when empty.
+ */
+export const seoType = defineType({
+  name: "seo",
+  title: "SEO",
+  type: "object",
+  fields: [
+    defineField({
+      name: "metaTitle",
+      type: "string",
+      title: "Meta title",
+      description:
+        "The title in search results and the browser tab, exactly as written: the site's name is not added. The page's title if empty.",
+      validation: (r) => r.max(60).warning("Search results cut titles at around 60 characters."),
+    }),
+    defineField({
+      name: "metaDescription",
+      type: "text",
+      rows: 3,
+      title: "Meta description",
+      description: "The line under the title in search results and on share cards. The excerpt if empty.",
+      validation: (r) =>
+        r.max(160).warning("Search results cut descriptions at around 160 characters."),
+    }),
+    defineField({
+      name: "keyword",
+      type: "string",
+      title: "Primary keyword",
+      description: "The search phrase the page is written for. It should appear in the meta title and description.",
+      validation: (r) =>
+        r.custom((keyword: string | undefined, context) => {
+          if (!keyword) return true;
+          const parent = context.parent as { metaTitle?: string; metaDescription?: string } | undefined;
+          const missing = (["metaTitle", "metaDescription"] as const).filter(
+            (field) => !parent?.[field]?.toLowerCase().includes(keyword.toLowerCase()),
+          );
+          return missing.length
+            ? `Not in the ${missing.map((f) => (f === "metaTitle" ? "meta title" : "meta description")).join(" or ")}.`
+            : true;
+        }).warning(),
+    }),
+    defineField({
+      name: "ogImage",
+      type: "image",
+      title: "Social image",
+      description:
+        "The picture on share cards: LinkedIn, X, Slack, iMessage. Cropped to 1200 × 630 around the hotspot. The cover if empty.",
+      options: { hotspot: true },
+      fields: [
+        defineField({ name: "alt", type: "string", title: "Alt text" }),
+      ],
+    }),
+  ],
+  options: { collapsible: false },
+});
+
 /** A labelled way on: a button or a link. */
 export const actionType = defineType({
   name: "action",
@@ -168,4 +227,4 @@ export const mediaRowType = defineType({
   },
 });
 
-export const objectTypes = [richTextType, inlineTextType, actionType, r2VideoType, mediaType, mediaRowType];
+export const objectTypes = [richTextType, inlineTextType, seoType, actionType, r2VideoType, mediaType, mediaRowType];
