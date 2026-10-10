@@ -9,6 +9,7 @@
     "lint": "eslint",
     "seed": "tsx --env-file=.env.local sanity/seed/seed.ts",
     "seed:projects": "tsx --env-file=.env.local sanity/seed/projects.ts",
+    "seed:stories": "tsx --env-file=.env.local sanity/seed/stories.ts",
     "migrate:films": "tsx --env-file=.env.local sanity/migrate/films-to-r2.ts",
     "migrate:rich": "tsx --env-file=.env.local sanity/migrate/text-to-rich.ts",
     "migrate:topics": "tsx --env-file=.env.local sanity/migrate/insight-topics.ts"

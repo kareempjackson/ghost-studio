@@ -5,13 +5,13 @@
  */
 
 import { defineArrayMember, defineField, defineType } from "sanity";
+import { toPlain } from "../../lib/rich";
 import {
   action,
   colour,
   href,
   lines,
   list,
-  num,
   object,
   para,
   paras,
@@ -28,6 +28,16 @@ const cover = [text("eyebrow"), lines("heading"), para("summary"), action()];
 
 const step = [text("title"), para("body")];
 const stepPreview = { preview: { select: { title: "title", subtitle: "body" } } };
+
+/** The project a page closes on, in the wide plate at its foot. */
+const featured = (fallback = "the page closes without one") =>
+  defineField({
+    name: "featured",
+    type: "reference",
+    title: "Featured project",
+    to: [{ type: "project" }],
+    description: `The project at the foot of the page. If empty, ${fallback}.`,
+  });
 
 /** Fixed slugs: the route reads its document by this, so it is not editable. */
 const fixedSlug = (options: string[]) =>
@@ -84,20 +94,8 @@ export const servicesPage = defineType({
       lines("heading"),
       paras("copy"),
       action(),
-      object("network", [
-        plain("alt"),
-        list(
-          "nodes",
-          [
-            num("x"),
-            num("y"),
-            num("r", { title: "Radius" }),
-            picture("image", { description: "The portrait in this node." }),
-          ],
-          { description: "Positions are in the plate's own 1436 × 756 units." },
-        ),
-      ]),
     ]),
+    featured(),
   ],
   preview: single("Services page"),
 });
@@ -121,6 +119,7 @@ export const whoWeServePage = defineType({
         validation: (r) => r.min(1),
       }),
     ]),
+    featured(),
   ],
   preview: single("Who we serve"),
 });
@@ -171,12 +170,15 @@ export const audience = defineType({
       lines("heading", { required: false }),
       lines("items", { required: false, description: "What the team leaves with, one per line." }),
     ], { title: "What you leave with" }),
+    featured("the one on Who we serve; if that is empty too, the page closes without one"),
   ],
   preview: {
     select: { line1: "name.0", line2: "name.1", subtitle: "body" },
     prepare: ({ line1, line2, subtitle }) => ({
       title: [line1, line2].filter(Boolean).join(" "),
-      subtitle,
+      /* prepare is handed rich text as its blocks, and a preview takes only
+         a string: passed through, every audience read "Invalid preview". */
+      subtitle: toPlain(subtitle),
     }),
   },
 });
@@ -309,6 +311,7 @@ export const trackPage = defineType({
       }),
     ]),
     object("others", [text("label")]),
+    featured(),
   ],
   preview: { select: { title: "title", subtitle: "slug" } },
 });
@@ -338,6 +341,31 @@ export const familyPage = defineType({
     ]),
     object("ask", [text("label"), lines("heading"), para("summary"), action()]),
     object("family", [text("label"), lines("heading")]),
+    object(
+      "stories",
+      [
+        text("itemLabel", {
+          title: "What one is called",
+          description: "Set before each story's number: Experiment → EXPERIMENT 01.",
+        }),
+        text("overview", { description: "Over each story's opening." }),
+        text("readMore"),
+        text("readLess"),
+        text("listHeading", { description: "Over each part's list, unless the part sets its own." }),
+        text("partsLabel", { description: "The bar of parts, for screen readers." }),
+        text("voiceLabel", { description: "Beside the quote at a story's foot, e.g. From the partner." }),
+        text("voiceHeading", { description: "Over the quote, e.g. In their words." }),
+        object("more", [text("label"), text("heading"), action()], {
+          title: "More stories",
+          description:
+            "The two stories at the foot of each one. Until there is another, the rest of the family shows instead.",
+        }),
+      ],
+      {
+        title: "Stories",
+        description: "The words every story under this page shares. The stories themselves are under Ghost family.",
+      },
+    ),
   ],
   preview: { select: { title: "title", subtitle: "slug" } },
 });
@@ -399,6 +427,7 @@ export const approachPage = defineType({
         validation: (r) => r.min(1),
       }),
     ]),
+    featured(),
   ],
   preview: single("Our approach"),
 });
@@ -449,6 +478,7 @@ export const phase = defineType({
       text("deck", { required: false }),
       lines("items", { required: false, description: "What the team leaves with, one per line." }),
     ], { title: "What you leave with" }),
+    featured("the one on Our approach; if that is empty too, the page closes without one"),
   ],
   preview: { select: { title: "title", subtitle: "question", media: "image" } },
 });

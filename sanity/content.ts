@@ -12,6 +12,7 @@ import "server-only";
 import { sanityFetch } from "./lib/live";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { stegaClean } from "next-sanity";
+import { families, storyHref } from "../lib/links";
 import { dataset, projectId } from "./env";
 import type {
   AboutPage,
@@ -40,6 +41,10 @@ import type {
   Services,
   ServicesPage,
   SiteSettings,
+  StoryCard,
+  StoryDetail,
+  StoryLabels,
+  StoryPageData,
   StudioStrip,
   Testimonials,
   TrackPageData,
@@ -83,6 +88,20 @@ const PROJECT = `{
   "imageAlt": coalesce(image.alt, "")
 }`;
 
+/**
+ * The project a page closes on: the first of `refs` that names a published
+ * project, else null, and the page closes without one. An empty field is an
+ * editor's choice, so nothing is picked in its place.
+ */
+const featured = (...refs: string[]) =>
+  `coalesce(${[
+    ...refs.map((ref) => `select(defined(${ref}->slug.current) => ${ref}->${PROJECT})`),
+    "null",
+  ].join(", ")})`;
+
+/** The first project in the home page's Selected work: the menu's card when none is picked. */
+const homeLead = `*[_id == "homePage"][0].selectedWork.projects[defined(@->slug.current)][0]->${PROJECT}`;
+
 const ARTICLE = `{
   "slug": slug.current,
   "topic": ${TOPIC}, title, excerpt,
@@ -107,6 +126,29 @@ const MEDIA = `{
   ground,
   "aspect": coalesce(aspect, "landscape")
 }`;
+
+/** A story told part by part, a project's or a family story's: see `parts`. */
+const CHAPTERS = `coalesce(chapters[]{
+  label, heading,
+  "body": coalesce(body, []),
+  listHeading,
+  "items": coalesce(items[]{lead, text}, []),
+  "rows": coalesce(media[]{"items": coalesce(items[]${MEDIA}, [])}, [])
+}, [])`;
+
+/** A family story's card. Its address and number are set by `numbered`. */
+const STORY = `{
+  "slug": slug.current, family, title,
+  "summary": coalesce(summary, []),
+  "ground": coalesce(ground, "#edebe7"),
+  "image": ${url("image")},
+  "imageVideo": ${vid("image")},
+  "imageAlt": coalesce(image.alt, "")
+}`;
+
+/** Every story in a family, newest first, as its archive lists them. */
+const familyStories = (family: string) =>
+  `*[_type == "familyStory" && family == ${family} && defined(slug.current)] | order(date desc, _createdAt desc) ${STORY}`;
 
 const SEO = `"title": coalesce(title, ""), "description": coalesce(description, "")`;
 const COVER = `eyebrow, heading, summary, action${link}`;
@@ -146,10 +188,7 @@ export async function getNavigation(): Promise<Navigation> {
       items[]{label, href, "inHeader": coalesce(inHeader, false), audiences, "intro": select(defined(intro.label) => intro{label, deck}), "children": children[]${link}},
       ventures{label, links[]{label, href, ground, ink}},
       contactLabel, featureLabel, openLabel,
-      "feature": coalesce(
-        select(defined(feature->slug.current) => feature->${PROJECT}),
-        *[_id == "homePage"][0].selectedWork.projects[defined(@->slug.current)][0]->${PROJECT}
-      ),
+      "feature": coalesce(${featured("feature")}, ${homeLead}),
       "audiences": coalesce(*[_id == "whoWeServePage"][0].audiences.items[defined(@->slug.current)]->${AUDIENCE}, [])
     }`,
     ["homePage", "whoWeServePage", "audience", "project"],
@@ -329,16 +368,21 @@ export const getServicesPage = () =>
       ${SEO}, ${COVER},
       ways{label, heading, deck},
       disciplines{label, heading, deck},
-      method{label, heading, copy, action${link}, network{alt, nodes[]{x, y, r, "src": ${url("image")}, "video": ${vid("image")}}}}
+      method{label, heading, copy, action${link}},
+      "featured": ${featured("featured")}
     }`,
-    [],
+    ["homePage", "project"],
   );
 
 export const getWhoWeServePage = () =>
   single<WhoWeServePage>(
     "whoWeServePage",
-    `{${SEO}, ${COVER}, audiences{label, heading, deck, "items": items[defined(@->slug.current)]->${AUDIENCE}}}`,
-    ["audience"],
+    `{
+      ${SEO}, ${COVER},
+      audiences{label, heading, deck, "items": items[defined(@->slug.current)]->${AUDIENCE}},
+      "featured": ${featured("featured")}
+    }`,
+    ["audience", "homePage", "project"],
   );
 
 export const getWorkPage = () =>
@@ -411,9 +455,9 @@ export const getApproachPage = () =>
       "plate": {"src": ${url("plate.image")}, "video": ${vid("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
       start{label, heading, deck, body},
       phases{label, heading, itemLabel, pageEyebrow, "items": items[defined(@->slug.current)]->${PHASE}},
-      "network": *[_id == "servicesPage"][0].method.network{alt, "nodes": coalesce(nodes[]{x, y, r, "src": ${url("image")}, "video": ${vid("image")}}, [])}
+      "featured": ${featured("featured")}
     }`,
-    ["servicesPage", "phase"],
+    ["phase", "homePage", "project"],
   );
 
 /** The phases with a page of their own. */
@@ -445,19 +489,18 @@ export async function getPhasePage(slug: string): Promise<PhasePage | null> {
         "plate": {"src": ${url("plate.image")}, "video": ${vid("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
         purpose{label, heading, deck},
         "practice": select(count(practice.items) > 0 => practice{label, heading, "items": items[]{title, body}}),
-        "outputs": select(count(outputs.items) > 0 => outputs{label, heading, deck, items})
-      },
-      "network": *[_id == "servicesPage"][0].method.network{alt, "nodes": coalesce(nodes[]{x, y, r, "src": ${url("image")}, "video": ${vid("image")}}, [])}
+        "outputs": select(count(outputs.items) > 0 => outputs{label, heading, deck, items}),
+        "featured": ${featured("featured", `*[_id == "approachPage"][0].featured`)}
+      }
     }`,
     params: { slug },
-    tags: ["approachPage", "phase", "servicesPage"],
+    tags: ["approachPage", "phase", "homePage", "project"],
   });
   const result = data as {
     phases: PhasePage["phases"];
     itemLabel: string;
     pageEyebrow: string;
-    page: Omit<PhasePage, "eyebrow" | "phases" | "network"> | null;
-    network: PhasePage["network"];
+    page: Omit<PhasePage, "eyebrow" | "phases"> | null;
   } | null;
   if (!result?.page) return null;
 
@@ -467,7 +510,6 @@ export async function getPhasePage(slug: string): Promise<PhasePage | null> {
     ...result.page,
     eyebrow: `${result.pageEyebrow} / ${result.itemLabel}${number}`,
     phases: result.phases,
-    network: result.network,
   };
 }
 
@@ -495,10 +537,10 @@ export async function getAudiencePage(slug: string): Promise<AudiencePage | null
       challenge{label, heading, deck},
       "practice": select(count(practice.items) > 0 => practice{label, heading, "items": items[]{"title": title, body}}),
       "outputs": select(count(outputs.items) > 0 => outputs{label, heading, items}),
-      "network": *[_id == "servicesPage"][0].method.network{alt, "nodes": coalesce(nodes[]{x, y, r, "src": ${url("image")}, "video": ${vid("image")}}, [])}
+      "featured": ${featured("featured", `*[_id == "whoWeServePage"][0].featured`)}
     }`,
     params: { slug },
-    tags: ["audience", "whoWeServePage", "servicesPage"],
+    tags: ["audience", "whoWeServePage", "homePage", "project"],
   }) as Promise<AudiencePage | null>;
 }
 
@@ -518,22 +560,159 @@ export const getTrackPage = (slug: string) =>
       shape{label, heading, ${STEPS}},
       process{label, heading, ${STEPS}},
       questions{label, heading, items[]{question, answer}},
-      others{label}
+      others{label},
+      "featured": ${featured("featured")}
     }`,
+    ["homePage", "project"],
   );
 
-export const getFamilyPage = (slug: string) =>
-  fixed<FamilyPageData>(
+export async function getFamilyPage(slug: string): Promise<FamilyPageData> {
+  const { stories, itemLabel, ...page } = await fixed<
+    Omit<FamilyPageData, "stories"> & { stories: StoryRow[]; itemLabel: string }
+  >(
     "familyPage",
     slug,
     `{
       "href": "/" + slug, ${SEO},
       cover{heading, summary, action${link}, notes[]{text, ground}, "card": ${pic("card")}},
-      archive{label, heading, deck, items[]{title, body, ground}},
+      archive{label, heading, deck, "items": coalesce(items[]{title, body, ground}, [])},
       ask{label, heading, summary, action${link}},
-      family{label, heading}
+      family{label, heading},
+      "itemLabel": coalesce(stories.itemLabel, "Story"),
+      "stories": ${familyStories("^.slug")}
     }`,
+    ["familyStory"],
   );
+  return { ...page, stories: numbered(stories, stories, itemLabel) };
+}
+
+/* ---- Family stories --------------------------------------------------------- */
+
+/** A story's card as the query returns it, before `numbered`. */
+type StoryRow = Omit<StoryCard, "href" | "eyebrow">;
+
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/**
+ * Stories as cards: each with its address, and its number in its family
+ * counted from the oldest, so the first story is 01 and stays 01 as more
+ * are published. `order` is the whole family, newest first; a story not in
+ * it is named without a number.
+ */
+function numbered(rows: readonly StoryRow[], order: readonly StoryRow[], itemLabel: string): StoryCard[] {
+  const slugs = order.map((row) => stegaClean(row.slug));
+  return rows.map((row) => {
+    const at = slugs.indexOf(stegaClean(row.slug));
+    return {
+      ...row,
+      href: storyHref(stegaClean(row.family), stegaClean(row.slug)),
+      eyebrow: at < 0 ? itemLabel : `${itemLabel} ${pad(order.length - at)}`,
+    };
+  });
+}
+
+/** A family's stories with a page: all of them, as every story has one. */
+export async function getStorySlugs(family: string): Promise<string[]> {
+  return sanityFetch({
+    query: `*[_type == "familyStory" && family == $family && defined(slug.current)].slug.current`,
+    params: { family },
+    tags: ["familyStory"],
+  }) as Promise<string[]>;
+}
+
+/**
+ * A story's page, with the words its family's page gives every story and
+ * the family's ask. The stories at its foot are what it names, or else the
+ * next two in its family's archive, wrapping round; with no other story yet
+ * the page closes on the rest of the family instead.
+ */
+export async function getStoryPage(family: string, slug: string): Promise<StoryPageData | null> {
+  const data = (await sanityFetch({
+    query: `{
+      "page": *[_id == $pageId][0]{
+        "href": "/" + slug,
+        title,
+        "labels": {
+          "itemLabel": coalesce(stories.itemLabel, "Story"),
+          "overview": coalesce(stories.overview, "Overview"),
+          "readMore": coalesce(stories.readMore, "Read more"),
+          "readLess": coalesce(stories.readLess, "Read less"),
+          "listHeading": coalesce(stories.listHeading, "What we did"),
+          "partsLabel": coalesce(stories.partsLabel, "Parts of the story"),
+          "voiceLabel": coalesce(stories.voiceLabel, "In their words"),
+          "voiceHeading": coalesce(stories.voiceHeading, "In their words."),
+          "more": {
+            "label": coalesce(stories.more.label, "More from " + title),
+            "heading": coalesce(stories.more.heading, "More stories."),
+            "action": coalesce(stories.more.action${link}, {"label": "See them all", "href": "/" + slug + "#archive"})
+          }
+        },
+        ask{label, heading, summary, action${link}},
+        "band": family{label, heading}
+      },
+      "story": *[_type == "familyStory" && family == $family && slug.current == $slug][0]{
+        ...@${STORY},
+        description,
+        "hero": select(defined(hero) => hero${MEDIA}),
+        "notes": coalesce(notes[]{text, ground}, []),
+        "headline": coalesce(headline, summary),
+        "facts": coalesce(facts[]{label, value}, []),
+        "tags": coalesce(tags, []),
+        "overview": coalesce(overview, []),
+        "link": select(defined(link.href) => link${link}),
+        "feature": select(defined(feature) => feature${MEDIA}),
+        "chapters": ${CHAPTERS},
+        "outcome": select(count(outcome.items) > 0 => outcome{
+          "label": coalesce(label, "What changed"),
+          heading,
+          "items": items[]{value, label}
+        }),
+        "voice": select(defined(voice.quote) && defined(voice.name) => voice{
+          quote, name, role,
+          "company": coalesce(company, ""),
+          "portrait": portrait${PORTRAIT},
+          "portraitAlt": coalesce(portrait.alt, "")
+        }),
+        "more": coalesce(more[defined(@->slug.current)]->${STORY}, [])
+      },
+      "order": ${familyStories("$family")}
+    }`,
+    params: { family, slug, pageId: `familyPage-${family}` },
+    tags: ["familyStory", "familyPage"],
+  })) as {
+    page: (Omit<StoryPageData["family"], "labels"> & { labels: StoryLabels }) | null;
+    story:
+      | (Omit<StoryDetail, "href" | "eyebrow" | "chapters" | "voice" | "more"> & {
+          chapters: ChapterRow[];
+          voice:
+            | (Omit<NonNullable<StoryDetail["voice"]>, "portrait"> & { portrait: SanityImage | null })
+            | null;
+          more: StoryRow[];
+        })
+      | null;
+    order: StoryRow[];
+  };
+  if (!data.page || !data.story) return null;
+
+  const { page, story, order } = data;
+  const { itemLabel } = page.labels;
+  const at = order.findIndex((row) => stegaClean(row.slug) === slug);
+  const others = [...order.slice(at + 1), ...order.slice(0, Math.max(at, 0))].filter(
+    (row) => stegaClean(row.slug) !== slug,
+  );
+  const [card] = numbered([story], order, itemLabel);
+
+  return {
+    family: page,
+    story: {
+      ...story,
+      ...card,
+      chapters: parts(story.chapters),
+      voice: story.voice ? { ...story.voice, portrait: portraitUrl(story.voice.portrait) } : null,
+      more: numbered(story.more.length ? story.more : others.slice(0, 2), order, itemLabel),
+    },
+  };
+}
 
 export const getLegalPage = (slug: string) =>
   fixed<LegalDocument>(
@@ -570,13 +749,7 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
         "overview": coalesce(overview, []),
         website,
         "feature": select(defined(feature) => feature${MEDIA}),
-        "chapters": coalesce(chapters[]{
-          label, heading,
-          "body": coalesce(body, []),
-          listHeading,
-          "items": coalesce(items[]{lead, text}, []),
-          "rows": coalesce(media[]{"items": coalesce(items[]${MEDIA}, [])}, [])
-        }, []),
+        "chapters": ${CHAPTERS},
         "testimonial": select(defined(testimonial.quote) && defined(testimonial.name) => testimonial{
           quote, name, role,
           "company": coalesce(company, ^.name),
@@ -595,7 +768,7 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
   })) as {
     project:
       | (Omit<ProjectDetail, "chapters" | "testimonial"> & {
-          chapters: (Omit<Chapter, "id" | "media"> & { rows: { items: Media[] }[] })[];
+          chapters: ChapterRow[];
           testimonial:
             | (Omit<NonNullable<ProjectDetail["testimonial"]>, "portrait"> & {
                 portrait: SanityImage | null;
@@ -615,11 +788,7 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
 
   return {
     ...project,
-    chapters: project.chapters.map(({ rows, ...chapter }) => ({
-      ...chapter,
-      id: anchor(chapter.label),
-      media: rows.map((row) => row.items).filter((items) => items.length),
-    })),
+    chapters: parts(project.chapters),
     testimonial: project.testimonial
       ? { ...project.testimonial, portrait: portraitUrl(project.testimonial.portrait) }
       : null,
@@ -633,6 +802,17 @@ const anchor = (label: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+
+/** A part as the query returns it: its plates still in their rows. */
+type ChapterRow = Omit<Chapter, "id" | "media"> & { rows: { items: Media[] }[] };
+
+/** The parts as the page sets them: each anchored by its label, empty rows left out. */
+const parts = (chapters: readonly ChapterRow[]): Chapter[] =>
+  chapters.map(({ rows, ...chapter }) => ({
+    ...chapter,
+    id: anchor(chapter.label),
+    media: rows.map((row) => row.items).filter((items) => items.length),
+  }));
 
 export async function getArticleSlugs(): Promise<string[]> {
   return sanityFetch({
@@ -700,8 +880,7 @@ export async function getMoreArticles(slug: string): Promise<ArticleCard[]> {
 export interface ShareCardData {
   readonly label: string;
   readonly title: string;
-  readonly subtitle: string | null;
-  /** The page's picture, 1200 × 630, as JPEG (the card renderer reads no WebP). */
+  /** The page's picture, 1200 × 630, as JPEG: sent on as the share image. */
   readonly image: string | null;
   /** The social image an editor set in the page's SEO fields. */
   readonly custom: string | null;
@@ -717,7 +896,6 @@ const IMAGE = `{asset, crop, hotspot}`;
 type ShareRow = {
   label?: string | null;
   title?: string | readonly string[] | null;
-  subtitle?: string | null;
   image?: SanityImage | null;
   custom?: SanityImage | null;
 };
@@ -730,7 +908,6 @@ function shareCard(row: ShareRow | null, label: string): ShareCardData | null {
   return {
     label: stegaClean(row.label || label),
     title: stegaClean(title),
-    subtitle: row.subtitle ? stegaClean(row.subtitle) : null,
     image: shareUrl(row.image),
     custom: shareUrl(row.custom),
   };
@@ -746,7 +923,7 @@ export async function getPageShare(id: string, type = id): Promise<ShareCardData
     query: `*[_id == $id][0]{
       "label": select(defined(coalesce(heading, cover.heading)) => title, null),
       "title": coalesce(heading, cover.heading, title),
-      "image": coalesce(plate.image, cover.card)${IMAGE},
+      "image": select(defined(plate.image.asset) => plate.image, defined(cover.card.asset) => cover.card)${IMAGE},
       "custom": ogImage${IMAGE}
     }`,
     params: { id },
@@ -769,18 +946,51 @@ export async function getInsightShare(slug: string): Promise<ShareCardData | nul
   return shareCard(row, "Insights");
 }
 
+/**
+ * A project's card is its featured image, as it is: the Feature plate's
+ * picture. A project whose Feature plate is a film falls back to the first
+ * picture it has (the card's, the hero's, then the first in its chapters),
+ * and one with no picture at all to the brand card with its name.
+ */
 export async function getProjectShare(slug: string): Promise<ShareCardData | null> {
   const row = (await sanityFetch({
     query: `*[_type == "project" && slug.current == $slug][0]{
       "label": "Work / " + coalesce(sector, scope, ""),
       "title": name,
-      "subtitle": tagline,
-      "image": coalesce(image, hero.image)${IMAGE}
+      "custom": select(
+        defined(feature.image.asset) => feature.image,
+        defined(image.asset) => image,
+        defined(hero.image.asset) => hero.image,
+        (chapters[].media[].items[defined(image.asset)])[0].image
+      )${IMAGE}
     }`,
     params: { slug },
     tags: ["project"],
   })) as ShareRow | null;
   return shareCard(row, "Work");
+}
+
+/**
+ * A story's card is its featured image, as a project's is, then the first
+ * picture it has; with none, the brand card with its name under its family's.
+ */
+export async function getStoryShare(family: string, slug: string): Promise<ShareCardData | null> {
+  const label = families.find((f) => f.slug === family)?.title ?? "Ghost Savvy Studios";
+  const row = (await sanityFetch({
+    query: `*[_type == "familyStory" && family == $family && slug.current == $slug][0]{
+      "label": coalesce(*[_id == "familyPage-" + $family][0].title, $label),
+      title,
+      "custom": select(
+        defined(feature.image.asset) => feature.image,
+        defined(image.asset) => image,
+        defined(hero.image.asset) => hero.image,
+        (chapters[].media[].items[defined(image.asset)])[0].image
+      )${IMAGE}
+    }`,
+    params: { family, slug, label },
+    tags: ["familyStory", "familyPage"],
+  })) as ShareRow | null;
+  return shareCard(row, label);
 }
 
 export async function getAudienceShare(slug: string): Promise<ShareCardData | null> {
@@ -801,8 +1011,7 @@ export async function getPhaseShare(slug: string): Promise<ShareCardData | null>
     query: `*[_type == "phase" && slug.current == $slug][0]{
       "label": "Our approach",
       "title": coalesce(heading, [title]),
-      "subtitle": question,
-      "image": coalesce(plate.image, image)${IMAGE}
+      "image": select(defined(plate.image.asset) => plate.image, defined(image.asset) => image)${IMAGE}
     }`,
     params: { slug },
     tags: ["phase"],
@@ -826,8 +1035,8 @@ const PAGE_PATHS: Record<string, string> = {
 
 /**
  * Every published page with the time it last changed, for the sitemap: the
- * pages, every insight and project, and the audiences and phases that have a
- * page of their own.
+ * pages, every insight, project and family story, and the audiences and
+ * phases that have a page of their own.
  */
 export async function getSitemapEntries(): Promise<{ path: string; updatedAt: string }[]> {
   const data = (await sanityFetch({
@@ -836,7 +1045,8 @@ export async function getSitemapEntries(): Promise<{ path: string; updatedAt: st
       "insights": *[_type == "article" && defined(slug.current)]{"slug": slug.current, "updatedAt": _updatedAt},
       "projects": *[_type == "project" && defined(slug.current)]{"slug": slug.current, "updatedAt": _updatedAt},
       "audiences": *[_type == "audience" && defined(slug.current) && defined(challenge.heading)]{"slug": slug.current, "updatedAt": _updatedAt},
-      "phases": *[_type == "phase" && defined(slug.current) && defined(purpose.heading)]{"slug": slug.current, "updatedAt": _updatedAt}
+      "phases": *[_type == "phase" && defined(slug.current) && defined(purpose.heading)]{"slug": slug.current, "updatedAt": _updatedAt},
+      "stories": *[_type == "familyStory" && defined(slug.current) && defined(family)]{family, "slug": slug.current, "updatedAt": _updatedAt}
     }`,
     params: { ids: Object.keys(PAGE_PATHS) },
     tags: [
@@ -848,6 +1058,7 @@ export async function getSitemapEntries(): Promise<{ path: string; updatedAt: st
       "project",
       "audience",
       "phase",
+      "familyStory",
     ],
   })) as {
     pages: { _id: string; _type: string; slug?: string; updatedAt: string }[];
@@ -855,6 +1066,7 @@ export async function getSitemapEntries(): Promise<{ path: string; updatedAt: st
     projects: { slug: string; updatedAt: string }[];
     audiences: { slug: string; updatedAt: string }[];
     phases: { slug: string; updatedAt: string }[];
+    stories: { family: string; slug: string; updatedAt: string }[];
   };
 
   const under = (base: string, rows: { slug: string; updatedAt: string }[]) =>
@@ -869,5 +1081,6 @@ export async function getSitemapEntries(): Promise<{ path: string; updatedAt: st
     ...under("/work", data.projects),
     ...under("/who-we-serve", data.audiences),
     ...under("/our-approach", data.phases),
+    ...data.stories.map((row) => ({ path: storyHref(row.family, row.slug), updatedAt: row.updatedAt })),
   ];
 }

@@ -3,6 +3,7 @@ import {
   defineLocations,
   type PresentationPluginOptions,
 } from "sanity/presentation";
+import { families } from "../lib/links";
 
 /**
  * Where each document shows on the site, so Presentation can open the right
@@ -26,6 +27,10 @@ export const resolve: PresentationPluginOptions["resolve"] = {
     { route: "/who-we-serve/:slug", filter: `_type == "audience" && slug.current == $slug` },
     { route: "/work/:slug", filter: `_type == "project" && slug.current == $slug` },
     { route: "/insights/:slug", filter: `_type == "article" && slug.current == $slug` },
+    ...families.map(({ slug }) => ({
+      route: `/${slug}/:slug`,
+      filter: `_type == "familyStory" && family == "${slug}" && slug.current == $slug`,
+    })),
     { route: "/:slug", filter: `_type in ["trackPage", "familyPage", "legalPage"] && slug == $slug` },
   ]),
   locations: {
@@ -100,6 +105,18 @@ export const resolve: PresentationPluginOptions["resolve"] = {
           { title: "Insights", href: "/insights" },
         ],
       }),
+    }),
+    familyStory: defineLocations({
+      select: { title: "title", family: "family", slug: "slug.current" },
+      resolve: (doc) => {
+        const family = families.find((f) => f.slug === doc?.family);
+        return {
+          locations: [
+            { title: doc?.title || "Story", href: `/${doc?.family}/${doc?.slug}` },
+            ...(family ? [{ title: family.title, href: `/${family.slug}` }] : []),
+          ],
+        };
+      },
     }),
     ...Object.fromEntries(
       ["trackPage", "familyPage", "legalPage"].map((type) => [

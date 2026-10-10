@@ -4,7 +4,8 @@
  *
  * R2 speaks the S3 API, so a write is a SigV4-signed PUT. The Studio never
  * sees the keys: it asks /api/r2/upload for a signed URL that lets it PUT one
- * object for a few minutes, and the seed and migration scripts sign their own.
+ * object for a few minutes, and /api/r2/films for what is already there; the
+ * seed and migration scripts sign their own.
  * Reads go to the bucket's public URL (a custom domain, or its r2.dev URL).
  *
  * Not "server-only" so the scripts under sanity/ can import it with tsx; the
@@ -50,25 +51,85 @@ export interface R2Video {
   readonly size: number;
 }
 
+/** A filename as it appears at the end of a key: lower case, URL-safe. */
+export function safeName(filename: string) {
+  return (
+    filename
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, "-")
+      .replace(/-+\./g, ".")
+      .replace(/^-+|-+$/g, "") || "film.mp4"
+  );
+}
+
 /**
  * Where a new film goes: under films/, behind a random prefix so two uploads
  * of "reel.mp4" never overwrite each other, with the name kept readable.
  */
 export function videoKey(filename: string) {
-  const safe =
-    filename
-      .toLowerCase()
-      .replace(/[^a-z0-9._-]+/g, "-")
-      .replace(/-+\./g, ".")
-      .replace(/^-+|-+$/g, "") || "film.mp4";
-  return `films/${crypto.randomUUID().slice(0, 8)}/${safe}`;
+  return `films/${crypto.randomUUID().slice(0, 8)}/${safeName(filename)}`;
 }
 
 /** Keys are never reused, so a film can be cached for good. */
 export const CACHE_CONTROL = "public, max-age=31536000, immutable";
 
+/* Keys from videoKey need no escaping; one put in from Cloudflare's dashboard might. */
 export function publicUrl(key: string) {
-  return `${r2().publicUrl}/${key}`;
+  return `${r2().publicUrl}/${key.split("/").map(encodeURIComponent).join("/")}`;
+}
+
+/** What a listing can tell of a file's type: only its extension. */
+const VIDEO_TYPES: Record<string, string> = {
+  mp4: "video/mp4",
+  m4v: "video/mp4",
+  mov: "video/quicktime",
+  webm: "video/webm",
+};
+
+const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
+
+/** The text of the first <name> in a scrap of S3's XML. */
+function tag(xml: string, name: string) {
+  const text = xml.match(new RegExp(`<${name}>([^<]*)</${name}>`))?.[1] ?? "";
+  return text.replace(/&(amp|lt|gt|quot|apos);/g, (_, entity: string) => ENTITIES[entity]);
+}
+
+/** A film in the bucket, as a field would store it, and when it went up. */
+export interface StoredFilm {
+  readonly video: R2Video;
+  readonly uploaded: string;
+}
+
+/**
+ * Every film in the bucket, newest first, so the Studio can reuse one instead
+ * of uploading it again. ListObjectsV2 answers in XML, a thousand keys a
+ * page; the shape is flat enough to read without a parser.
+ */
+export async function listFilms() {
+  const { client, endpoint } = r2();
+  const films: StoredFilm[] = [];
+  let next = "";
+  do {
+    const url = new URL(endpoint);
+    url.searchParams.set("list-type", "2");
+    if (next) url.searchParams.set("continuation-token", next);
+    const res = await client.fetch(url);
+    const xml = await res.text();
+    if (!res.ok) throw new Error(`R2 list failed: ${res.status} ${xml}`);
+
+    for (const [, entry] of xml.matchAll(/<Contents>([\s\S]*?)<\/Contents>/g)) {
+      const key = tag(entry, "Key");
+      const filename = key.split("/").pop()!;
+      const mimeType = VIDEO_TYPES[filename.split(".").pop()!.toLowerCase()];
+      if (!mimeType) continue;
+      films.push({
+        video: { _type: "r2Video", url: publicUrl(key), key, filename, mimeType, size: Number(tag(entry, "Size")) },
+        uploaded: tag(entry, "LastModified"),
+      });
+    }
+    next = tag(xml, "IsTruncated") === "true" ? tag(xml, "NextContinuationToken") : "";
+  } while (next);
+  return films.sort((a, b) => b.uploaded.localeCompare(a.uploaded));
 }
 
 /**

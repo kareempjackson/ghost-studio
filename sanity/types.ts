@@ -419,11 +419,9 @@ export interface ServicesPage extends Seo, Cover {
     readonly heading: Lines;
     readonly copy: Rich;
     readonly action: Link;
-    readonly network: {
-      readonly alt: string;
-      readonly nodes: readonly { readonly x: number; readonly y: number; readonly r: number; readonly src: string | null; readonly video: Film }[];
-    };
   };
+  /** The project the page closes on; null only with no project to show. */
+  readonly featured: Project | null;
 }
 
 export interface Audience {
@@ -441,6 +439,8 @@ export interface WhoWeServePage extends Seo, Cover {
     readonly deck: Rich;
     readonly items: readonly Audience[];
   };
+  /** The project the page closes on; null only with no project to show. */
+  readonly featured: Project | null;
 }
 
 export interface WorkPage extends Seo {
@@ -531,6 +531,8 @@ export interface TrackPageData extends Seo, Cover {
   readonly process: { readonly label: string; readonly heading: Lines; readonly items: readonly Step[] };
   readonly questions: { readonly label: string; readonly heading: string; readonly items: readonly Question[] };
   readonly others: { readonly label: string };
+  /** The project the page closes on; null only with no project to show. */
+  readonly featured: Project | null;
 }
 
 export interface Note {
@@ -554,8 +556,86 @@ export interface FamilyPageData extends Seo {
     readonly card: Picture;
   };
   readonly archive: { readonly label: string; readonly heading: Lines; readonly deck: Rich; readonly items: readonly Experiment[] };
-  readonly ask: { readonly label: string; readonly heading: Lines; readonly summary: Rich; readonly action: Link };
-  readonly family: { readonly label: string; readonly heading: Lines };
+  readonly ask: FamilyAsk;
+  readonly family: FamilyBand;
+  /** The family's stories, newest first: the archive opens on them. */
+  readonly stories: readonly StoryCard[];
+}
+
+export interface FamilyAsk {
+  readonly label: string;
+  readonly heading: Lines;
+  readonly summary: Rich;
+  readonly action: Link;
+}
+
+/** The band that sends a reader on to the rest of the family. */
+export interface FamilyBand {
+  readonly label: string;
+  readonly heading: Lines;
+}
+
+/** A story from the Ghost family, as its card shows it. */
+export interface StoryCard {
+  readonly slug: string;
+  readonly family: string;
+  readonly href: string;
+  readonly title: string;
+  readonly summary: Rich;
+  readonly ground: string;
+  readonly image: string | null;
+  readonly imageVideo: Film;
+  readonly imageAlt: string;
+  /** What one is called and its number in the family, oldest first: Experiment 01. */
+  readonly eyebrow: string;
+}
+
+/** The words every story under a family page shares. */
+export interface StoryLabels {
+  readonly itemLabel: string;
+  readonly overview: string;
+  readonly readMore: string;
+  readonly readLess: string;
+  readonly listHeading: string;
+  readonly partsLabel: string;
+  readonly voiceLabel: string;
+  readonly voiceHeading: string;
+  readonly more: { readonly label: string; readonly heading: string; readonly action: Link };
+}
+
+/** A story's own page: the record, the claim, the parts, and how it ended. */
+export interface StoryDetail extends StoryCard {
+  readonly description: string | null;
+  readonly hero: Media | null;
+  readonly notes: readonly Note[];
+  readonly headline: Rich;
+  readonly facts: readonly { readonly label: string; readonly value: Rich }[];
+  readonly tags: Lines;
+  readonly overview: Rich;
+  readonly link: Link | null;
+  readonly feature: Media | null;
+  readonly chapters: readonly Chapter[];
+  /** What changed, in figures; null until there is one. */
+  readonly outcome: {
+    readonly label: string;
+    readonly heading: Rich | null;
+    readonly items: readonly { readonly value: string; readonly label: string }[];
+  } | null;
+  /** What someone it was for said about it; null until there is a quote and a name. */
+  readonly voice: ClientTestimonial | null;
+  readonly more: readonly StoryCard[];
+}
+
+/** A story, with what it carries over from its family's page. */
+export interface StoryPageData {
+  readonly story: StoryDetail;
+  readonly family: {
+    readonly href: string;
+    readonly title: string;
+    readonly labels: StoryLabels;
+    readonly ask: FamilyAsk;
+    readonly band: FamilyBand;
+  };
 }
 
 export interface LegalSection {
@@ -586,8 +666,8 @@ export interface ApproachPage extends Seo, Cover {
   readonly plate: { readonly src: string | null; readonly video: Film; readonly alt: string; readonly ground: string | null };
   readonly start: { readonly label: string; readonly heading: string; readonly deck: Rich; readonly body: Rich };
   readonly phases: { readonly label: string; readonly heading: Lines; readonly itemLabel: string; readonly pageEyebrow: string; readonly items: readonly ApproachPhase[] };
-  /** The chain of people that closes the page, off the /services document. */
-  readonly network: ServicesPage["method"]["network"];
+  /** The project the page closes on; null only with no project to show. */
+  readonly featured: Project | null;
 }
 
 /** A phase's own page, with every phase alongside it for the pills. */
@@ -612,7 +692,8 @@ export interface PhasePage extends Seo {
     readonly items: Lines;
   } | null;
   readonly phases: readonly ApproachPhase[];
-  readonly network: ServicesPage["method"]["network"];
+  /** The project the page closes on; null only with no project to show. */
+  readonly featured: Project | null;
 }
 
 /** An audience's own page. */
@@ -632,5 +713,6 @@ export interface AudiencePage extends Seo {
     readonly items: readonly { readonly title: string | null; readonly body: Rich }[];
   } | null;
   readonly outputs: { readonly label: string; readonly heading: Lines; readonly items: Lines } | null;
-  readonly network: ServicesPage["method"]["network"];
+  /** The project the page closes on; null only with no project to show. */
+  readonly featured: Project | null;
 }

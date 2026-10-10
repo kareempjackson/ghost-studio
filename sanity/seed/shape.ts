@@ -1,8 +1,9 @@
 /**
  * The shapes the seed scripts write: plain content objects made into what a
- * Sanity document stores. Shared by seed.ts and projects.ts.
+ * Sanity document stores. Shared by seed.ts, projects.ts and stories.ts.
  */
 
+import type { StorySeed } from "./content/family-stories";
 import type { CaseStudySeed, PlateSeed } from "./content/work";
 
 type Json = string | number | boolean | null | undefined | Json[] | { [key: string]: Json };
@@ -27,21 +28,42 @@ export function keyed(value: unknown): Json {
 /** A plate, until its picture is in: the ground and the shape. */
 export const media = (plate: PlateSeed) => ({ _type: "media", ...plate });
 
+/** A story's parts, as a document stores them: each a chapter, its plates in rows. */
+const chapters = (parts: CaseStudySeed["chapters"]) =>
+  parts.map(({ media: rows, ...chapter }) => ({
+    _type: "chapter",
+    ...chapter,
+    media: rows.map((row) => ({ _type: "mediaRow", items: row.map(media) })),
+  }));
+
 /** A project's case study, in the shape the project document stores it. */
 export function caseStudy(study: CaseStudySeed | undefined) {
   if (!study) return {};
-  const { hero, feature, chapters, ...fields } = study;
+  const { hero, feature, chapters: parts, ...fields } = study;
   return {
     ...fields,
     ...(hero ? { hero: media(hero) } : {}),
     ...(feature ? { feature: media(feature) } : {}),
-    chapters: chapters.map(({ media: rows, ...chapter }) => ({
-      _type: "chapter",
-      ...chapter,
-      media: rows.map((row) => ({ _type: "mediaRow", items: row.map(media) })),
-    })),
+    chapters: chapters(parts),
   };
 }
+
+/** A Ghost family story, in the shape its document stores it. */
+export function story(seed: StorySeed) {
+  const { slug, hero, feature, chapters: parts, ...fields } = seed;
+  return {
+    ...fields,
+    slug: { _type: "slug", current: slug },
+    image: { _type: "image", alt: "" },
+    ...(hero ? { hero: media(hero) } : {}),
+    ...(feature ? { feature: media(feature) } : {}),
+    chapters: chapters(parts),
+  };
+}
+
+/** A story's document id, from its family and slug: familyStory-ghost-labs-low-signal. */
+export const storyId = (seed: Pick<StorySeed, "family" | "slug">) =>
+  `familyStory-${seed.family}-${seed.slug}`;
 
 /** A topic's document, at a fixed id from its name: "Strategy" → insightTopic-strategy. */
 export const topicId = (name: string) =>

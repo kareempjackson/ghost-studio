@@ -11,12 +11,12 @@ import { ArrowPill } from "../_components/ArrowPill";
 import { ChatLauncher } from "../_components/ChatLauncher";
 import { ContactBand } from "../_components/ContactBand";
 import { PageCover } from "../_components/PageCover";
+import { FeaturedProject } from "../_components/ProjectCard";
 import { BAND_STYLE, MONO, SectionHead } from "../_components/SectionHead";
 import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
 import { LABEL, StudioStrip } from "../_components/StudioStrip";
 import { Disciplines } from "./_components/Disciplines";
-import { Network } from "./_components/Network";
 import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,9 +32,6 @@ const MODEL_STYLE: CSSProperties = {
   lineHeight: 0.9,
 };
 
-/** The ground of the network plate, off the comp: ink with the green kept in. */
-const FOREST = "#132a28";
-
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
@@ -44,7 +41,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
  * things with the working principle between them. Then two answers, in the
  * order a buyer asks them: how do we engage you, and what do you do. The
  * method closes the page, because it is the thing every model and every
- * discipline has in common.
+ * discipline has in common, and a project under it shows it done.
  */
 export default async function Services() {
   const [servicesPage, studioStrip, services, engagement] = await Promise.all([
@@ -141,12 +138,11 @@ export default async function Services() {
             {method.action.label}
           </ArrowPill>
 
-          <div
-            data-ground="dark"
-            className="mt-20 overflow-hidden lg:mt-36"
-          >
-            <Network ground={FOREST} network={method.network} />
-          </div>
+          {servicesPage.featured && (
+            <div className="mt-20 lg:mt-36">
+              <FeaturedProject project={servicesPage.featured} />
+            </div>
+          )}
         </section>
       </main>
       {/* The close sits over the footer, not inside the page, so its rounded

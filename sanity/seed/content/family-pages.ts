@@ -48,7 +48,35 @@ export interface FamilyPageData {
     readonly action: { readonly label: string; readonly href: string };
   };
   readonly family: { readonly label: string; readonly heading: readonly string[] };
+  /** The words every story under the page shares. The stories are in family-stories.ts. */
+  readonly stories: StoryLabels;
 }
+
+export interface StoryLabels {
+  readonly itemLabel: string;
+  readonly overview: string;
+  readonly readMore: string;
+  readonly readLess: string;
+  readonly listHeading: string;
+  readonly partsLabel: string;
+  readonly voiceLabel: string;
+  readonly voiceHeading: string;
+  readonly more: {
+    readonly label: string;
+    readonly heading: string;
+    readonly action: { readonly label: string; readonly href: string };
+  };
+}
+
+/** What every family's stories say the same way; each family names its own. */
+const storyWords = {
+  overview: "Overview",
+  readMore: "Read more",
+  readLess: "Read less",
+  listHeading: "What we did",
+  partsLabel: "Parts of the story",
+  voiceHeading: "In their words.",
+} as const;
 
 const VERMILION = "#eb5b32";
 const LILAC = "#dcd3ea";
@@ -101,6 +129,16 @@ export const labsPage: FamilyPageData = {
     action: { label: "Share an idea", href: "/contact" },
   },
   family,
+  stories: {
+    ...storyWords,
+    itemLabel: "Experiment",
+    voiceLabel: "From the field",
+    more: {
+      label: "More from Ghost Labs",
+      heading: "Other experiments.",
+      action: { label: "See the archive", href: "/ghost-labs#archive" },
+    },
+  },
 };
 
 /**
@@ -137,6 +175,16 @@ export const ghostUPage: FamilyPageData = {
     action: { label: "Ask about Ghost U", href: "/contact" },
   },
   family,
+  stories: {
+    ...storyWords,
+    itemLabel: "Cohort",
+    voiceLabel: "From the room",
+    more: {
+      label: "More from Ghost U",
+      heading: "Other cohorts.",
+      action: { label: "See every cohort", href: "/ghost-u#archive" },
+    },
+  },
 };
 
 /**
@@ -173,4 +221,14 @@ export const givesPage: FamilyPageData = {
     action: { label: "Tell us about it", href: "/contact" },
   },
   family,
+  stories: {
+    ...storyWords,
+    itemLabel: "Project",
+    voiceLabel: "From the partner",
+    more: {
+      label: "More from Ghost Gives",
+      heading: "Other projects.",
+      action: { label: "See every project", href: "/ghost-gives#archive" },
+    },
+  },
 };

@@ -8,11 +8,11 @@ import type { PhasePage } from "@/sanity/types";
 import { ChatLauncher } from "../../_components/ChatLauncher";
 import { ContactBand } from "../../_components/ContactBand";
 import { PageCover } from "../../_components/PageCover";
+import { FeaturedProject } from "../../_components/ProjectCard";
 import { Practice } from "../../_components/Practice";
 import { SectionHead } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
-import { Network } from "../../services/_components/Network";
 import { Visual } from "../../_components/Visual";
 
 /** Cache Components needs one param to prerender against; `_` is never a phase. */
@@ -39,9 +39,6 @@ const OUTPUT_STYLE: CSSProperties = {
   lineHeight: 1.2,
 };
 
-/** The ground the network is set on: the one /services closes on. */
-const FOREST = "#132a28";
-
 /** The plate under the cover, until its picture is in. */
 const PAPER = "#edebe7";
 
@@ -53,8 +50,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
  * The cover names the phase and the question it answers, with every phase
  * in a row of pills under it so a reader can move along the thread without
  * going back. Then why the phase exists, what the team does in it, and what
- * the client is left holding. The network closes the page, as it closes
- * /our-approach: the people the understanding connects.
+ * the client is left holding. A project closes the page, as it closes
+ * /our-approach.
  */
 export default async function PhaseRoute({
   params,
@@ -117,10 +114,15 @@ export default async function PhaseRoute({
           />
         )}
 
+        {/* With a featured project the plate's own padding closes the page;
+            without one this list is the last thing on it, and needs the
+            band's full space before the contact band. */}
         {outputs && (
           <section
             aria-labelledby="outputs-heading"
-            className="px-5 pt-24 sm:px-8 lg:px-12 lg:pt-36"
+            className={`px-5 pt-24 sm:px-8 lg:px-12 lg:pt-36 ${
+              page.featured ? "" : "pb-24 lg:pb-36"
+            }`}
           >
             <SectionHead
               id="outputs-heading"
@@ -143,11 +145,11 @@ export default async function PhaseRoute({
           </section>
         )}
 
-        <div className="px-5 pt-20 pb-20 sm:px-8 lg:px-12 lg:pt-28 lg:pb-28">
-          <div data-ground="dark" className="overflow-hidden rounded-[0.5rem]">
-            <Network ground={FOREST} network={page.network} />
+        {page.featured && (
+          <div className="px-5 pt-20 pb-20 sm:px-8 lg:px-12 lg:pt-28 lg:pb-28">
+            <FeaturedProject project={page.featured} />
           </div>
-        </div>
+        )}
       </main>
       {/* The close sits over the footer, not inside the page, so its rounded
           corners open onto the footer beneath it. */}

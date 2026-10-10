@@ -3,16 +3,15 @@ import { stegaClean } from "next-sanity";
 import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import { getAboutPage } from "@/sanity/content";
 import type { FamilyPageData } from "@/sanity/types";
 import { ArrowPill } from "./ArrowPill";
 import { ChatLauncher } from "./ChatLauncher";
 import { ContactBand } from "./ContactBand";
-import { MONO, SectionHead } from "./SectionHead";
+import { BAND, FamilyAsk, FamilyMembers, StickyNote } from "./FamilyBands";
+import { SectionHead } from "./SectionHead";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
-import { LABEL } from "./StudioStrip";
-import { UpRight } from "./UpRight";
+import { STORY_TITLE_STYLE, StoryCard } from "./StoryCard";
 import { Visual } from "./Visual";
 import { Rich } from "./Rich";
 
@@ -29,53 +28,26 @@ const COVER_STYLE: CSSProperties = {
   lineHeight: 0.94,
 };
 
-/** 44px at 390 to 80px at 1440, held there. The ask, in the close's voice. */
-const ASK_STYLE: CSSProperties = {
-  fontSize: "clamp(2.75rem, 1.9143rem + 3.429vw, 5rem)",
-  fontWeight: 400,
-  letterSpacing: "-0.05em",
-  lineHeight: 1,
-};
-
-/** 26px at 390 to 32px at 1440, held there. One experiment's name. */
-const EXPERIMENT_STYLE: CSSProperties = {
-  fontSize: "clamp(1.5rem, 1.3571rem + 0.571vw, 1.875rem)",
-  fontWeight: 400,
-  letterSpacing: "-0.04em",
-  lineHeight: 1.1,
-};
-
-/** 26px at 390 to 32px at 1440, held there. What a family member is for. */
-const FAMILY_STYLE: CSSProperties = {
-  fontSize: "clamp(1.625rem, 1.4857rem + 0.571vw, 2rem)",
-  fontWeight: 400,
-  letterSpacing: "-0.04em",
-  lineHeight: 1.12,
-};
-
-const BAND = "px-5 py-24 sm:px-8 lg:px-12 lg:py-36";
-
-/** A note stuck to the wall beside the claim: square, a little off true. */
-const NOTE =
-  "grid place-items-center text-ink-950 text-[1.125rem] font-medium tracking-[-0.03em] shadow-raised lg:text-[1.375rem]";
+/**
+ * The archive's plates step down the page in two columns: the left one a
+ * little wider than tall, the right one square and dropped.
+ */
+const plateFor = (index: number) => (index % 2 ? "aspect-square" : "aspect-[11/10]");
+const dropFor = (index: number) => (index % 2 ? "sm:mt-24 lg:mt-36" : undefined);
 
 /**
- * A Ghost family page: `/ghost-labs`, `/ghost-u`.
+ * A Ghost family page: `/ghost-labs`, `/ghost-u`, `/ghost-gives`.
  *
  * The claim is centred and set solid, with the working wall around it: two
  * notes and a poster, pinned at angles, so the cover reads as a bench and not
- * a brochure. Then the archive, staggered in two columns, the ask, and the
- * rest of the family.
+ * a brochure. Then the archive, staggered in two columns — the family's
+ * stories first, each a way into its own page, then what is still on the
+ * bench — the ask, and the rest of the family.
  */
 export async function FamilyPage({ data }: { data: FamilyPageData }) {
-  const { cover, archive, ask } = data;
+  const { cover, archive, ask, stories } = data;
   /* Two notes, if both are set; the wall goes without one that is not. */
   const [high, low] = cover.notes;
-  /** The rest of the family: everyone on /about but the page you are on. */
-  const aboutPage = await getAboutPage();
-  const family = aboutPage.family.members.filter(
-    (member) => member.href !== data.href,
-  );
 
   return (
     <>
@@ -91,20 +63,16 @@ export async function FamilyPage({ data }: { data: FamilyPageData }) {
               would sit on the words, so they line up under it instead. */}
           <div aria-hidden className="hidden lg:block">
             {high && (
-              <span
-                style={{ backgroundColor: high.ground }}
-                className={`${NOTE} absolute top-[36%] left-[5%] h-[5.5rem] w-[7.5rem] -rotate-[12deg]`}
-              >
-                {high.text}
-              </span>
+              <StickyNote
+                note={high}
+                className="absolute top-[36%] left-[5%] h-[5.5rem] w-[7.5rem] -rotate-[12deg]"
+              />
             )}
             {low && (
-              <span
-                style={{ backgroundColor: low.ground }}
-                className={`${NOTE} absolute top-[62%] left-[16%] h-[5.25rem] min-w-[5.25rem] rotate-[5deg] px-5`}
-              >
-                {low.text}
-              </span>
+              <StickyNote
+                note={low}
+                className="absolute top-[62%] left-[16%] h-[5.25rem] min-w-[5.25rem] rotate-[5deg] px-5"
+              />
             )}
           </div>
 
@@ -161,26 +129,12 @@ export async function FamilyPage({ data }: { data: FamilyPageData }) {
             aria-hidden
             className="mt-12 flex justify-center gap-6 lg:hidden"
           >
-            {high && (
-              <span
-                style={{ backgroundColor: high.ground }}
-                className={`${NOTE} h-20 w-28 -rotate-[10deg]`}
-              >
-                {high.text}
-              </span>
-            )}
-            {low && (
-              <span
-                style={{ backgroundColor: low.ground }}
-                className={`${NOTE} h-20 min-w-20 rotate-[5deg] px-4`}
-              >
-                {low.text}
-              </span>
-            )}
+            {high && <StickyNote note={high} className="h-20 w-28 -rotate-[10deg]" />}
+            {low && <StickyNote note={low} className="h-20 min-w-20 rotate-[5deg] px-4" />}
           </div>
         </section>
 
-        <section aria-labelledby="archive-heading" className={BAND}>
+        <section id="archive" aria-labelledby="archive-heading" className={`${BAND} scroll-mt-8`}>
           <SectionHead
             id="archive-heading"
             label={archive.label}
@@ -189,88 +143,45 @@ export async function FamilyPage({ data }: { data: FamilyPageData }) {
           />
 
           {/* Two columns, the right one dropped, so the plates step down
-              the page rather than line up as a grid of products. */}
+              the page rather than line up as a grid of products. The
+              stories lead; what has no story yet follows, as a plate. */}
           <ul className="mt-16 grid gap-y-14 sm:grid-cols-2 sm:gap-x-5 lg:mt-28 lg:gap-x-8 lg:gap-y-24">
-            {archive.items.map((item, index) => (
-              <li
-                key={item.title}
-                className={index % 2 ? "sm:mt-24 lg:mt-36" : undefined}
-              >
-                <div
-                  aria-hidden
-                  style={{ backgroundColor: item.ground }}
-                  className={index % 2 ? "aspect-square" : "aspect-[11/10]"}
+            {stories.map((story, index) => (
+              <li key={story.slug} className={dropFor(index)}>
+                <StoryCard
+                  story={story}
+                  plate={plateFor(index)}
+                  sizes="(min-width: 640px) 50vw, 100vw"
                 />
-                <h3
-                  className="mt-6 text-primary lg:mt-8"
-                  style={EXPERIMENT_STYLE}
-                >
-                  {item.title}
-                </h3>
-                <div className="mt-3 text-[0.875rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-4">
-                  <Rich value={item.body} />
-                </div>
               </li>
             ))}
+            {archive.items.map((item, i) => {
+              const index = stories.length + i;
+              return (
+                <li key={item.title} className={dropFor(index)}>
+                  <div
+                    aria-hidden
+                    style={{ backgroundColor: item.ground }}
+                    className={plateFor(index)}
+                  />
+                  <h3
+                    className="mt-6 text-primary lg:mt-8"
+                    style={STORY_TITLE_STYLE}
+                  >
+                    {item.title}
+                  </h3>
+                  <div className="mt-3 text-[0.875rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-4">
+                    <Rich value={item.body} />
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </section>
 
-        <section aria-labelledby="ask-heading" className={BAND}>
-          <p className={`${MONO} text-ink-950`}>{ask.label}</p>
-          <h2
-            id="ask-heading"
-            className="mt-8 text-primary uppercase lg:mt-10"
-            style={ASK_STYLE}
-          >
-            {ask.heading.map((line) => (
-              <span key={line} className="block">
-                {line}
-              </span>
-            ))}
-          </h2>
-          <div className="mt-8 text-[1.0625rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:text-[1.1875rem]">
-            <Rich value={ask.summary} />
-          </div>
-          <ArrowPill href={ask.action.href} className="mt-10 inline-flex">
-            {ask.action.label}
-          </ArrowPill>
-        </section>
+        <FamilyAsk ask={ask} />
 
-        <section aria-labelledby="family-heading" className={BAND}>
-          <SectionHead
-            id="family-heading"
-            label={data.family.label}
-            heading={data.family.heading}
-          >
-            <ul className="mt-14 grid gap-y-14 sm:grid-cols-2 sm:gap-x-8 lg:mt-24">
-              {family.map((member) => (
-                <li key={member.name}>
-                  <a
-                    href={member.href}
-                    className="group flex flex-col text-primary"
-                  >
-                    <span className={`${LABEL} text-ink-950`}>
-                      {member.name}
-                    </span>
-                    <span
-                      className="mt-8 transition-colors duration-200 group-hover:text-accent lg:mt-12"
-                      style={FAMILY_STYLE}
-                    >
-                      {member.statement.map((line) => (
-                        <span key={line} className="block">
-                          {line}
-                        </span>
-                      ))}
-                    </span>
-                    <span className="mt-10 transition-colors duration-200 group-hover:text-accent lg:mt-16">
-                      <UpRight />
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </SectionHead>
-        </section>
+        <FamilyMembers band={data.family} current={data.href} />
       </main>
       {/* The close sits over the footer, not inside the page, so its rounded
           corners open onto the footer beneath it. */}

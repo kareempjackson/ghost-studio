@@ -21,7 +21,7 @@ import { createClient } from "next-sanity";
 import { positioning } from "../../lib/brand/voice";
 import { put, videoKey } from "../../lib/r2";
 import { richify } from "../lib/rich";
-import { caseStudy, keyed, topicId } from "./shape";
+import { caseStudy, keyed, story, storyId, topicId } from "./shape";
 import { schemaTypes } from "../schemaTypes";
 import { audienceSlug } from "../../lib/links";
 import { aboutPage } from "./content/about";
@@ -31,6 +31,7 @@ import { contact } from "./content/contact";
 import { engagePage } from "./content/engage";
 import { engagement } from "./content/engagement";
 import { ghostUPage, givesPage, labsPage, type FamilyPageData } from "./content/family-pages";
+import { stories } from "./content/family-stories";
 import { contactBand, email, footer, social } from "./content/footer";
 import { articles, insightsPage, topics } from "./content/insights";
 import { integratePage } from "./content/integrate";
@@ -301,21 +302,7 @@ async function documents() {
     },
   });
 
-  add("servicesPage", "servicesPage", {
-    ...servicesPage,
-    method: {
-      ...servicesPage.method,
-      network: {
-        alt: servicesPage.method.network.alt,
-        nodes: await Promise.all(
-          servicesPage.method.network.nodes.map(async ({ src, ...node }) => ({
-            ...node,
-            image: await image(src, ""),
-          })),
-        ),
-      },
-    },
-  });
+  add("servicesPage", "servicesPage", servicesPage);
 
   /* Each audience is its own document: its card on /who-we-serve, and its
      page at /who-we-serve/[slug] where it has one. */
@@ -375,6 +362,12 @@ async function documents() {
       ...page,
       cover: { ...cover, card: await image(cover.card.src, cover.card.alt) },
     });
+  }
+
+  /* Each family's stories: its archive's first cards, and their pages at
+     /[family]/[slug]. No pictures yet: each plate is its colour. */
+  for (const seed of stories) {
+    add(storyId(seed), "familyStory", story(seed));
   }
 
   for (const document of Object.values(legalDocuments)) {

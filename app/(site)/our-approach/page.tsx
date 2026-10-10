@@ -6,10 +6,10 @@ import { getApproachPage } from "@/sanity/content";
 import { ChatLauncher } from "../_components/ChatLauncher";
 import { ContactBand } from "../_components/ContactBand";
 import { PageCover } from "../_components/PageCover";
+import { FeaturedProject } from "../_components/ProjectCard";
 import { MONO, SectionHead } from "../_components/SectionHead";
 import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
-import { Network } from "../services/_components/Network";
 import { Visual } from "../_components/Visual";
 import { Rich } from "../_components/Rich";
 
@@ -26,7 +26,7 @@ const PHASE_STYLE: CSSProperties = {
   lineHeight: 1.1,
 };
 
-/** The ground the phases and the network are set on: the one /services closes on. */
+/** The phases' ground until their pictures are in: ink with the green kept in. */
 const FOREST = "#132a28";
 
 /** The plate under the cover, until its picture is in. */
@@ -40,8 +40,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
  * The cover makes the claim and the plate under it carries the picture. The
  * first band says where the work starts: not with the brief, but with what
  * the brief is a response to. The second sets the four phases as a staggered
- * pair of columns, each phase the question it exists to answer. The network
- * closes the page: the people one understanding connects.
+ * pair of columns, each phase the question it exists to answer. A project
+ * closes the page: the understanding, put to work.
  */
 export default async function OurApproach() {
   const page = await getApproachPage();
@@ -155,11 +155,11 @@ export default async function OurApproach() {
           </ol>
         </section>
 
-        <div className="px-5 pb-20 sm:px-8 lg:px-12 lg:pb-28">
-          <div data-ground="dark" className="overflow-hidden rounded-[0.5rem]">
-            <Network ground={FOREST} network={page.network} />
+        {page.featured && (
+          <div className="px-5 pb-20 sm:px-8 lg:px-12 lg:pb-28">
+            <FeaturedProject project={page.featured} />
           </div>
-        </div>
+        )}
       </main>
       {/* The close sits over the footer, not inside the page, so its rounded
           corners open onto the footer beneath it. */}

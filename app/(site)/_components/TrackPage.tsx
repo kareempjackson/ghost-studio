@@ -3,17 +3,17 @@ import { stegaClean } from "next-sanity";
 import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import { getEngagement, getServicesPage } from "@/sanity/content";
+import { getEngagement } from "@/sanity/content";
 import type { TrackPageData } from "@/sanity/types";
 import { ChatLauncher } from "./ChatLauncher";
 import { ContactBand } from "./ContactBand";
 import { PageCover } from "./PageCover";
+import { FeaturedProject } from "./ProjectCard";
 import { BAND_STYLE, MONO, SectionHead } from "./SectionHead";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 import { LABEL } from "./StudioStrip";
 import { Questions } from "../build/_components/Questions";
-import { Network } from "../services/_components/Network";
 import { Visual } from "./Visual";
 import { Rich } from "./Rich";
 
@@ -46,9 +46,6 @@ const TRACK_STYLE: CSSProperties = {
   lineHeight: 1,
 };
 
-/** The ground of the network plate: the one /services closes on. */
-const FOREST = "#132a28";
-
 /** The plate's colour until a track sets its own: /build's, off the comp. */
 const PLATE = "#2f3b24";
 
@@ -62,7 +59,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
  * The cover and the plate under it say what the track is; the terms say
  * what it costs, straight after, so no one reads the rest wondering. Then
  * who it is for, what comes with it, how it runs, the questions left over,
- * and the other two ways in for anyone it does not fit.
+ * and the other two ways in for anyone it does not fit. A project closes it.
  *
  * `/build` sets its claim at the larger cover size; the other tracks' comps
  * run two-line claims longer, so they take `md`.
@@ -75,10 +72,7 @@ export async function TrackPage({
   size?: "lg" | "md";
 }) {
   const { plate, terms, who, shape, process, questions, others } = data;
-  const [{ models }, { method }] = await Promise.all([
-    getEngagement(),
-    getServicesPage(),
-  ]);
+  const { models } = await getEngagement();
   const tracks = models.filter((model) => model.slug !== data.slug);
 
   return (
@@ -243,9 +237,11 @@ export async function TrackPage({
             ))}
           </ul>
 
-          <div data-ground="dark" className="mt-20 overflow-hidden lg:mt-36">
-            <Network ground={FOREST} network={method.network} />
-          </div>
+          {data.featured && (
+            <div className="mt-20 lg:mt-36">
+              <FeaturedProject project={data.featured} />
+            </div>
+          )}
         </section>
       </main>
       {/* The close sits over the footer, not inside the page, so its rounded

@@ -137,25 +137,6 @@ export const servicesPage = {
       "Every discipline works from that same document.",
     ],
     action: { label: "Start a conversation", href: "/contact" },
-    /**
-     * The people in the room, as a chain: each node is one conversation, and
-     * the links run in the order the work is written down. Positions are in
-     * the plate's own 1436 × 756 units, off the comp.
-     *
-     * PLACEHOLDER — the comp sets a portrait in each node. Export them to
-     * `public/images/` and set `src`; until then a node is a ground.
-     */
-    network: {
-      alt: "Six people from one engagement, from the clinic floor to the operating theatre, joined in a single chain.",
-      nodes: [
-        { x: 433, y: 243, r: 90, src: null },
-        { x: 567, y: 538, r: 60, src: null },
-        { x: 728, y: 416, r: 55, src: null },
-        { x: 896, y: 534, r: 55, src: null },
-        { x: 990, y: 290, r: 95, src: null },
-        { x: 730, y: 248, r: 55, src: null },
-      ] as readonly { x: number; y: number; r: number; src: string | null }[],
-    },
   },
 } as const;
 

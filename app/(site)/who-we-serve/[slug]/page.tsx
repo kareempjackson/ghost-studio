@@ -6,11 +6,11 @@ import { getAudiencePage, getAudienceSlugs } from "@/sanity/content";
 import { ChatLauncher } from "../../_components/ChatLauncher";
 import { ContactBand } from "../../_components/ContactBand";
 import { PageCover } from "../../_components/PageCover";
+import { FeaturedProject } from "../../_components/ProjectCard";
 import { Practice } from "../../_components/Practice";
 import { MONO, SectionHead } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
-import { Network } from "../../services/_components/Network";
 import { Visual } from "../../_components/Visual";
 
 /** Cache Components needs one param to prerender against; `_` is never an audience. */
@@ -45,9 +45,6 @@ const OUTPUT_STYLE: CSSProperties = {
   lineHeight: 1.2,
 };
 
-/** The ground the network is set on: the one /services closes on. */
-const FOREST = "#132a28";
-
 /** The plate under the cover, until its picture is in. */
 const PAPER = "#edebe7";
 
@@ -56,7 +53,7 @@ const PAPER = "#edebe7";
  *
  * The cover says where they are and what they need next. Then the challenge
  * they are facing, what the team does about it, and the mix of disciplines
- * that brings. The network closes the page, as it closes /who-we-serve.
+ * that brings. A project closes the page, as it closes /who-we-serve.
  */
 export default async function AudienceRoute({
   params,
@@ -118,10 +115,15 @@ export default async function AudienceRoute({
           />
         )}
 
+        {/* With a featured project the plate's own padding closes the page;
+            without one this list is the last thing on it, and needs the
+            band's full space before the contact band. */}
         {outputs && (
           <section
             aria-labelledby="outputs-heading"
-            className="grid gap-y-10 px-5 pt-24 sm:px-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,5fr)] lg:gap-x-8 lg:px-12 lg:pt-36"
+            className={`grid gap-y-10 px-5 pt-24 sm:px-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,5fr)] lg:gap-x-8 lg:px-12 lg:pt-36 ${
+              page.featured ? "" : "pb-24 lg:pb-36"
+            }`}
           >
             {/* The label and a short heading in the margin column; the
                 list, which is the point, at full size beside them. */}
@@ -149,11 +151,11 @@ export default async function AudienceRoute({
           </section>
         )}
 
-        <div className="px-5 pt-20 pb-20 sm:px-8 lg:px-12 lg:pt-28 lg:pb-28">
-          <div data-ground="dark" className="overflow-hidden rounded-[0.5rem]">
-            <Network ground={FOREST} network={page.network} />
+        {page.featured && (
+          <div className="px-5 pt-20 pb-20 sm:px-8 lg:px-12 lg:pt-28 lg:pb-28">
+            <FeaturedProject project={page.featured} />
           </div>
-        </div>
+        )}
       </main>
       {/* The close sits over the footer, not inside the page, so its rounded
           corners open onto the footer beneath it. */}

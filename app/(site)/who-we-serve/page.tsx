@@ -2,14 +2,14 @@ import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { getServicesPage, getWhoWeServePage } from "@/sanity/content";
+import { getWhoWeServePage } from "@/sanity/content";
 import { ChatLauncher } from "../_components/ChatLauncher";
 import { ContactBand } from "../_components/ContactBand";
 import { PageCover } from "../_components/PageCover";
+import { FeaturedProject } from "../_components/ProjectCard";
 import { MONO, SectionHead } from "../_components/SectionHead";
 import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
-import { Network } from "../services/_components/Network";
 import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -25,23 +25,17 @@ const AUDIENCE_STYLE: CSSProperties = {
   lineHeight: 1.1,
 };
 
-/** The ground of the network plate: the one /services closes on. */
-const FOREST = "#132a28";
-
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
  * `/who-we-serve` — who is on the other side of the table.
  *
  * The cover says the needs differ and the start does not; the band under it
- * names the six kinds of client and what the work is for each. The network
- * closes the page: the people in the room, whoever hired them.
+ * names the six kinds of client and what the work is for each. A project
+ * closes the page.
  */
 export default async function WhoWeServe() {
-  const [whoWeServePage, servicesPage] = await Promise.all([
-    getWhoWeServePage(),
-    getServicesPage(),
-  ]);
+  const whoWeServePage = await getWhoWeServePage();
   const { audiences } = whoWeServePage;
 
   return (
@@ -108,14 +102,11 @@ export default async function WhoWeServe() {
           </ol>
         </section>
 
-        <div className="px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
-          <div
-            data-ground="dark"
-            className="overflow-hidden rounded-[0.5rem]"
-          >
-            <Network ground={FOREST} network={servicesPage.method.network} />
+        {whoWeServePage.featured && (
+          <div className="px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
+            <FeaturedProject project={whoWeServePage.featured} />
           </div>
-        </div>
+        )}
       </main>
       {/* The close sits over the footer, not inside the page, so its rounded
           corners open onto the footer beneath it. */}

@@ -1,13 +1,15 @@
 /**
  * The share cards: what a link to the site shows on LinkedIn, X, Slack or in
- * a message. Every route's opengraph-image renders one of three, all 1200 ×
- * 630:
+ * a message. Every route's opengraph-image returns one of two, 1200 × 630:
  *
- *   - the page's own social image, set in its SEO fields, as it was made;
- *   - its picture (an insight's cover, a project's plate), full bleed, with
- *     the page's name over a darkened foot;
+ *   - the page's own picture, as it is: an editor's social image, a
+ *     project's featured image, an insight's cover. Sanity's image CDN crops
+ *     it around its hotspot and sends it as a JPEG, passed on unchanged, so a
+ *     photograph stays small enough for every app (WhatsApp drops previews
+ *     over about 300 KB, which a redrawn PNG of a photograph easily is);
  *   - the brand card, public/og.png, with the page's name set in the open
- *     band between the mark and the line at its foot.
+ *     band between the mark and the line at its foot, for a page with no
+ *     picture of its own.
  *
  * Fonts and the card are read from disk; next.config.ts traces them into
  * the image routes so they are there when a card renders on demand.
@@ -23,11 +25,9 @@ export interface ShareCard {
   /** Small, over the title: the section, e.g. "Insights / Engineering". */
   readonly label: string;
   readonly title: string;
-  /** Under the title, on a picture card only: a project's tagline. */
-  readonly subtitle?: string | null;
-  /** The page's picture, cropped to 1200 × 630. */
+  /** The page's picture, cropped to 1200 × 630: its featured image or cover. */
   readonly image?: string | null;
-  /** The social image an editor set, used as it is. */
+  /** The social image an editor set, which comes before the picture. */
   readonly custom?: string | null;
 }
 
@@ -63,7 +63,33 @@ const LABEL = {
   textTransform: "uppercase",
 } as const;
 
-export async function shareImage(card: ShareCard | null): Promise<ImageResponse> {
+/**
+ * A picture from Sanity's CDN, already cropped and encoded. Cached: its
+ * address names the asset and the crop, so a new picture is a new address.
+ */
+async function picture(url: string): Promise<{ data: string; type: string } | null> {
+  "use cache";
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  return {
+    data: Buffer.from(await res.arrayBuffer()).toString("base64"),
+    type: res.headers.get("content-type") ?? "image/jpeg",
+  };
+}
+
+export async function shareImage(card: ShareCard | null): Promise<Response> {
+  /* The page's own picture, as it is. */
+  const source = card?.custom ?? card?.image;
+  const photo = source ? await picture(source) : null;
+  if (photo) {
+    return new Response(Buffer.from(photo.data, "base64"), {
+      headers: {
+        "Content-Type": photo.type,
+        "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+      },
+    });
+  }
+
   const [dmSans, arial, cardPng] = await assets;
   const options = {
     ...OG_SIZE,
@@ -72,76 +98,7 @@ export async function shareImage(card: ShareCard | null): Promise<ImageResponse>
       { name: "Arial", data: arial, weight: 400 as const, style: "normal" as const },
     ],
   };
-
-  /* The editor's own image, untouched. */
-  if (card?.custom) {
-    return new ImageResponse(
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={card.custom} width={OG_SIZE.width} height={OG_SIZE.height} alt="" />,
-      options,
-    );
-  }
-
   const title = card ? fit(card.title) : "";
-
-  /* The page's picture, its name set over a darkened foot. */
-  if (card?.image) {
-    return new ImageResponse(
-      (
-        <div style={{ display: "flex", position: "relative", width: "100%", height: "100%", background: "#000" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={card.image}
-            width={OG_SIZE.width}
-            height={OG_SIZE.height}
-            alt=""
-            style={{ ...FILL, objectFit: "cover" }}
-          />
-          <div
-            style={{
-              ...FILL,
-              display: "flex",
-              backgroundImage:
-                "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.82) 100%)",
-            }}
-          />
-          <div
-            style={{
-              ...FILL,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              padding: `56px ${EDGE}px 60px`,
-              color: "#fff",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", ...LABEL }}>
-              <span>Ghost Savvy Studios</span>
-              <span>{card.label}</span>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", maxWidth: MEASURE }}>
-              <div
-                style={{
-                  fontFamily: "DM Sans",
-                  fontSize: titleSize(title),
-                  lineHeight: 1.04,
-                  letterSpacing: "-0.035em",
-                }}
-              >
-                {title}
-              </div>
-              {card.subtitle && (
-                <div style={{ ...LABEL, marginTop: 22, opacity: 0.8, textTransform: "none", fontSize: 24 }}>
-                  {fit(card.subtitle, 90)}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ),
-      options,
-    );
-  }
 
   /* The brand card, with the page's name in its open band. */
   return new ImageResponse(

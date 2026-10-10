@@ -33,8 +33,8 @@ const CLOSE_STYLE: CSSProperties = {
 /**
  * `/work` — the studio's record, as an index.
  *
- * The cover states the claim, the filter sits on a rule under it, and the
- * work follows: one piece across the page, then the rest two up. The close
+ * The cover states the claim, the filter sits under it, and the work
+ * follows: one piece across the page, then the rest two up, staggered. The close
  * hands the reader to the process, because the question a good index leaves
  * is how the work got made. The contact band and the footer are the site's,
  * unchanged, so the page ends the way every other page does.
@@ -77,7 +77,7 @@ export default async function Work() {
 
         <section
           aria-labelledby="work-close-heading"
-          className="border-t border-edge-subtle px-5 pt-20 pb-28 sm:px-8 lg:px-12 lg:pt-28 lg:pb-40"
+          className="px-5 pb-28 sm:px-8 lg:px-12 lg:pb-40"
         >
           <p className="font-label text-[0.6875rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
             {workPage.close.eyebrow}

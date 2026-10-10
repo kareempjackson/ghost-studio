@@ -1,10 +1,12 @@
 /**
- * The two things the studio publishes more of over time: projects and
- * insights. Each has a page of its own, at /work/[slug] and /insights/[slug].
+ * The things the studio publishes more of over time: projects, insights and
+ * the Ghost family's stories. Each has a page of its own, at /work/[slug],
+ * /insights/[slug] and /[family]/[slug].
  */
 
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { colour, lines, num, object, para, paras, phrase, picture, plain, text } from "../fields";
+import { families } from "../../../lib/links";
+import { action, colour, lines, num, object, para, paras, phrase, picture, plain, text } from "../fields";
 
 export const disciplines = ["Brand", "Digital", "Systems"] as const;
 
@@ -66,6 +68,49 @@ const body = defineField({
 
 const plate = (name: string, o: { title?: string; description?: string; group?: string } = {}) =>
   defineField({ name, type: "media", ...o });
+
+/**
+ * A story told part by part: a project's case study, and a Ghost family
+ * story. Each part is its words and then its pictures, and a stop on the bar
+ * that runs along the page.
+ */
+const chapters = defineField({
+  name: "chapters",
+  type: "array",
+  description: "The story, part by part. Each one is a stop on the bar that runs along the page.",
+  of: [
+    defineArrayMember({
+      type: "object",
+      name: "chapter",
+      fields: [
+        text("label", { description: "The stop on the bar, and the label beside the heading." }),
+        phrase("heading"),
+        paras("body"),
+        text("listHeading", { required: false, description: "Over the list. What We Did if empty." }),
+        defineField({
+          name: "items",
+          type: "array",
+          description: "What we did, one per line. A lead is set in bold before the line.",
+          of: [
+            defineArrayMember({
+              type: "object",
+              fields: [text("lead", { required: false }), phrase("text")],
+              preview: { select: { title: "text", subtitle: "lead" } },
+            }),
+          ],
+        }),
+        defineField({
+          name: "media",
+          type: "array",
+          title: "Plates",
+          description: "Set after the text, before the next part.",
+          of: [defineArrayMember({ type: "mediaRow" })],
+        }),
+      ],
+      preview: { select: { title: "label", subtitle: "heading" } },
+    }),
+  ],
+});
 
 export const project = defineType({
   name: "project",
@@ -144,44 +189,7 @@ export const project = defineType({
       description: "The client's live site, for Visit site.",
     }),
     plate("feature", { group: "story", description: "The plate between the opening and the chapters." }),
-    defineField({
-      name: "chapters",
-      type: "array",
-      group: "story",
-      description: "The story, part by part. Each one is a stop on the bar that runs along the page.",
-      of: [
-        defineArrayMember({
-          type: "object",
-          name: "chapter",
-          fields: [
-            text("label", { description: "The stop on the bar, and the label beside the heading." }),
-            phrase("heading"),
-            paras("body"),
-            text("listHeading", { required: false, description: "Over the list. What We Did if empty." }),
-            defineField({
-              name: "items",
-              type: "array",
-              description: "What we did, one per line. A lead is set in bold before the line.",
-              of: [
-                defineArrayMember({
-                  type: "object",
-                  fields: [text("lead", { required: false }), phrase("text")],
-                  preview: { select: { title: "text", subtitle: "lead" } },
-                }),
-              ],
-            }),
-            defineField({
-              name: "media",
-              type: "array",
-              title: "Plates",
-              description: "Set after the text, before the next part.",
-              of: [defineArrayMember({ type: "mediaRow" })],
-            }),
-          ],
-          preview: { select: { title: "label", subtitle: "heading" } },
-        }),
-      ],
-    }),
+    { ...chapters, group: "story" },
     object(
       "testimonial",
       [
@@ -211,6 +219,193 @@ export const project = defineType({
     }),
   ],
   preview: { select: { title: "name", subtitle: "scope", media: "image" } },
+});
+
+/**
+ * One story from the Ghost family: an experiment from Ghost Labs, a cohort
+ * of Ghost U, a project Ghost Gives gave away. Its card sits in the archive
+ * on its family's page, and its own page at /[family]/[slug] tells it the
+ * way a case study tells a project: the record and the claim, then part by
+ * part, then what changed and who it changed it for.
+ *
+ * Every part of the page is optional, as a project's are: a story reads as
+ * far as it is written.
+ */
+export const familyStory = defineType({
+  name: "familyStory",
+  title: "Story",
+  type: "document",
+  groups: [
+    { name: "card", title: "Card", default: true },
+    { name: "story", title: "Story" },
+  ],
+  fields: [
+    defineField({
+      name: "family",
+      type: "string",
+      group: "card",
+      description: "Whose story it is: the archive it shows in, and where its page lives.",
+      options: {
+        list: families.map(({ slug, title }) => ({ title, value: slug })),
+        layout: "radio",
+        direction: "horizontal",
+      },
+      validation: (r) => r.required(),
+    }),
+    text("title", { description: "What it is called, e.g. Low Signal.", group: "card" }),
+    { ...slug("title"), group: "card" },
+    defineField({
+      name: "date",
+      type: "date",
+      group: "card",
+      description: "When it happened. Newest first in the archive; numbered oldest first, so the first story is 01.",
+      validation: (r) => r.required(),
+    }),
+    para("summary", { description: "One or two sentences: the line under its name in the archive.", group: "card" }),
+    colour("ground", { description: "The card's colour in the archive, and behind its picture.", group: "card" }),
+    picture("image", { description: "The card's picture or film. Its colour if empty.", group: "card" }),
+    plain("description", { required: false, description: "For search results. The summary is used if empty.", group: "card" }),
+
+    /* The story, at /[family]/[slug]. */
+    plate("hero", { group: "story", description: "The plate at the top of the page." }),
+    defineField({
+      name: "notes",
+      type: "array",
+      group: "story",
+      description: "Up to two notes stuck to the top plate, the way the family page pins them round its claim.",
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [text("text", { description: "Two or three words." }), colour()],
+          preview: { select: { title: "text", subtitle: "ground" } },
+        }),
+      ],
+      validation: (r) => r.max(2),
+    }),
+    phrase("headline", {
+      required: false,
+      description: "The page's heading: what happened, in a sentence. The summary is used if empty.",
+      group: "story",
+    }),
+    defineField({
+      name: "facts",
+      type: "array",
+      group: "story",
+      description: "The record beside the headline, e.g. Partner, When, Who, Status.",
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [text("label"), phrase("value")],
+          preview: { select: { title: "label", subtitle: "value" } },
+        }),
+      ],
+    }),
+    defineField({
+      name: "tags",
+      type: "array",
+      group: "story",
+      description: "The pills under the headline.",
+      of: [defineArrayMember({ type: "string" })],
+    }),
+    paras("overview", { group: "story", description: "The opening. After the first few lines it folds behind Read more." }),
+    action("link", {
+      required: false,
+      group: "story",
+      description: "Optional. A way out to the thing itself: the prototype, the partner's site, the showcase.",
+    }),
+    plate("feature", { group: "story", description: "The plate between the opening and the chapters." }),
+    { ...chapters, group: "story" },
+    object(
+      "outcome",
+      [
+        text("label", { required: false, description: "Beside the figures. What changed if empty." }),
+        phrase("heading", { required: false, description: "Over the figures. The label is used if empty." }),
+        defineField({
+          name: "items",
+          type: "array",
+          description: "Two or four read best.",
+          of: [
+            defineArrayMember({
+              type: "object",
+              fields: [
+                text("value", { description: "The figure, set large, e.g. 212 or 3 weeks." }),
+                text("label", { description: "What it counts, in a line." }),
+              ],
+              preview: { select: { title: "value", subtitle: "label" } },
+            }),
+          ],
+        }),
+      ],
+      {
+        group: "story",
+        title: "What changed",
+        description: "The result, in figures, after the chapters. Shows once it has one.",
+      },
+    ),
+    object(
+      "voice",
+      [
+        phrase("quote", {
+          required: false,
+          description: "Their words, as they said them. The section shows once this and the name are in.",
+        }),
+        text("name", { required: false, description: "As they sign it." }),
+        text("role", { required: false, description: "e.g. Founder and head coach." }),
+        text("company", { required: false, description: "Where they are from, e.g. the partner's name." }),
+        picture("portrait", {
+          required: false,
+          video: false,
+          description: "Shown in a circle beside the name: set the hotspot on the face. Their initials if empty.",
+        }),
+      ],
+      {
+        group: "story",
+        title: "In their words",
+        description: "What a partner, a participant or a tester said about it.",
+      },
+    ),
+    defineField({
+      name: "more",
+      type: "array",
+      group: "story",
+      title: "More stories",
+      description: "The two stories at the foot, from the same family. The next two in its archive if empty.",
+      of: [
+        defineArrayMember({
+          type: "reference",
+          to: [{ type: "familyStory" }],
+          options: {
+            /* Only this family's other stories. */
+            filter: ({ document }) => ({
+              filter: "family == $family && !(_id in [$id, 'drafts.' + $id])",
+              params: {
+                family: (document as { family?: string }).family ?? "",
+                id: document._id.replace(/^drafts\./, ""),
+              },
+            }),
+          },
+        }),
+      ],
+      validation: (r) => r.max(2),
+    }),
+  ],
+  orderings: [
+    {
+      title: "Newest first",
+      name: "dateDesc",
+      by: [{ field: "date", direction: "desc" }],
+    },
+  ],
+  preview: {
+    select: { title: "title", family: "family", date: "date", media: "image" },
+    prepare: ({ title, family, date, media }) => ({
+      title,
+      subtitle: [families.find((f) => f.slug === family)?.title, date?.slice(0, 4)]
+        .filter(Boolean)
+        .join(" · "),
+      media,
+    }),
+  },
 });
 
 /**

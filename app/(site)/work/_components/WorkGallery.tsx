@@ -52,16 +52,20 @@ function CornerArrow() {
  * sits under it, so the page reads as an index rather than a wall of colour.
  *
  * `featured` gives the first card the full width and a taller plate, which is
- * what makes the page open on one piece of work rather than a grid.
+ * what makes the page open on one piece of work rather than a grid. `side`
+ * sets the plate for its column in the two-up below it: the left column is
+ * the wider one, so its plate is longer, and the two come out the same height.
  */
 function ProjectCard({
   project,
   previewLabel,
   featured = false,
+  side = "left",
 }: {
   project: Project;
   previewLabel: string;
   featured?: boolean;
+  side?: "left" | "right";
 }) {
   /* The project's picture or film fills the plate once there is one; until
      then the plate is its ground, with the name and a note that the
@@ -72,7 +76,11 @@ function ProjectCard({
       <div
         style={media && project.fit !== "contain" ? undefined : { backgroundColor: project.ground }}
         className={`relative flex flex-col justify-between overflow-hidden rounded-[0.75rem] p-5 text-ink-950 sm:p-6 ${
-          featured ? "aspect-[16/10] lg:aspect-[21/9]" : "aspect-[4/3]"
+          featured
+            ? "aspect-[16/10] lg:aspect-[21/9]"
+            : side === "left"
+              ? "aspect-[4/3] md:aspect-[3/2]"
+              : "aspect-[4/3] md:aspect-[5/4]"
         }`}
       >
         {media && (
@@ -80,7 +88,7 @@ function ProjectCard({
             src={project.image}
             video={project.imageVideo}
             alt={project.imageAlt}
-            sizes={featured ? "100vw" : "(min-width: 768px) 50vw, 100vw"}
+            sizes={featured ? "100vw" : "(min-width: 768px) 55vw, 100vw"}
             priority={featured}
             className={`${project.fit === "contain" ? "object-contain" : "object-cover"} transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]`}
           />
@@ -166,7 +174,7 @@ export function WorkGallery({
         {all}
       </h2>
 
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-5 border-t border-edge-subtle pt-8 lg:pt-10">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-5">
         <div
           role="group"
           aria-label="Filter the work by discipline"
@@ -222,13 +230,19 @@ export function WorkGallery({
               </motion.div>
             </AnimatePresence>
 
+            {/* Two up, the left column wider and the right one dropped, so
+                the plates step down the page rather than square up into a
+                grid. Position-only layout animation: a card that changes
+                column on a filter changes shape too, and scaling it there
+                would stretch its picture. */}
             {rest.length > 0 && (
-              <ul className="mt-16 grid gap-x-6 gap-y-16 md:grid-cols-2 lg:mt-24">
+              <ul className="mt-16 grid gap-y-16 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:gap-x-10 md:gap-y-20 lg:mt-24 lg:gap-x-20">
                 <AnimatePresence mode="popLayout" initial={false}>
                   {rest.map((project, index) => (
                     <motion.li
                       key={project.slug}
-                      layout
+                      layout="position"
+                      className={index % 2 ? "md:mt-16 lg:mt-24" : undefined}
                       initial={{ opacity: 0, y: 32 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -16 }}
@@ -238,7 +252,11 @@ export function WorkGallery({
                         delay: index * 0.06,
                       }}
                     >
-                      <ProjectCard project={project} previewLabel={previewLabel} />
+                      <ProjectCard
+                        project={project}
+                        previewLabel={previewLabel}
+                        side={index % 2 ? "right" : "left"}
+                      />
                     </motion.li>
                   ))}
                 </AnimatePresence>

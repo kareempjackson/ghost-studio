@@ -3,16 +3,23 @@
  * to R2: the Studio asks /api/r2/upload for a signed URL, PUTs the file
  * straight to the bucket, and stores what it was and where it plays from.
  *
+ * A film already in the bucket is picked from the library instead
+ * (R2FilmLibrary.tsx). Uploading one that is already there, by name and
+ * size, skips the upload and uses that copy.
+ *
  * Removing a film only clears the field. The object stays in the bucket,
  * since an earlier revision of the document may still point at it.
  */
 
+import { FolderIcon } from "@sanity/icons/Folder";
 import { TrashIcon } from "@sanity/icons/Trash";
 import { UploadIcon } from "@sanity/icons/Upload";
 import { Button, Card, Flex, Stack, Text } from "@sanity/ui";
 import { useCallback, useRef, useState, type DragEvent } from "react";
 import { set, unset, useClient, type ObjectInputProps } from "sanity";
+import type { R2Video } from "../../lib/r2";
 import { apiVersion } from "../env";
+import { callR2, megabytes, R2FilmLibrary } from "./R2FilmLibrary";
 
 const ACCEPT = "video/mp4";
 
@@ -26,6 +33,9 @@ type R2VideoValue = {
 };
 
 type Ticket = { key: string; url: string; uploadUrl: string; headers: Record<string, string> };
+
+/** The same file is already in the bucket: use that copy instead. */
+type Existing = { existing: R2Video };
 
 /** fetch cannot report upload progress, so the PUT goes by XHR. */
 function putFile(ticket: Ticket, file: File, onProgress: (fraction: number) => void) {
@@ -41,16 +51,17 @@ function putFile(ticket: Ticket, file: File, onProgress: (fraction: number) => v
   });
 }
 
-const megabytes = (bytes = 0) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-
 export function R2VideoInput({ value, onChange, readOnly }: ObjectInputProps<R2VideoValue>) {
   const client = useClient({ apiVersion });
   const picker = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [browsing, setBrowsing] = useState(false);
 
   const upload = useCallback(
     async (file: File) => {
+      setNotice(null);
       if (file.type !== ACCEPT) {
         setError("Films must be MP4.");
         return;
@@ -58,15 +69,14 @@ export function R2VideoInput({ value, onChange, readOnly }: ObjectInputProps<R2V
       setError(null);
       setProgress(0);
       try {
-        const token = client.config().token;
-        if (!token) throw new Error("No Studio session token. Sign out and in again.");
-        const res = await fetch("/api/r2/upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ filename: file.name, contentType: file.type, size: file.size }),
+        const ticket = await callR2<Ticket | Existing>(client, "/api/r2/upload", {
+          body: { filename: file.name, contentType: file.type, size: file.size },
         });
-        if (!res.ok) throw new Error(await res.text());
-        const ticket = (await res.json()) as Ticket;
+        if ("existing" in ticket) {
+          onChange(set(ticket.existing));
+          setNotice(`${file.name} is already in the library, so this uses that copy.`);
+          return;
+        }
         await putFile(ticket, file, setProgress);
         onChange(
           set({
@@ -91,6 +101,13 @@ export function R2VideoInput({ value, onChange, readOnly }: ObjectInputProps<R2V
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file && !readOnly) void upload(file);
+  };
+
+  const pick = (video: R2Video) => {
+    setBrowsing(false);
+    setError(null);
+    setNotice(null);
+    onChange(set(video));
   };
 
   const busy = progress !== null;
@@ -130,7 +147,7 @@ export function R2VideoInput({ value, onChange, readOnly }: ObjectInputProps<R2V
           />
         ) : (
           <Text align="center" muted size={1}>
-            {busy ? `Uploading… ${Math.round(progress * 100)}%` : "Drop an MP4 here, or choose one."}
+            {busy ? `Uploading… ${Math.round(progress * 100)}%` : "Drop an MP4 here, or choose one from the library."}
           </Text>
         )}
       </Card>
@@ -142,13 +159,19 @@ export function R2VideoInput({ value, onChange, readOnly }: ObjectInputProps<R2V
         </Text>
       )}
 
+      {notice && (
+        <Text muted size={1}>
+          {notice}
+        </Text>
+      )}
+
       {error && (
         <Text size={1} style={{ color: "var(--card-badge-critical-fg-color, #c00)" }}>
           {error}
         </Text>
       )}
 
-      <Flex gap={2}>
+      <Flex gap={2} wrap="wrap">
         <Button
           icon={UploadIcon}
           mode="ghost"
@@ -156,6 +179,13 @@ export function R2VideoInput({ value, onChange, readOnly }: ObjectInputProps<R2V
           disabled={readOnly || busy}
           loading={busy}
           onClick={() => picker.current?.click()}
+        />
+        <Button
+          icon={FolderIcon}
+          mode="ghost"
+          text="Choose from library"
+          disabled={readOnly || busy}
+          onClick={() => setBrowsing(true)}
         />
         {value?.url && (
           <Button
@@ -168,6 +198,10 @@ export function R2VideoInput({ value, onChange, readOnly }: ObjectInputProps<R2V
           />
         )}
       </Flex>
+
+      {browsing && (
+        <R2FilmLibrary currentKey={value?.key} onPick={pick} onClose={() => setBrowsing(false)} />
+      )}
     </Stack>
   );
 }

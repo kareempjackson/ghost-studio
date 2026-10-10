@@ -39,6 +39,14 @@ export default defineConfig({
           topic: { _type: "reference", _ref: topicId },
         }),
       },
+      /* A story started from a family's list, already filed under it. */
+      {
+        id: "story-in-family",
+        title: "Story in this family",
+        schemaType: "familyStory",
+        parameters: [{ name: "family", type: "string" }],
+        value: ({ family }: { family: string }) => ({ family }),
+      },
     ],
   },
   document: {

@@ -152,7 +152,7 @@ export function Overview({
             </button>
           )}
           {website && (
-            <ArrowPill href={website} external>
+            <ArrowPill href={website} external={/^https?:\/\//.test(website)}>
               {visit}
             </ArrowPill>
           )}

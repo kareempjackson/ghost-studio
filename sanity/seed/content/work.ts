@@ -213,7 +213,7 @@ export const workPage = {
   close: {
     eyebrow: "The thread through our work",
     heading: ["We start with what", "needs to change."],
-    action: { label: "See how we work", href: "/#process" },
+    action: { label: "See how we work", href: "/our-approach" },
   },
 } as const;
 
