@@ -1,9 +1,9 @@
 "use client";
 
-import { stegaClean } from "next-sanity";
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, useTransition, type FormEvent } from "react";
 import type { ContactPage } from "@/sanity/types";
 import { Rich } from "../../_components/Rich";
+import { sendEnquiry } from "../actions";
 
 /**
  * No rule around a field: the white fill is what says where to type, and on
@@ -17,59 +17,23 @@ const LABEL = "block text-[0.875rem] leading-none text-ink-950";
 const OPTIONAL = "mt-1.5 block text-[0.8125rem] leading-none text-ink-500";
 
 /**
- * The letter, as the visitor would have written it themselves.
- *
- * Empty lines are dropped rather than sent as blank headings: a draft that
- * opens with three unanswered labels reads as a form, and the point of
- * handing it over as mail is that it reads as a letter.
- */
-function draft(email: string, state: {
-  name: string;
-  from: string;
-  company: string;
-  help: readonly string[];
-  brief: string;
-  budget: string;
-  timing: string;
-}) {
-  const lines: string[] = [];
-  if (state.brief) lines.push(state.brief, "");
-  /* The options are the document's own strings: in Draft Mode they carry
-     invisible edit markers, which have no business in someone's mail. */
-  if (state.help.length) {
-    lines.push(`Help with: ${state.help.map((one) => stegaClean(one)).join(", ")}`);
-  }
-  if (state.budget) lines.push(`Budget: ${stegaClean(state.budget)}`);
-  if (state.timing) lines.push(`Timing: ${state.timing}`);
-  if (state.company) lines.push(`Company: ${state.company}`);
-  if (state.name || state.from) {
-    lines.push("", [state.name, state.from].filter(Boolean).join(" — "));
-  }
-
-  const subject = state.name ? `A project — ${state.name}` : "A project";
-  return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
-    lines.join("\n"),
-  )}`;
-}
-
-/**
  * The form on `/contact`.
  *
- * It composes what was typed into a draft and hands it to the visitor's own
- * mail app; nothing is posted, and the note under the button says so. When an
- * inbox is connected, `onSubmit` is the one thing that changes — every field
- * here is already named for the record it would post.
+ * It sends the message to the studio: the server action stores it in Sanity
+ * as an enquiry and emails the sender a confirmation (see ../actions.ts).
+ * Sent, the fields give way to a line saying where the confirmation went;
+ * if it could not be sent, what was typed stays, with the studio's address
+ * to write to instead.
  *
- * The draft is opened by setting `location.href` rather than by making the
- * button a link, because the link's `href` would otherwise be stale by
- * exactly one keystroke.
+ * Two quiet guards against bots, both invisible to people: a field only a
+ * script would fill, and the time since the form was shown.
  */
 export function ContactForm({
   form,
   email,
 }: {
   form: ContactPage["form"];
-  /** Where the draft is addressed: the studio's own inbox. */
+  /** The studio's own inbox: the way in if the form cannot send. */
   email: string;
 }) {
   const id = useId();
@@ -80,7 +44,23 @@ export function ContactForm({
   const [brief, setBrief] = useState("");
   const [budget, setBudget] = useState("");
   const [timing, setTiming] = useState("");
-  const [handed, setHanded] = useState(false);
+  const [website, setWebsite] = useState("");
+  const [status, setStatus] = useState<"idle" | "sent" | "failed">("idle");
+  const [sentTo, setSentTo] = useState("");
+  const [sending, startSending] = useTransition();
+  const startedAt = useRef(0);
+  const confirmation = useRef<HTMLParagraphElement>(null);
+
+  /* Set on the client, after the form is shown, not when it was rendered. */
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
+
+  /* Sent, the confirmation takes the fields' place: put focus on it so a
+     screen reader starts there, rather than on a control that has gone. */
+  useEffect(() => {
+    if (status === "sent") confirmation.current?.focus();
+  }, [status]);
 
   const toggle = (option: string) =>
     setHelp((current) =>
@@ -91,23 +71,45 @@ export function ContactForm({
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
-    window.location.href = draft(email, {
-      name,
-      from,
-      company,
-      help,
-      brief,
-      budget,
-      timing,
+    if (sending) return;
+    startSending(async () => {
+      const result = await sendEnquiry({
+        name,
+        email: from,
+        company,
+        help,
+        brief,
+        budget,
+        timing,
+        website,
+        startedAt: startedAt.current,
+      }).catch(() => ({ ok: false as const }));
+      if (!result.ok) {
+        setStatus("failed");
+        return;
+      }
+      setSentTo(from);
+      setStatus("sent");
+      setName("");
+      setFrom("");
+      setCompany("");
+      setHelp([]);
+      setBrief("");
+      setBudget("");
+      setTiming("");
     });
-    setHanded(true);
+  }
+
+  function another() {
+    startedAt.current = Date.now();
+    setStatus("idle");
   }
 
   return (
     <form
       onSubmit={onSubmit}
       aria-labelledby={`${id}-heading`}
-      className="rounded-[1rem] bg-surface-subtle p-6 sm:p-8 lg:p-10"
+      className="relative rounded-[1rem] bg-surface-subtle p-6 sm:p-8 lg:p-10"
     >
       <p className="font-label text-[0.6875rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
         {form.label}
@@ -118,6 +120,40 @@ export function ContactForm({
       >
         {form.heading}
       </h2>
+
+      {status === "sent" ? (
+        <div className="mt-8">
+          <p
+            ref={confirmation}
+            tabIndex={-1}
+            className="max-w-[30rem] text-[1.0625rem] leading-[1.5] tracking-[-0.01em] text-ink-950 outline-none"
+          >
+            {(form.sent ?? "").replace("{email}", sentTo)}
+          </p>
+          <button
+            type="button"
+            onClick={another}
+            className="mt-6 text-[0.875rem] text-ink-600 underline underline-offset-4 transition-colors duration-200 hover:text-ink-950"
+          >
+            {form.another}
+          </button>
+        </div>
+      ) : (
+      <>
+      {/* Only a bot fills this: it is off the page, out of the tab order and
+          hidden from assistive tech. */}
+      <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
+        <label htmlFor={`${id}-website`}>Website</label>
+        <input
+          id={`${id}-website`}
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={website}
+          onChange={(event) => setWebsite(event.target.value)}
+        />
+      </div>
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         <div>
@@ -249,10 +285,12 @@ export function ContactForm({
           site, but it submits rather than navigates. */}
       <button
         type="submit"
-        className="gs-pill gs-pill-signal group relative mt-8 inline-flex h-11 items-center rounded-pill font-label text-[0.8125rem] leading-none tracking-[0.08em] uppercase transition-colors duration-300"
+        disabled={sending}
+        aria-disabled={sending}
+        className="gs-pill gs-pill-signal group relative mt-8 inline-flex h-11 items-center rounded-pill font-label text-[0.8125rem] leading-none tracking-[0.08em] uppercase transition-[colors,opacity] duration-300 disabled:cursor-progress disabled:opacity-70"
       >
         <span className="block pr-12 pl-5 transition-[padding] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:pr-5 group-hover:pl-12">
-          {form.action}
+          {sending ? form.sending || form.action : form.action}
         </span>
         <span
           aria-hidden
@@ -272,11 +310,18 @@ export function ContactForm({
         </span>
       </button>
 
+      </>
+      )}
+
       <div
         aria-live="polite"
-        className="mt-6 text-[0.8125rem] leading-[1.5] text-ink-500"
+        className={`mt-6 text-[0.8125rem] leading-[1.5] ${status === "failed" ? "text-ink-950" : "text-ink-500"}`}
       >
-        {handed ? `${form.handed} ${form.again}` : <Rich value={form.note} />}
+        {status === "failed" ? (
+          <p>{(form.failed ?? "").replace("{email}", email)}</p>
+        ) : status === "idle" ? (
+          <Rich value={form.note} />
+        ) : null}
       </div>
     </form>
   );

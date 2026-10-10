@@ -517,8 +517,12 @@ export interface ContactPage extends Seo {
     readonly timing: FormField;
     readonly action: string;
     readonly note: Rich;
-    readonly handed: string;
-    readonly again: string;
+    readonly sending: string;
+    /** {email}: the sender's address. */
+    readonly sent: string;
+    readonly another: string;
+    /** {email}: the studio's address. */
+    readonly failed: string;
   };
 }
 
@@ -647,6 +651,8 @@ export interface LegalSection {
 
 export interface LegalDocument extends Seo {
   readonly slug: string;
+  readonly eyebrow: string;
+  readonly updatedLabel: string;
   readonly updated: string;
   readonly intro: Rich;
   readonly contentsLabel: string;
@@ -715,4 +721,20 @@ export interface AudiencePage extends Seo {
   readonly outputs: { readonly label: string; readonly heading: Lines; readonly items: Lines } | null;
   /** The project the page closes on; null only with no project to show. */
   readonly featured: Project | null;
+}
+
+/** What the contact form's server action needs: the email copy and the labels. */
+export interface EnquiryCopy {
+  readonly studioEmail: string;
+  readonly siteName: string;
+  readonly form: Pick<ContactPage["form"], "name" | "email" | "company" | "help" | "brief" | "budget" | "timing">;
+  readonly acknowledgement: {
+    readonly subject: string;
+    /** {name}: the sender's first name. */
+    readonly greeting: string;
+    /** Paragraphs separated by a blank line. */
+    readonly body: string;
+    readonly recapLabel: string;
+    readonly signoff: Lines;
+  };
 }

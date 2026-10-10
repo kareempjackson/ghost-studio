@@ -33,8 +33,7 @@ export function legalMetadata(doc: LegalDocument): Promise<Metadata> {
  * contents list held beside them on wide screens.
  *
  * Every section has an anchor, so a clause can be linked to directly, and
- * the contents list is those links. It says it is placeholder content, under
- * the eyebrow, until counsel has written the real thing.
+ * the contents list is those links.
  */
 export function LegalPage({ data: doc }: { data: LegalDocument }) {
   return (
@@ -42,19 +41,12 @@ export function LegalPage({ data: doc }: { data: LegalDocument }) {
       <SiteHeader />
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">
         <header className="px-5 pt-[calc(var(--gs-header-h)+4rem)] pb-14 sm:px-8 lg:px-12 lg:pt-[calc(var(--gs-header-h)+6rem)] lg:pb-20">
-          <div className="gs-reveal flex flex-wrap items-center gap-3">
-            <p className={`${MONO} text-ink-950`}>Legal</p>
-            <span
-              className={`${MONO} rounded-pill border border-dashed border-ink-400 px-2.5 py-1.5 text-[0.625rem] text-ink-500`}
-            >
-              Placeholder · not legal advice
-            </span>
-          </div>
+          <p className={`${MONO} gs-reveal text-ink-950`}>{doc.eyebrow}</p>
           <h1 className="mt-8 text-ink-950 lg:mt-10" style={HEADING_STYLE}>
             {doc.title}
           </h1>
           <p className={`${MONO} gs-reveal mt-8 text-ink-500 [--reveal:2]`}>
-            Last updated · {doc.updated}
+            {doc.updatedLabel} · {doc.updated}
           </p>
         </header>
 

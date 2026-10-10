@@ -371,7 +371,12 @@ async function documents() {
   }
 
   for (const document of Object.values(legalDocuments)) {
-    add(`legalPage-${document.slug}`, "legalPage", { ...document, contentsLabel: "Contents" });
+    add(`legalPage-${document.slug}`, "legalPage", {
+      ...document,
+      eyebrow: "Legal",
+      updatedLabel: "Last updated",
+      contentsLabel: "Contents",
+    });
   }
 
   for (const { slug, ...phase } of approachPhases) {

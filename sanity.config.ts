@@ -27,7 +27,8 @@ export default defineConfig({
     /* No "new" button for a page that exists once, or once per fixed route. */
     templates: (templates) => [
       ...templates.filter(
-        ({ schemaType }) => !singletonTypes.has(schemaType) && !fixedTypes.has(schemaType),
+        ({ schemaType }) =>
+          !singletonTypes.has(schemaType) && !fixedTypes.has(schemaType) && schemaType !== "enquiry",
       ),
       /* An insight started from a topic's list, already filed under it. */
       {
@@ -52,7 +53,10 @@ export default defineConfig({
   document: {
     /* A singleton can be edited and published, never duplicated or deleted. */
     actions: (actions, { schemaType }) =>
-      singletonTypes.has(schemaType) || fixedTypes.has(schemaType)
+      schemaType === "enquiry"
+        ? /* The site writes enquiries: they can be filed and deleted, not copied. */
+          actions.filter(({ action }) => action !== "duplicate")
+        : singletonTypes.has(schemaType) || fixedTypes.has(schemaType)
         ? actions.filter(
             ({ action }) => action && !["duplicate", "delete", "unpublish"].includes(action),
           )

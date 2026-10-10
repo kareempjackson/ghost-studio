@@ -159,6 +159,25 @@ export const project = defineType({
     /* The case study, at /work/[slug]. Every part is optional: what is
        empty is left out, so a project reads as far as it is written. */
     plate("hero", { group: "story", description: "The plate at the top of the page." }),
+    defineField({
+      name: "ogImage",
+      type: "image",
+      title: "Social image",
+      group: "story",
+      description:
+        "The picture on share cards: LinkedIn, X, Slack, iMessage. Cropped to 1200 × 630 around the hotspot. A film can't be a share image, so set one when the header is a film; otherwise the first picture in the case study is used.",
+      options: { hotspot: true },
+      fields: [defineField({ name: "alt", type: "string", title: "Alt text" })],
+      validation: (r) =>
+        r
+          .custom((value: { asset?: unknown } | undefined, context) => {
+            const hero = (context.document as { hero?: { video?: { url?: string } } } | undefined)?.hero;
+            return hero?.video?.url && !value?.asset
+              ? "The header is a film, which a share card can't show. Add a social image to choose the picture links carry."
+              : true;
+          })
+          .warning(),
+    }),
     picture("logo", { description: "The client's mark, set small over the headline.", group: "story", video: false }),
     phrase("headline", { required: false, description: "The page's heading. The tagline is used if empty.", group: "story" }),
     defineField({

@@ -1,4 +1,5 @@
 import { objectTypes } from "./objects";
+import { enquiry } from "./documents/enquiry";
 import { article, familyStory, insightTopic, project } from "./documents/collections";
 import {
   aboutPage,
@@ -28,6 +29,7 @@ import { chat, footer, navigation, siteSettings } from "./documents/site";
 
 export const schemaTypes = [
   ...objectTypes,
+  enquiry,
   siteSettings,
   navigation,
   footer,

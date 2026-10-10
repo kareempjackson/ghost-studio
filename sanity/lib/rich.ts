@@ -21,18 +21,38 @@ export function toPlain(value: Rich | string | null | undefined): string {
 let n = 0;
 const key = () => `r${(n++).toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 
-const block = (text: string) => ({
-  _type: "block",
-  _key: key(),
-  style: "normal",
-  markDefs: [],
-  children: [{ _type: "span", _key: key(), text, marks: [] }],
-});
+/** `[words](href)` is a link and `**words**` bold; everything else, the words. */
+const INLINE = /\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*/g;
+
+function block(text: string) {
+  const markDefs: { _type: "link"; _key: string; href: string }[] = [];
+  const children: { _type: "span"; _key: string; text: string; marks: string[] }[] = [];
+  const span = (words: string, marks: string[] = []) =>
+    words && children.push({ _type: "span", _key: key(), text: words, marks });
+
+  let at = 0;
+  for (const match of text.matchAll(INLINE)) {
+    span(text.slice(at, match.index));
+    if (match[1]) {
+      const link = { _type: "link" as const, _key: key(), href: match[2] };
+      markDefs.push(link);
+      span(match[1], [link._key]);
+    } else {
+      span(match[3], ["strong"]);
+    }
+    at = match.index + match[0].length;
+  }
+  span(text.slice(at));
+  if (!children.length) span(" ");
+
+  return { _type: "block", _key: key(), style: "normal", markDefs, children };
+}
 
 /**
  * One block per paragraph. A list of strings is a run, one paragraph each; a
  * string splits at its blank lines, and its single line breaks stay inside
- * the block, where the site sets them as line breaks.
+ * the block, where the site sets them as line breaks. Links and bold are
+ * written as in Markdown: `[words](href)` and `**words**`.
  */
 export function toBlocks(value: string | readonly string[]) {
   const paragraphs =

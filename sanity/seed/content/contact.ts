@@ -2,9 +2,10 @@
  * Ghost Savvy Studios — `/contact`, and everything it says.
  *
  * The page asks one question and gives two ways to answer it: the address,
- * for anyone who would rather write their own letter, and a form that drafts
- * one for them. Nothing here posts anywhere — see `ContactForm` — so the copy
- * says as much rather than implying an inbox the studio has not built yet.
+ * for anyone who would rather write their own letter, and a form that sends
+ * the message to the studio. A sent message is stored in Sanity as an
+ * enquiry, and the sender gets the confirmation email below: see
+ * app/(site)/contact/actions.ts.
  *
  * PLACEHOLDER: `budgets` are written to the shape the comp shows but the
  * bands themselves are a guess. Confirm before this ships.
@@ -79,11 +80,21 @@ export const contact = {
       ],
     },
     timing: { label: "Timing", placeholder: "e.g. This quarter" },
-    action: "Continue in mail",
-    /** The one thing the form must be honest about. */
-    note: "This prepares a draft in your email app. Nothing is sent or stored by this form.",
-    /** Shown when the draft has been handed to the mail app. */
-    handed: "Your draft is open in your email app.",
-    again: "Change anything above and press the button again.",
+    action: "Send message",
+    /** Under the button: what happens to the message. */
+    note: "A copy of your message goes to your inbox, and someone from the studio will reply personally. Your details are only used to answer you.",
+    sending: "Sending…",
+    sent: "Thank you. Your message is with the studio, and a confirmation is on its way to {email}.",
+    another: "Send another message",
+    failed: "That didn’t send. Please try again, or write to us at {email}.",
+  },
+
+  /** The confirmation email, sent the moment a message arrives. */
+  acknowledgement: {
+    subject: "We’ve got your message",
+    greeting: "Hi {name},",
+    body: "Thank you for writing to Ghost Savvy Studios. Your message has reached the studio, and someone from the team will reply to you personally.\n\nIf there’s anything you’d like to add in the meantime, just reply to this email.",
+    recapLabel: "What you sent",
+    signoff: ["Speak soon,", "Ghost Savvy Studios"],
   },
 } as const;

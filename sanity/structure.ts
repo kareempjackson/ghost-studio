@@ -160,6 +160,19 @@ export const structure: StructureResolver = (S) => {
   return S.list()
     .title("Content")
     .items([
+      /* What came in through /contact, newest first. Listed by an explicit
+         filter: enquiries are stored at private, dotted ids. */
+      S.listItem()
+        .title("Enquiries")
+        .id("enquiries")
+        .child(
+          S.documentList()
+            .title("Enquiries")
+            .schemaType("enquiry")
+            .filter('_type == "enquiry"')
+            .defaultOrdering([{ field: "receivedAt", direction: "desc" }]),
+        ),
+      S.divider(),
       S.documentTypeListItem("project").title("Projects"),
       insights,
       family,

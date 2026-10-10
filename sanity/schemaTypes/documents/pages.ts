@@ -282,10 +282,30 @@ export const contactPage = defineType({
       object("budget", [text("label"), text("placeholder"), lines("options")]),
       formField("timing"),
       text("action"),
-      para("note"),
-      text("handed"),
-      text("again"),
+      para("note", { description: "Under the button: what happens to the message." }),
+      text("sending", { description: "On the button while the message sends." }),
+      text("sent", {
+        description: "Shown once it has arrived. {email} is replaced with the sender's address.",
+      }),
+      text("another", { description: "The way back to an empty form." }),
+      text("failed", {
+        description: "If it could not be sent. {email} is replaced with the studio's address.",
+      }),
     ]),
+    object(
+      "acknowledgement",
+      [
+        text("subject"),
+        text("greeting", { description: "{name} is replaced with the sender's first name." }),
+        plain("body", { description: "The letter. A blank line starts a new paragraph." }),
+        text("recapLabel", { description: "Over the copy of their message." }),
+        lines("signoff"),
+      ],
+      {
+        title: "Confirmation email",
+        description: "Sent to whoever writes in, the moment their message arrives.",
+      },
+    ),
   ],
   preview: single("Contact page"),
 });
@@ -377,7 +397,9 @@ export const legalPage = defineType({
   fields: [
     fixedSlug(["privacy", "terms", "cookies"]),
     ...seo(),
-    text("updated"),
+    text("eyebrow", { description: "Over the title, e.g. Legal." }),
+    text("updatedLabel", { description: "Before the date, e.g. Last updated." }),
+    text("updated", { description: "The date it last changed, as it should read, e.g. 10 October 2026." }),
     para("intro"),
     text("contentsLabel", { description: "Over the table of contents." }),
     list(

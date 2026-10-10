@@ -19,6 +19,7 @@ import type {
   ApproachPage,
   AudiencePage,
   Chapter,
+  EnquiryCopy,
   Media,
   Project,
   PhasePage,
@@ -447,6 +448,19 @@ export const getContactPage = () =>
     ["siteSettings"],
   );
 
+/** The copy and labels the contact form's server action sends with. */
+export const getEnquiryCopy = () =>
+  single<EnquiryCopy>(
+    "contactPage",
+    `{
+      "studioEmail": *[_id == "siteSettings"][0].email,
+      "siteName": coalesce(*[_id == "siteSettings"][0].title, "Ghost Savvy Studios"),
+      "form": form{name, email, company, help, brief, budget, timing},
+      acknowledgement{subject, greeting, body, recapLabel, signoff}
+    }`,
+    ["siteSettings"],
+  );
+
 export const getApproachPage = () =>
   single<ApproachPage>(
     "approachPage",
@@ -718,7 +732,7 @@ export const getLegalPage = (slug: string) =>
   fixed<LegalDocument>(
     "legalPage",
     slug,
-    `{slug, ${SEO}, updated, intro, contentsLabel, sections[]{id, title, "paragraphs": coalesce(paragraphs, []), list}}`,
+    `{slug, ${SEO}, eyebrow, updatedLabel, updated, intro, contentsLabel, sections[]{id, title, "paragraphs": coalesce(paragraphs, []), list}}`,
   );
 
 /* ---- Projects and articles -------------------------------------------------- */
@@ -947,17 +961,19 @@ export async function getInsightShare(slug: string): Promise<ShareCardData | nul
 }
 
 /**
- * A project's card is its featured image, as it is: the Feature plate's
- * picture. A project whose Feature plate is a film falls back to the first
- * picture it has (the card's, the hero's, then the first in its chapters),
- * and one with no picture at all to the brand card with its name.
+ * A project's card is the social image an editor set, for a project whose
+ * header is a film. Without one it is its featured image, as it is: the
+ * Feature plate's picture, then the first picture it has (the card's, the
+ * hero's, then the first in its chapters), and with no picture at all the
+ * brand card with its name.
  */
 export async function getProjectShare(slug: string): Promise<ShareCardData | null> {
   const row = (await sanityFetch({
     query: `*[_type == "project" && slug.current == $slug][0]{
       "label": "Work / " + coalesce(sector, scope, ""),
       "title": name,
-      "custom": select(
+      "custom": ogImage${IMAGE},
+      "image": select(
         defined(feature.image.asset) => feature.image,
         defined(image.asset) => image,
         defined(hero.image.asset) => hero.image,
