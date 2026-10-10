@@ -4,7 +4,7 @@
  */
 
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { colour, lines, num, para, paras, phrase, picture, plain, text } from "../fields";
+import { colour, lines, num, object, para, paras, phrase, picture, plain, text } from "../fields";
 
 export const disciplines = ["Brand", "Digital", "Systems"] as const;
 
@@ -182,6 +182,24 @@ export const project = defineType({
         }),
       ],
     }),
+    object(
+      "testimonial",
+      [
+        phrase("quote", {
+          required: false,
+          description: "The client's words, as they said them. The section shows at the foot of the page once this and the name are in.",
+        }),
+        text("name", { required: false, description: "As they sign it, e.g. Dr. Cindi A. Lewis." }),
+        text("role", { required: false, description: "e.g. Chief Executive Officer A.g." }),
+        text("company", { required: false, description: "The project's client if empty." }),
+        picture("portrait", {
+          required: false,
+          video: false,
+          description: "Shown in a circle beside the name: set the hotspot on the face. Their initials if empty.",
+        }),
+      ],
+      { group: "story", title: "Client feedback", description: "What the client said about the work." },
+    ),
     defineField({
       name: "more",
       type: "array",

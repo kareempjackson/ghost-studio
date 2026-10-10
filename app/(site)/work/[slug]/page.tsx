@@ -12,6 +12,7 @@ import { ContactBand } from "../../_components/ContactBand";
 import { MONO } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
+import { ClientFeedback } from "../_components/ClientFeedback";
 import { Overview } from "../_components/Overview";
 import { PartsBar } from "../_components/PartsBar";
 import { Plate, PlateRows } from "../_components/Plate";
@@ -208,6 +209,15 @@ export default async function ProjectPage({
               />
             ))}
           </div>
+        )}
+
+        {/* What the client said: the story's close, once they have said it. */}
+        {project.testimonial && (
+          <ClientFeedback
+            testimonial={project.testimonial}
+            label={labels.feedbackLabel}
+            heading={labels.feedbackHeading}
+          />
         )}
 
         {project.more.length > 0 && (

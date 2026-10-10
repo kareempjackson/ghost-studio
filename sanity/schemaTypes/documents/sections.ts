@@ -214,8 +214,18 @@ export const testimonials = defineType({
     text("label"),
     list(
       "items",
-      [para("quote"), text("name"), text("role"), text("company")],
-      { preview: { select: { title: "name", subtitle: "company" } } },
+      [
+        para("quote"),
+        text("name"),
+        text("role"),
+        text("company"),
+        picture("portrait", {
+          required: false,
+          video: false,
+          description: "Shown in a circle beside the name: set the hotspot on the face. Their initials if empty.",
+        }),
+      ],
+      { preview: { select: { title: "name", subtitle: "company", media: "portrait" } } },
     ),
     object("controls", [
       text("previous"),

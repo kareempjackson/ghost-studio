@@ -280,12 +280,25 @@ export const getSectors = () =>
     [],
   );
 
-export const getTestimonials = () =>
-  single<Testimonials>(
+export async function getTestimonials(): Promise<Testimonials> {
+  const data = await single<
+    Omit<Testimonials, "items"> & {
+      items: (Omit<Testimonials["items"][number], "portrait"> & { portrait: SanityImage | null })[];
+    }
+  >(
     "testimonials",
-    `{eyebrow, heading, deck, label, items[]{quote, name, role, company}, controls}`,
+    `{
+      eyebrow, heading, deck, label,
+      items[]{quote, name, role, company, "portrait": portrait${PORTRAIT}, "portraitAlt": coalesce(portrait.alt, "")},
+      controls
+    }`,
     [],
   );
+  return {
+    ...data,
+    items: (data.items ?? []).map((item) => ({ ...item, portrait: portraitUrl(item.portrait) })),
+  };
+}
 
 export const getStudioStrip = () =>
   single<StudioStrip>(
@@ -339,7 +352,12 @@ export const getWorkPage = () =>
       ],
       all, previewLabel, empty,
       close{eyebrow, heading, action${link}},
-      caseStudy{back, overview, readMore, readLess, visit, listHeading, partsLabel, more{label, heading, action${link}}}
+      caseStudy{
+        back, overview, readMore, readLess, visit, listHeading, partsLabel,
+        "feedbackLabel": coalesce(feedbackLabel, "Client feedback"),
+        "feedbackHeading": coalesce(feedbackHeading, "In their words."),
+        more{label, heading, action${link}}
+      }
     }`,
     ["project"],
   );
@@ -559,6 +577,12 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
           "items": coalesce(items[]{lead, text}, []),
           "rows": coalesce(media[]{"items": coalesce(items[]${MEDIA}, [])}, [])
         }, []),
+        "testimonial": select(defined(testimonial.quote) && defined(testimonial.name) => testimonial{
+          quote, name, role,
+          "company": coalesce(company, ^.name),
+          "portrait": portrait${PORTRAIT},
+          "portraitAlt": coalesce(portrait.alt, "")
+        }),
         "more": coalesce(more[defined(@->slug.current)]->${PROJECT}, [])
       },
       "order": *[_id == "workPage"][0]{"list": [
@@ -570,8 +594,13 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
     tags: ["project", "workPage"],
   })) as {
     project:
-      | (Omit<ProjectDetail, "chapters"> & {
+      | (Omit<ProjectDetail, "chapters" | "testimonial"> & {
           chapters: (Omit<Chapter, "id" | "media"> & { rows: { items: Media[] }[] })[];
+          testimonial:
+            | (Omit<NonNullable<ProjectDetail["testimonial"]>, "portrait"> & {
+                portrait: SanityImage | null;
+              })
+            | null;
         })
       | null;
     order: Project[];
@@ -591,6 +620,9 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
       id: anchor(chapter.label),
       media: rows.map((row) => row.items).filter((items) => items.length),
     })),
+    testimonial: project.testimonial
+      ? { ...project.testimonial, portrait: portraitUrl(project.testimonial.portrait) }
+      : null,
     more: project.more.length ? project.more : others.slice(0, 2),
   };
 }
@@ -612,6 +644,20 @@ export async function getArticleSlugs(): Promise<string[]> {
 const images = createImageUrlBuilder({ projectId, dataset });
 
 type SanityImage = { asset: { _ref: string }; crop?: unknown; hotspot?: unknown; alt?: string };
+
+/** A portrait's image, as the queries take it: enough to crop around its hotspot. */
+const PORTRAIT = `{asset, crop, hotspot}`;
+
+/**
+ * A portrait for a circle: square, cropped around the face the editor
+ * marked, at twice the largest size it is shown. Clean of edit marks, which
+ * would break the address in draft mode.
+ */
+function portraitUrl(image: SanityImage | null | undefined) {
+  return image?.asset
+    ? images.image(stegaClean(image)).width(160).height(160).fit("crop").auto("format").url()
+    : null;
+}
 
 export async function getArticle(slug: string): Promise<ArticleDetail | null> {
   const data = (await sanityFetch({

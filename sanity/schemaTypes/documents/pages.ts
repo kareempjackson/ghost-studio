@@ -210,6 +210,16 @@ export const workPage = defineType({
         text("visit", { description: "The link to the client's live site." }),
         text("listHeading", { description: "Over each part's list, unless the part sets its own." }),
         text("partsLabel", { description: "The bar of parts, for screen readers." }),
+        text("feedbackLabel", {
+          required: false,
+          title: "Client feedback label",
+          description: "Beside a project's testimonial, e.g. Client feedback.",
+        }),
+        text("feedbackHeading", {
+          required: false,
+          title: "Client feedback heading",
+          description: "Over the quote, e.g. In their words.",
+        }),
         object("more", [text("label"), text("heading"), action()], {
           title: "More work",
           description: "The two projects at the foot of every case study.",

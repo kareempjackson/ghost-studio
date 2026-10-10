@@ -191,6 +191,7 @@ export interface ProjectDetail extends Project {
   readonly website: string | null;
   readonly feature: Media | null;
   readonly chapters: readonly Chapter[];
+  readonly testimonial: ClientTestimonial | null;
   readonly more: readonly Project[];
 }
 
@@ -333,6 +334,9 @@ export interface Testimonial {
   readonly name: string;
   readonly role: string;
   readonly company: string;
+  /** Square, cropped around the face; their initials are shown without one. */
+  readonly portrait: string | null;
+  readonly portraitAlt: string;
 }
 
 export interface Testimonials {
@@ -459,7 +463,20 @@ export interface CaseStudyLabels {
   readonly visit: string;
   readonly listHeading: string;
   readonly partsLabel: string;
+  /** Beside a project's testimonial, and over its quote. */
+  readonly feedbackLabel: string;
+  readonly feedbackHeading: string;
   readonly more: { readonly label: string; readonly heading: string; readonly action: Link };
+}
+
+/** What a client said about the work, at the foot of its case study. */
+export interface ClientTestimonial {
+  readonly quote: Rich;
+  readonly name: string;
+  readonly role: string | null;
+  readonly company: string;
+  readonly portrait: string | null;
+  readonly portraitAlt: string;
 }
 
 export interface InsightsPage extends Seo {

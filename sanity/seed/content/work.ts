@@ -82,6 +82,53 @@ export const projects = [
     image: PLACEHOLDER,
   },
 
+  /* PLACEHOLDER — four clients by name only. Their location, sector and
+     scope below are guesses from the name: confirm each in the Studio. */
+  {
+    slug: "lore-filmaker",
+    name: "Lore Filmaker",
+    scope: "Brand and digital",
+    tagline: "A portfolio that lets the films speak first.",
+    location: "Caribbean",
+    sector: "Film and video production",
+    disciplines: ["Brand", "Digital"],
+    ground: "#ebe4da",
+    image: PLACEHOLDER,
+  },
+  {
+    slug: "higher-level-accounting",
+    name: "Higher Level Accounting",
+    scope: "Brand, digital and systems",
+    tagline: "An accounting practice as organised online as its books.",
+    location: "Caribbean",
+    sector: "Accounting",
+    disciplines: ["Brand", "Digital", "Systems"],
+    ground: "#dfe7f2",
+    image: PLACEHOLDER,
+  },
+  {
+    slug: "trekker",
+    name: "Trekker",
+    scope: "Product and digital",
+    tagline: "Plan the route, then leave the signal behind.",
+    location: "Caribbean",
+    sector: "Travel and outdoors",
+    disciplines: ["Digital", "Systems"],
+    ground: "#dce8d6",
+    image: PLACEHOLDER,
+  },
+  {
+    slug: "medz",
+    name: "Medz",
+    scope: "Product and systems",
+    tagline: "Prescriptions filled and delivered without the queue.",
+    location: "Caribbean",
+    sector: "Health",
+    disciplines: ["Digital", "Systems"],
+    ground: "#f2dcd6",
+    image: PLACEHOLDER,
+  },
+
   /* DEMO — the five below are invented clients, written to fill /work and
      show the case study at different lengths. None of them is real work:
      replace or delete them before the site ships. */
@@ -184,6 +231,8 @@ export const caseStudyLabels = {
   visit: "Visit site",
   listHeading: "What We Did",
   partsLabel: "Parts of the story",
+  feedbackLabel: "Client feedback",
+  feedbackHeading: "In their words.",
   more: {
     label: "More from GhostSavvy",
     heading: "Selected projects.",
@@ -215,6 +264,13 @@ export interface CaseStudySeed {
     /** Rows of plates after the text: one across, or two side by side. */
     media: readonly (readonly PlateSeed[])[];
   }[];
+  /** What the client said, at the foot of the page. */
+  readonly testimonial?: {
+    readonly quote: string;
+    readonly name: string;
+    readonly role?: string;
+    readonly company?: string;
+  };
 }
 
 const plate = (ground: string, aspect: Aspect = "landscape"): PlateSeed => ({ ground, aspect });
@@ -229,6 +285,13 @@ const plate = (ground: string, aspect: Aspect = "landscape"): PlateSeed => ({ gr
  */
 export const caseStudies: Record<string, CaseStudySeed> = {
   "barbados-pharmaceuticals": {
+    testimonial: {
+      quote:
+        "The Team Took Time To Understand What We Were Building And Brought The Different Parts Together. We Came Away With A Clearer Way To Present Our Work And A Stronger Foundation For The Team Behind It.",
+      name: "Dr. Cindi A. Lewis",
+      role: "Chief Executive Officer A.g.",
+      company: "Barbados Pharmaceutical Inc.",
+    },
     hero: plate("#132a28", "wide"),
     headline:
       "A new brand, website, and working environment for a business operating across borders",
@@ -569,6 +632,330 @@ export const caseStudies: Record<string, CaseStudySeed> = {
           { text: "A website with services, approach, insights, and booking." },
           { text: "A speaker kit and media page." },
           { text: "Stationery and document templates." },
+        ],
+        media: [],
+      },
+    ],
+  },
+
+  /* PLACEHOLDER — the four clients named without a brief: the BPI study's
+     shape, with copy drawn from each name. Every fact and every line of
+     what was built is to confirm and rewrite in the Studio. */
+  "lore-filmaker": {
+    hero: plate("#1c1a17", "wide"),
+    headline: "A brand and a film-first portfolio for an independent production studio",
+    facts: [
+      { label: "Client", value: "Lore Filmaker" },
+      { label: "Location", value: "Caribbean" },
+      { label: "Industry", value: "Film And Video Production" },
+      { label: "Partnership", value: "Build" },
+      { label: "Scope", value: "Brand Identity, Portfolio Website, Showreel Delivery, And Enquiry Flow." },
+    ],
+    tags: ["Brand", "Website", "Film"],
+    overview: [
+      "Lore Filmaker makes brand films, documentaries, and commercial work. The work was strong, but it lived in scattered links, and prospective clients had to piece the studio together from a showreel and a social feed.",
+      "The studio needed an identity that stepped back for the footage, and a portfolio where the films load fast and play beautifully on any screen.",
+      "What we did:",
+      "Built an identity that frames the work instead of competing with it.",
+      "Designed and developed a portfolio website organised by project and by craft.",
+      "Set up streaming that keeps reels sharp and fast on mobile.",
+      "Built an enquiry flow that gathers the brief before the first call.",
+    ],
+    feature: plate("#ebe4da"),
+    chapters: [
+      {
+        label: "Brand identity",
+        heading: "An Identity That Steps Back For The Work.",
+        body: [
+          "A production studio’s brand is mostly its footage. We kept the identity quiet: a wordmark set for title cards and end slates, a near-black palette that suits a screening room, and type that reads as credits.",
+        ],
+        items: [
+          { text: "Designed a wordmark that works as a title card and an end slate." },
+          { text: "Set a palette and type system built around the footage." },
+          { text: "Designed templates for treatments, pitch decks, and call sheets." },
+        ],
+        media: [
+          [plate("#1c1a17", "wide")],
+          [plate("#ebe4da", "portrait"), plate("#1c1a17", "portrait")],
+        ],
+      },
+      {
+        label: "Portfolio website",
+        heading: "The Films First, Everything Else Second.",
+        body: [
+          "Every project opens on its film. The website is organised the way clients look for a filmmaker: by the kind of work they need, then by the projects that prove it.",
+        ],
+        items: [
+          { text: "Designed project pages that open on the film, full width." },
+          { text: "Organised the work by craft: brand films, documentary, and commercial." },
+          { text: "Served video in formats that stay sharp and load quickly on mobile." },
+          { text: "Designed and developed the website using Next.js and Sanity." },
+        ],
+        media: [[plate("#ebe4da")], [plate("#1c1a17", "portrait"), plate("#ebe4da", "portrait")]],
+      },
+      {
+        label: "Enquiries",
+        heading: "A Better Brief Before The First Call.",
+        body: [
+          "Enquiries used to arrive as a single line in an inbox. The new flow asks for what a quote depends on, so the first conversation starts with the brief already in hand.",
+        ],
+        items: [
+          { text: "Built an enquiry form that captures the format, timeline, and budget." },
+          { text: "Routed enquiries to the studio’s inbox with the brief attached." },
+        ],
+        media: [[plate("#ebe4da")]],
+      },
+      {
+        label: "Delivery",
+        heading: "A Studio Clients Can Understand In One Visit.",
+        body: [
+          "Lore Filmaker now sends prospective clients to one place that shows the work at its best and makes it easy to start a project.",
+        ],
+        items: [
+          { text: "A brand identity and production templates." },
+          { text: "A film-first portfolio website." },
+          { text: "Fast, sharp video on every screen." },
+          { text: "An enquiry flow that gathers the brief." },
+        ],
+        media: [],
+      },
+    ],
+  },
+
+  "higher-level-accounting": {
+    hero: plate("#1d2b3a", "wide"),
+    headline: "A brand, website, and client portal for an accounting practice ready to grow",
+    facts: [
+      { label: "Client", value: "Higher Level Accounting" },
+      { label: "Location", value: "Caribbean" },
+      { label: "Industry", value: "Accounting And Financial Services" },
+      { label: "Partnership", value: "Engage + Integrate" },
+      {
+        label: "Scope",
+        value: "Brand Identity, Website Design And Development, Client Portal, And Microsoft 365.",
+      },
+    ],
+    tags: ["Brand", "Website", "Systems"],
+    overview: [
+      "Higher Level Accounting provides bookkeeping, tax, and advisory services to small and growing businesses. Its clients trusted the work, but documents arrived by email and WhatsApp, and every month started with chasing receipts.",
+      "The practice needed a brand that matched its standards, a website that explained its services clearly, and a single secure place for clients to send and receive documents.",
+      "What we did:",
+      "Developed a brand identity for the practice.",
+      "Designed and built a website that sets out its services and packages.",
+      "Built a client portal for documents, requests, and deadlines.",
+      "Set up a secure Microsoft 365 environment for the team.",
+    ],
+    feature: plate("#dfe7f2"),
+    chapters: [
+      {
+        label: "Brand identity",
+        heading: "Precise, Without Feeling Cold.",
+        body: [
+          "Accounting brands tend toward grey. We kept the precision and added warmth: a confident wordmark, a calm navy palette, and plain language that explains what the numbers mean.",
+        ],
+        items: [
+          { text: "Designed a wordmark and supporting graphic system." },
+          { text: "Set a colour and type system for screen and print." },
+          { text: "Designed proposal, engagement letter, and report templates." },
+        ],
+        media: [[plate("#1d2b3a", "wide")], [plate("#dfe7f2", "portrait"), plate("#1d2b3a", "portrait")]],
+      },
+      {
+        label: "Website",
+        heading: "Services A Business Owner Can Compare At A Glance.",
+        body: [
+          "Prospective clients wanted to know what was included and what it would cost. We organised the website around the practice’s service packages and the businesses each one suits.",
+        ],
+        items: [
+          { text: "Designed service pages for bookkeeping, tax, payroll, and advisory." },
+          { text: "Set out packages with what each one includes." },
+          { text: "Built a consultation booking flow." },
+          { text: "Designed and developed the website using Next.js and Sanity." },
+        ],
+        media: [[plate("#dfe7f2")]],
+      },
+      {
+        label: "Client portal",
+        heading: "One Place For Every Document And Deadline.",
+        body: [
+          "Documents used to arrive across email and messaging apps. The portal gives each client one secure place to upload receipts and statements, see what the practice still needs, and track upcoming deadlines.",
+        ],
+        items: [
+          { lead: "Document upload", text: "Clients upload receipts and statements from their phone." },
+          { lead: "Requests", text: "The team requests missing documents, and clients see what is outstanding." },
+          { lead: "Deadlines", text: "Each client sees their filing and payment dates in one view." },
+          { lead: "Access", text: "Configured multi-factor authentication for every client account." },
+        ],
+        media: [[plate("#1d2b3a")]],
+      },
+      {
+        label: "Delivery",
+        heading: "Less Chasing, More Advising.",
+        body: [
+          "The team spends less time collecting documents and more time on the advice clients pay for, and new clients arrive already understanding the service.",
+        ],
+        items: [
+          { text: "A brand identity and document templates." },
+          { text: "A website with services, packages, and booking." },
+          { text: "A secure client portal for documents and deadlines." },
+          { text: "A Microsoft 365 environment for the team." },
+        ],
+        media: [],
+      },
+    ],
+  },
+
+  trekker: {
+    hero: plate("#1f2d24", "wide"),
+    headline: "An offline-first trip planning app for hikers and outdoor travellers",
+    facts: [
+      { label: "Client", value: "Trekker" },
+      { label: "Location", value: "Caribbean" },
+      { label: "Industry", value: "Travel And Outdoors" },
+      { label: "Partnership", value: "Build" },
+      { label: "Scope", value: "Product Design, Mobile App Development, Offline Maps, And Trip Sharing." },
+    ],
+    tags: ["App", "Product"],
+    overview: [
+      "Trekker helps hikers and outdoor travellers plan routes, pack for them, and share their plans with someone at home. The best trails are often where the signal is weakest, so an app that needed a connection failed exactly when it mattered.",
+      "Trekker needed an app that does its work before the trip and keeps working without a signal once it starts.",
+      "What we did:",
+      "Designed the app around planning first and navigating offline.",
+      "Built route planning with maps saved to the phone.",
+      "Added packing lists built from the route and the weather.",
+      "Built trip sharing so someone at home knows the plan.",
+    ],
+    feature: plate("#dce8d6"),
+    chapters: [
+      {
+        label: "Product design",
+        heading: "Built Around Where The Signal Ends.",
+        body: [
+          "We designed every screen for the moment the connection drops. Anything a hiker needs on the trail is saved before they set off, and the app tells them clearly what is ready to use offline.",
+        ],
+        items: [
+          { text: "Mapped the journey from planning at home to the trail and back." },
+          { text: "Designed an offline status that shows what is ready before setting off." },
+          { text: "Tested the designs with hikers on real routes." },
+        ],
+        media: [[plate("#1f2d24", "wide")], [plate("#dce8d6", "portrait"), plate("#1f2d24", "portrait")]],
+      },
+      {
+        label: "Route planning",
+        heading: "Plan At Home, Follow It Offline.",
+        body: [
+          "Hikers plan a route on the map, see its distance and elevation, and save the area to their phone. On the trail, the route and their position work without a connection.",
+        ],
+        items: [
+          { text: "Built route planning with distance and elevation." },
+          { text: "Saved map areas to the phone for offline use." },
+          { text: "Showed the hiker’s position on the route without a signal." },
+        ],
+        media: [[plate("#dce8d6")]],
+      },
+      {
+        label: "Packing and sharing",
+        heading: "Ready Before The Trip, Known At Home.",
+        body: [
+          "The app builds a packing list from the route and the forecast, and shares the plan with a contact at home, with the time the hiker expects to be back.",
+        ],
+        items: [
+          { text: "Generated packing lists from the route and the weather." },
+          { text: "Shared trip plans and expected return times with a contact." },
+          { text: "Sent a check-in reminder when the hiker is due back." },
+        ],
+        media: [[plate("#1f2d24"), plate("#dce8d6")]],
+      },
+      {
+        label: "Delivery",
+        heading: "An App That Works Where Hikers Actually Go.",
+        body: [
+          "Trekker launched with planning, offline navigation, packing, and trip sharing in one app, built for the places with the least coverage.",
+        ],
+        items: [
+          { text: "A product designed around offline use." },
+          { text: "Route planning with offline maps." },
+          { text: "Packing lists and trip sharing." },
+        ],
+        media: [],
+      },
+    ],
+  },
+
+  medz: {
+    hero: plate("#3a1f1c", "wide"),
+    headline: "A prescription ordering and delivery platform for pharmacies and their patients",
+    facts: [
+      { label: "Client", value: "Medz" },
+      { label: "Location", value: "Caribbean" },
+      { label: "Industry", value: "Health And Pharmacy" },
+      { label: "Partnership", value: "Build + Integrate" },
+      {
+        label: "Scope",
+        value: "Product Design, Patient App, Pharmacy Dashboard, And Delivery Tracking.",
+      },
+    ],
+    tags: ["App", "Platform", "Systems"],
+    overview: [
+      "Medz connects patients with pharmacies for prescription orders and delivery. Filling a prescription usually meant a trip to the pharmacy and a wait in line, which is hardest for the patients who need their medication most.",
+      "Medz needed a patient app that makes ordering simple, and tools that let pharmacists verify, prepare, and dispatch orders safely.",
+      "What we did:",
+      "Designed a patient app for ordering prescriptions and refills.",
+      "Built a pharmacy dashboard for verifying and preparing orders.",
+      "Added delivery tracking from the pharmacy to the door.",
+      "Built refill reminders for ongoing medication.",
+    ],
+    feature: plate("#f2dcd6"),
+    chapters: [
+      {
+        label: "Patient app",
+        heading: "A Prescription In A Few Taps.",
+        body: [
+          "Patients photograph a prescription or choose a refill, pick a pharmacy, and choose delivery or collection. The app keeps their prescriptions and orders in one place.",
+        ],
+        items: [
+          { text: "Designed prescription upload by photo." },
+          { text: "Built one-tap refills for ongoing medication." },
+          { text: "Let patients choose delivery or collection." },
+          { text: "Sent reminders before a refill is due." },
+        ],
+        media: [[plate("#3a1f1c", "wide")], [plate("#f2dcd6", "portrait"), plate("#3a1f1c", "portrait")]],
+      },
+      {
+        label: "Pharmacy dashboard",
+        heading: "Verification Stays With The Pharmacist.",
+        body: [
+          "Every order is checked by a pharmacist before it is prepared. The dashboard gives the pharmacy one queue, from new prescriptions to orders ready for dispatch.",
+        ],
+        items: [
+          { lead: "Order queue", text: "One view of new, verified, prepared, and dispatched orders." },
+          { lead: "Verification", text: "Pharmacists review each prescription before preparation." },
+          { lead: "Patient contact", text: "Pharmacists message patients about substitutions or questions." },
+        ],
+        media: [[plate("#f2dcd6")]],
+      },
+      {
+        label: "Delivery",
+        heading: "From The Pharmacy To The Door, Tracked.",
+        body: [
+          "Patients see when their order is prepared, dispatched, and on its way, and the pharmacy sees every delivery in progress.",
+        ],
+        items: [
+          { text: "Built delivery tracking for patients and pharmacies." },
+          { text: "Confirmed delivery on arrival." },
+        ],
+        media: [[plate("#3a1f1c")]],
+      },
+      {
+        label: "Outcome",
+        heading: "Medication Without The Queue.",
+        body: [
+          "Patients order and receive their medication without a trip to the pharmacy, and pharmacists keep control of every prescription they fill.",
+        ],
+        items: [
+          { text: "A patient app for orders, refills, and reminders." },
+          { text: "A pharmacy dashboard for verification and preparation." },
+          { text: "Delivery tracking from pharmacy to patient." },
         ],
         media: [],
       },

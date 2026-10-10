@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import type { CSSProperties } from "react";
 import { useState } from "react";
 import type { Link, Testimonials as TestimonialsData } from "@/sanity/types";
@@ -16,12 +17,12 @@ const HEADING_STYLE: CSSProperties = {
   lineHeight: 1,
 };
 
-/** 21px at 390 to 28px at 1440, held there. */
+/** 17px at 390 to 22px at 1440, held there: a long quote reads as text. */
 const QUOTE_STYLE: CSSProperties = {
-  fontSize: "clamp(1.3125rem, 1.15rem + 0.667vw, 1.75rem)",
+  fontSize: "clamp(1.0625rem, 0.9554rem + 0.4381vw, 1.375rem)",
   fontWeight: 500,
-  letterSpacing: "-0.035em",
-  lineHeight: 1.25,
+  letterSpacing: "-0.025em",
+  lineHeight: 1.35,
 };
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -189,11 +190,12 @@ export function Testimonials({
               >
                 <blockquote style={QUOTE_STYLE}><Rich value={item.quote} /></blockquote>
                 <div className="flex items-center gap-4">
-                  <span
-                    aria-hidden
-                    className="grid size-10 shrink-0 place-items-center rounded-full bg-ink-200 font-label text-[0.6875rem] leading-none"
-                  >
-                    {initials(item.name)}
+                  <span className="relative grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-ink-200 font-label text-[0.6875rem] leading-none">
+                    {item.portrait ? (
+                      <Image src={item.portrait} alt={item.portraitAlt} fill sizes="40px" className="object-cover" />
+                    ) : (
+                      <span aria-hidden>{initials(item.name)}</span>
+                    )}
                   </span>
                   <span>
                     <span className="block text-[0.9375rem] leading-[1.3] font-medium tracking-[-0.01em]">
