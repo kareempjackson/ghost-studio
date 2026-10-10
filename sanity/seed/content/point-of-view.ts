@@ -23,7 +23,7 @@ export const pointOfView = {
   eyebrow: "Our point of view",
   heading: ["AI didn’t make", "engineering", "easier."],
   deck: ["Better tools still need", "better decisions."],
-  action: { label: "See how we work", href: "/how-we-work" },
+  action: { label: "See how we work", href: "/our-approach" },
   cards: [
     {
       label: "Clarity",

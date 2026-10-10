@@ -8,7 +8,6 @@ import {
 } from "motion/react";
 import type { CSSProperties } from "react";
 import { useRef } from "react";
-import { serviceHref } from "@/lib/links";
 import type { Link, Service, Services as ServicesData } from "@/sanity/types";
 import { ArrowPill } from "./ArrowPill";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
@@ -58,10 +57,13 @@ function CardBody({
   service,
   index,
   cta,
+  href,
 }: {
   service: Service;
   index: number;
   cta: string;
+  /** Where the card's pill goes: the band's own way on. */
+  href: string;
 }) {
   return (
     <div className="flex h-full flex-col p-6 sm:p-8 lg:p-10">
@@ -87,7 +89,7 @@ function CardBody({
 
       <div className="mt-8 flex justify-end">
         <ArrowPill
-          href={serviceHref(service.slug)}
+          href={href}
           ariaLabel={`${cta}: ${service.name}`}
         >
           {cta}
@@ -112,6 +114,7 @@ function DeckCard({
   index,
   count,
   cta,
+  href,
   position,
 }: {
   service: Service;
@@ -119,6 +122,7 @@ function DeckCard({
   /** How many cards are in the deck. */
   count: number;
   cta: string;
+  href: string;
   position: MotionValue<number>;
 }) {
   const depth = useTransform(position, (p) => index - p);
@@ -163,7 +167,7 @@ function DeckCard({
       }}
       className="absolute inset-x-0 top-0 bottom-[calc(var(--peek)*2)] overflow-hidden rounded-[0.75rem] text-ink-950 will-change-transform"
     >
-      <CardBody service={service} index={index} cta={cta} />
+      <CardBody service={service} index={index} cta={cta} href={href} />
     </motion.li>
   );
 }
@@ -181,7 +185,7 @@ export function Services({
   action,
 }: {
   services: ServicesData;
-  /** The way through to the studio's point of view. */
+  /** The way through to how the studio works: the band's button, and every card's. */
   action: Link;
 }) {
   const COUNT = services.items.length;
@@ -221,7 +225,7 @@ export function Services({
               key={service.slug}
               className="min-h-[28rem] overflow-hidden rounded-[0.75rem] bg-white text-ink-950"
             >
-              <CardBody service={service} index={index} cta={services.cta} />
+              <CardBody service={service} index={index} cta={services.cta} href={action.href} />
             </li>
           ))}
         </ol>
@@ -252,6 +256,7 @@ export function Services({
                 index={index}
                 count={COUNT}
                 cta={services.cta}
+                href={action.href}
                 position={position}
               />
             ))}
