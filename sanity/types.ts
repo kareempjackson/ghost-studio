@@ -559,7 +559,14 @@ export interface FamilyPageData extends Seo {
     readonly notes: readonly Note[];
     readonly card: Picture;
   };
-  readonly archive: { readonly label: string; readonly heading: Lines; readonly deck: Rich; readonly items: readonly Experiment[] };
+  readonly archive: {
+    readonly label: string;
+    readonly heading: Lines;
+    readonly deck: Rich;
+    readonly items: readonly Experiment[];
+    /** What the archive says while it has no story and no plate. */
+    readonly empty: { readonly heading: string; readonly body: Rich | null };
+  };
   readonly ask: FamilyAsk;
   readonly family: FamilyBand;
   /** The family's stories, newest first: the archive opens on them. */

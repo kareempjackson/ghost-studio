@@ -129,6 +129,73 @@ export const projects = [
     image: PLACEHOLDER,
   },
 
+  /* PLACEHOLDER — the client and the shape of the work are confirmed: a
+     Build engagement, and a full-stack web application with a member
+     community platform and an admin dashboard and CMS. The tagline and the
+     case study's detail are written from that brief: confirm in the Studio. */
+  {
+    slug: "island-innovators",
+    name: "Island Innovators",
+    scope: "Product and engineering",
+    tagline: "A home online for the people building the region.",
+    location: "Grenada",
+    sector: "Community and innovation",
+    disciplines: ["Digital", "Systems"],
+    ground: "#d3e6e2",
+    image: PLACEHOLDER,
+  },
+
+  /* PLACEHOLDER — the three websites below are confirmed; the scope, sector
+     and taglines are written from the sites themselves: confirm in the Studio. */
+  {
+    slug: "jernigan-associates",
+    name: "Jernigan & Associates",
+    scope: "Website design and build",
+    tagline: "Psychological and educational consulting, set out for everyone it serves.",
+    location: "Atlanta, Georgia",
+    sector: "Psychology and consulting",
+    disciplines: ["Digital"],
+    ground: "#e9e0d2",
+    image: PLACEHOLDER,
+  },
+  {
+    slug: "dr-maryam-jernigan-noesi",
+    name: "Dr. Maryam Jernigan-Noesi",
+    scope: "Website design and build",
+    tagline: "A psychologist and organisational strategist, under her own name.",
+    location: "Atlanta, Georgia",
+    sector: "Psychology and leadership",
+    disciplines: ["Digital"],
+    ground: "#e6dcea",
+    image: PLACEHOLDER,
+  },
+  {
+    slug: "psychologists-for-racial-justice",
+    name: "Psychologists for Racial Justice",
+    scope: "Website design and build",
+    tagline: "Psychology in the service of racial justice.",
+    location: "Lawrenceville, Georgia",
+    sector: "Mental health and non-profit",
+    disciplines: ["Digital"],
+    ground: "#f1e3c8",
+    image: PLACEHOLDER,
+  },
+
+  /* PLACEHOLDER — the branding work is confirmed; the café, its location and
+     its menu are taken from its listings. The tagline and the deliverables
+     are written from the brief: confirm in the Studio. */
+  {
+    slug: "brown-girl-cafe",
+    name: "Brown Girl Café",
+    scope: "Brand identity",
+    tagline: "A café with a twist of its own, and a brand to match.",
+    location: "Grenada",
+    sector: "Food and hospitality",
+    disciplines: ["Brand"],
+    ground: "#f3d9c4",
+    image: PLACEHOLDER,
+  },
+
   /* DEMO — the five below are invented clients, written to fill /work and
      show the case study at different lengths. None of them is real work:
      replace or delete them before the site ships. */
@@ -956,6 +1023,526 @@ export const caseStudies: Record<string, CaseStudySeed> = {
           { text: "A patient app for orders, refills, and reminders." },
           { text: "A pharmacy dashboard for verification and preparation." },
           { text: "Delivery tracking from pharmacy to patient." },
+        ],
+        media: [],
+      },
+    ],
+  },
+
+  /* PLACEHOLDER — features beyond the brief (messaging, moderation, the
+     content types the CMS manages) and the engineering detail are written
+     to what such a platform needs, not from the project record: confirm or
+     correct them, and add the stack and any results, in the Studio. */
+  "island-innovators": {
+    hero: plate("#0f3b3a", "wide"),
+    headline:
+      "A full-stack community platform for the innovators building the Caribbean, and the tools to run it",
+    facts: [
+      { label: "Client", value: "Island Innovators" },
+      { label: "Location", value: "Grenada" },
+      { label: "Industry", value: "Community And Innovation" },
+      { label: "Partnership", value: "Build" },
+      {
+        label: "Scope",
+        value:
+          "Product Strategy, Product Design, Full-Stack Engineering, Member Platform, And Admin Dashboard And CMS.",
+      },
+    ],
+    tags: ["Platform", "Community", "Systems"],
+    overview: [
+      "Island Innovators brings together the founders, technologists and creatives building the Caribbean, through a series of in-person gatherings that started in Grenada. As the community grew, the connections made in the room needed somewhere to continue between events.",
+      "Island Innovators needed a platform where members could present themselves and find each other, and a way for its small team to run the community without a developer on call.",
+      "What we did:",
+      "Ran the work as a Build engagement: one standing team for product, design and engineering.",
+      "Designed and built a full-stack web application, front end to database.",
+      "Built a member platform with profiles, a searchable directory and connections.",
+      "Built an admin dashboard and content management system for the team.",
+    ],
+    feature: plate("#d3e6e2"),
+    chapters: [
+      {
+        label: "Member platform",
+        heading: "A Place For The Region’s Innovators To Find Each Other.",
+        body: [
+          "Every member has a profile that says who they are, what they’re building and what they can help with. The directory turns a room of introductions into a network members can search long after the event ends.",
+        ],
+        items: [
+          { lead: "Profiles", text: "Members describe their work, skills, island and what they’re looking for." },
+          { lead: "Directory", text: "Search and filter members by island, sector and skill." },
+          { lead: "Connections", text: "Members reach out to each other and keep track of the people they’ve met." },
+          { lead: "Accounts", text: "Secure sign-up and sign-in, with members in control of their own profiles." },
+        ],
+        media: [
+          [plate("#0f3b3a", "wide")],
+          [plate("#d3e6e2", "portrait"), plate("#0f3b3a", "portrait")],
+        ],
+      },
+      {
+        label: "Admin dashboard and CMS",
+        heading: "One Place To Run The Community.",
+        body: [
+          "The Island Innovators team runs the platform from its own dashboard: who joins, what members see, and what the community is talking about, without waiting on a developer.",
+        ],
+        items: [
+          { lead: "Members", text: "Review new members, manage accounts and set who can do what." },
+          { lead: "Content", text: "Publish announcements, opportunities and pages from a content management system." },
+          { lead: "Moderation", text: "Keep the directory accurate and the community safe." },
+        ],
+        media: [[plate("#d3e6e2")]],
+      },
+      {
+        label: "Engineering",
+        heading: "One Application, Front To Back.",
+        body: [
+          "We built the platform as a single full-stack web application: the interface members use, the dashboard the team uses, and the API, database and authentication behind both, designed and built by the same team.",
+          "That kept every decision in one place. A change to how members work shows up in the platform and the dashboard together, and nothing is lost between a design team and a development team.",
+        ],
+        items: [
+          { text: "Designed one data model behind the member platform and the dashboard." },
+          { text: "Built role-based access, so members and administrators each see what they should." },
+          { text: "Made every screen work on a phone as well as on a desktop." },
+          { text: "Documented the system so the team can run it and extend it." },
+        ],
+        media: [[plate("#0f3b3a")]],
+      },
+      {
+        label: "How we worked",
+        heading: "A Standing Team, Month To Month.",
+        body: [
+          "Island Innovators engaged us through Build: product direction, design and engineering on a monthly subscription, with the team shaped around what the platform needed next.",
+        ],
+        items: [
+          { lead: "Define", text: "Agreed the problem, the priorities and the first release together." },
+          { lead: "Build", text: "Worked through the roadmap in regular delivery cycles, reviewing each release with the team." },
+          { lead: "Establish", text: "Documented the platform and set out the next stage." },
+        ],
+        media: [],
+      },
+      {
+        label: "Outcome",
+        heading: "A Community That Keeps Going Between Events.",
+        body: [
+          "Island Innovators has a platform where its members can be found and can find each other, and the tools to run it themselves, ready to grow with the series beyond Grenada.",
+        ],
+        items: [
+          { text: "A member platform with profiles, a searchable directory and connections." },
+          { text: "An admin dashboard and content management system for the team." },
+          { text: "One full-stack application, documented for the team that runs it." },
+        ],
+        media: [],
+      },
+    ],
+  },
+
+  /* PLACEHOLDER — the practice, its services and its people are taken from
+     the live site (mmjerniganassociates.com). What the work covered, the
+     partnership and the way the site is managed are inferred: confirm them
+     in the Studio. The live site says "LLC"; the brief said "Inc". */
+  "jernigan-associates": {
+    hero: plate("#3b2a1e", "wide"),
+    headline:
+      "A website for a psychological and educational consulting practice, organised around the people it serves",
+    facts: [
+      { label: "Client", value: "Jernigan & Associates" },
+      { label: "Location", value: "Atlanta, Georgia" },
+      { label: "Industry", value: "Psychological And Educational Consulting" },
+      { label: "Partnership", value: "Engage" },
+      {
+        label: "Scope",
+        value: "Website Design And Development, Site Structure, Associate Profiles, And Media And Blog.",
+      },
+    ],
+    tags: ["Website", "Health", "Education"],
+    overview: [
+      "Jernigan & Associates is a psychological and educational consulting practice founded in Atlanta in 2008 by Dr. Maryam M. Jernigan-Noesi, a licensed psychologist. It began in schools, working on diversity and inclusion, and grew into national work with secondary schools and universities, government agencies, legal and behavioural health organisations, child care providers and professional associations.",
+      "The practice needed a website that made the breadth of that work easy to follow: who it serves, how it helps, and the associates and research behind it.",
+      "What we did:",
+      "Structured the site around the practice’s three areas of consultation: education, mental health and health care.",
+      "Gave psychotherapy and research sections of their own.",
+      "Introduced the founder and each associate with a profile.",
+      "Built a multimedia section for media appearances and the practice’s blog, Mind Field.",
+    ],
+    website: "https://mmjerniganassociates.com",
+    feature: plate("#e9e0d2"),
+    chapters: [
+      {
+        label: "Structure",
+        heading: "Organised Around Who The Practice Serves.",
+        body: [
+          "Schools, clinicians and health systems come to Jernigan & Associates with different questions. We organised the site so each finds its own way in: consultation set out by field, with psychotherapy and research alongside.",
+        ],
+        items: [
+          { lead: "Consultation", text: "Education, mental health and health care, each with a page of its own." },
+          { lead: "Psychotherapy", text: "The practice’s clinical work, apart from its consulting." },
+          { lead: "Research", text: "The practice’s research, including its manuscript Racial Trauma Is Real, to read on the site." },
+        ],
+        media: [
+          [plate("#3b2a1e", "wide")],
+          [plate("#e9e0d2", "portrait"), plate("#3b2a1e", "portrait")],
+        ],
+      },
+      {
+        label: "People",
+        heading: "The Associates Behind The Work.",
+        body: [
+          "Clients engage the practice for its people. The site introduces Dr. Jernigan-Noesi and the associates who consult alongside her, and lets the practice’s clients speak for it.",
+        ],
+        items: [
+          { text: "A profile for Dr. Maryam M. Jernigan-Noesi, the practice’s founder." },
+          { text: "A profile for each associate." },
+          { text: "Client testimonials on the home page, in clients’ own words." },
+        ],
+        media: [[plate("#e9e0d2")]],
+      },
+      {
+        label: "Multimedia",
+        heading: "Interviews, Talks And Writing In One Place.",
+        body: [
+          "Dr. Jernigan-Noesi is often asked to speak on race, trauma and healing. The multimedia section gathers those appearances with the practice’s own writing, so a visitor can hear from the practice before they get in touch.",
+        ],
+        items: [
+          { lead: "Media", text: "Interviews and appearances, with video on the page." },
+          { lead: "Mind Field", text: "The practice’s blog." },
+          { lead: "Social", text: "The practice’s social channels, linked across the site." },
+        ],
+        media: [[plate("#3b2a1e")]],
+      },
+      {
+        label: "Outcome",
+        heading: "A Clear Front Door For A Broad Practice.",
+        body: [
+          "Jernigan & Associates has a website that sets out the full range of its work, so schools, organisations and individuals can see where they fit before they get in touch.",
+        ],
+        items: [
+          { text: "A website organised by area of consultation." },
+          { text: "Profiles for the founder and her associates." },
+          { text: "A multimedia section for media and the Mind Field blog." },
+        ],
+        media: [],
+      },
+    ],
+  },
+
+  /* PLACEHOLDER — Dr. Jernigan-Noesi's story, framework and record are taken
+     from the site as built (mj-final.vercel.app). What the work covered, the
+     partnership and the location are inferred: confirm them in the Studio.
+     The site is on a staging address, so there is no website link yet: add
+     the domain in the Studio once it is live. */
+  "dr-maryam-jernigan-noesi": {
+    hero: plate("#3a2440", "wide"),
+    headline: "A website of her own for a psychologist and organisational strategist",
+    facts: [
+      { label: "Client", value: "Dr. Maryam Jernigan-Noesi" },
+      { label: "Location", value: "Atlanta, Georgia" },
+      { label: "Industry", value: "Psychology And Organisational Strategy" },
+      { label: "Partnership", value: "Engage" },
+      {
+        label: "Scope",
+        value: "Website Design And Development, Content Structure, And Consultation Enquiries.",
+      },
+    ],
+    tags: ["Website", "Personal Brand"],
+    overview: [
+      "Dr. Maryam Jernigan-Noesi is a licensed psychologist, clinician-scientist and organisational strategist whose work centres on race, healing and human development. Through Jernigan & Associates, the practice she founded in 2008, she has trained more than 30,000 professionals and advised state and federal agencies, university systems, K–12 schools, healthcare organisations, professional associations and corporations.",
+      "Her advisory work had grown beyond the practice’s website. She needed a site of her own: one that introduced her as a leader in her field, set out her framework and her practice, and made it easy to book a consultation.",
+      "What we did:",
+      "Shaped her story into a site: who she is, how she works, and the record behind it.",
+      "Gave her Connecting to Ancestral Wisdom framework a section of its own.",
+      "Brought her education, publications, awards and media together in one place.",
+      "Designed and built the website, with a way to book a consultation from across the site.",
+    ],
+    feature: plate("#e6dcea"),
+    chapters: [
+      {
+        label: "Story",
+        heading: "Systems Weren’t Built For Everybody. She’s Changing That.",
+        body: [
+          "The site opens on the conviction behind her work, then introduces the person: a psychologist and organisational strategist who works with institutions on the systems that shape people’s lives.",
+        ],
+        items: [
+          { lead: "About", text: "Her story, her practice and the institutions she works with." },
+          {
+            lead: "Education",
+            text: "A PhD in Counseling Psychology from Boston College, an M.Ed. from Vanderbilt and a B.A. from Fisk University, with postdoctoral fellowships at Harvard Medical School and Yale School of Medicine.",
+          },
+        ],
+        media: [
+          [plate("#3a2440", "wide")],
+          [plate("#e6dcea", "portrait"), plate("#3a2440", "portrait")],
+        ],
+      },
+      {
+        label: "Framework",
+        heading: "Connecting To Ancestral Wisdom.",
+        body: [
+          "Dr. Jernigan-Noesi’s framework moves through four stages. We gave it a section of its own, so a visitor can follow how her work unfolds before they meet her.",
+        ],
+        items: [
+          { text: "Set out the framework’s four stages: Recognition, Restoration, Relation and Renewal." },
+          { text: "Designed the section to be read in order, one stage at a time." },
+        ],
+        media: [[plate("#e6dcea")]],
+      },
+      {
+        label: "The practice",
+        heading: "Every Organisation Is Different. So Is The Approach.",
+        body: [
+          "Her advisory work covers organisational change, executive advisory and culture transformation, for agencies, university systems, schools, healthcare organisations, associations and companies. The site sets that work out for each of them, with a consultation one step away.",
+        ],
+        items: [
+          { lead: "Advisory", text: "Organisational change, executive advisory and culture transformation." },
+          { lead: "Consultation", text: "A way to book a consultation from across the site." },
+        ],
+        media: [[plate("#3a2440")]],
+      },
+      {
+        label: "Record",
+        heading: "The Record Behind The Work.",
+        body: [
+          "For the institutions she advises, her record matters. The site brings it together in one place, ready to grow as she publishes.",
+        ],
+        items: [
+          { lead: "Publications", text: "Seven peer-reviewed publications." },
+          { lead: "Awards", text: "Honours including the Janet E. Helms Racial Justice Award." },
+          { lead: "Media", text: "Selected appearances, including NPR, HuffPost and WBUR." },
+          { lead: "Books", text: "A section ready for her books as they’re announced." },
+        ],
+        media: [[plate("#e6dcea", "portrait"), plate("#3a2440", "portrait")]],
+      },
+      {
+        label: "Outcome",
+        heading: "A Site That Speaks For Her.",
+        body: [
+          "Dr. Jernigan-Noesi has a website of her own that introduces her to the institutions she advises, sets out her framework and her practice, and makes it easy to start a conversation.",
+        ],
+        items: [
+          { text: "A personal website, alongside the practice’s." },
+          { text: "A section for the Connecting to Ancestral Wisdom framework." },
+          { text: "Her education, publications, awards and media in one place." },
+          { text: "Consultation bookings from across the site." },
+        ],
+        media: [],
+      },
+    ],
+  },
+
+  /* PLACEHOLDER — the organisation, its pillars, the conference and the CE
+     programme are taken from the live site (psychforracialjustice.org). What
+     the work covered and the partnership are inferred: confirm them in the
+     Studio. */
+  "psychologists-for-racial-justice": {
+    hero: plate("#1f2d4a", "wide"),
+    headline: "A website for psychologists advancing racial justice, with its conference and CE credits",
+    facts: [
+      { label: "Client", value: "Psychologists For Racial Justice" },
+      { label: "Location", value: "Lawrenceville, Georgia" },
+      { label: "Industry", value: "Mental Health And Non-Profit" },
+      { label: "Partnership", value: "Engage" },
+      {
+        label: "Scope",
+        value:
+          "Website Design And Development, Event Pages, Continuing Education, And Donations And Newsletter.",
+      },
+    ],
+    tags: ["Website", "Non-Profit", "Events"],
+    overview: [
+      "Psychologists for Racial Justice is a community of psychologists and mental health professionals working to dismantle systemic racism. Through research, education and community engagement, it works toward a more racially inclusive and equitable field of psychology, and uses psychology to support collective healing from racism.",
+      "PRJ needed a website that explained its mission, brought people to its annual conference, Healing While Harmed, and gave psychologists what they need to earn continuing education credit.",
+      "What we did:",
+      "Designed and built the website in Next.js, from the mission to the team.",
+      "Set out the organisation’s work as four pillars: education, community spaces, events and advocacy.",
+      "Built a page for the annual conference, with its curriculum, speakers and registration.",
+      "Gave continuing education a page of its own, from registration to certificate.",
+      "Connected donations, the newsletter and a contact form across the site.",
+    ],
+    website: "https://www.psychforracialjustice.org",
+    feature: plate("#f1e3c8"),
+    chapters: [
+      {
+        label: "Mission",
+        heading: "Advancing Racial Justice Through Psychology And Action.",
+        body: [
+          "The site opens on PRJ’s purpose and moves from vision to mission to approach: centring BIPOC experiences, and promoting racial justice through many kinds of action and support.",
+        ],
+        items: [
+          { lead: "Vision", text: "Dismantling systemic racism, for a more equitable and inclusive world." },
+          { lead: "Mission", text: "Research, education and community engagement, using psychology to support collective healing." },
+          { lead: "Team", text: "The psychologists behind the work, including Dr. Janet Helms and Dr. Maryam Jernigan-Noesi." },
+        ],
+        media: [
+          [plate("#1f2d4a", "wide")],
+          [plate("#f1e3c8", "portrait"), plate("#1f2d4a", "portrait")],
+        ],
+      },
+      {
+        label: "What we do",
+        heading: "Four Pillars Of Impact.",
+        body: [
+          "PRJ’s work reaches professionals and communities in different ways. We set it out as four pillars, so every visitor can see where they fit.",
+        ],
+        items: [
+          { lead: "Education", text: "Workshops, training, professional development and resources." },
+          { lead: "Community Spaces", text: "Discussions for Communities of Color on racism-related stress and healing." },
+          { lead: "Events", text: "Virtual and in-person events on racial justice and systemic change." },
+          { lead: "Advocacy", text: "Resources and support for activism and advocacy." },
+        ],
+        media: [[plate("#f1e3c8")]],
+      },
+      {
+        label: "Conference",
+        heading: "Healing While Harmed.",
+        body: [
+          "PRJ’s annual virtual conference brings psychologists, clinicians and healthcare professionals together on racism in mental health systems and healthcare. The conference has a page of its own: why it matters, what it covers, who is speaking and who should attend, with registration one step away.",
+        ],
+        items: [
+          { lead: "Curriculum", text: "Eight areas, from racism in clinical practice to policy advocacy for healthcare equity." },
+          { lead: "Speakers", text: "The opening speaker, the keynote and the panellists, each introduced." },
+          { lead: "Registration", text: "Registration through Eventbrite, from the conference page." },
+          { lead: "Upcoming events", text: "The next event featured on the home page." },
+        ],
+        media: [[plate("#1f2d4a", "wide")]],
+      },
+      {
+        label: "Continuing education",
+        heading: "From Registration To Certificate.",
+        body: [
+          "PRJ is approved by the American Psychological Association to sponsor continuing education for psychologists. The CE page sets out how credit is earned, step by step, alongside the programme’s goals and policies.",
+        ],
+        items: [
+          { text: "Set out the three steps to credit: register, attend the full programme, pass the post-test." },
+          { text: "Made the session slides available to download." },
+          { text: "Published the grievance procedure and the conflict of interest statement." },
+          { text: "Named the contacts for questions about credit." },
+        ],
+        media: [[plate("#f1e3c8", "portrait"), plate("#1f2d4a", "portrait")]],
+      },
+      {
+        label: "Support",
+        heading: "A Way To Take Part On Every Page.",
+        body: [
+          "PRJ runs on the support of its community. Every page ends with a way to join in: give, subscribe or get in touch.",
+        ],
+        items: [
+          { lead: "Donate", text: "Donations through PRJ’s fundraising page." },
+          { lead: "Newsletter", text: "Sign-up to the mailing list from every page." },
+          { lead: "Contact", text: "A contact form, with phone, email and social channels alongside." },
+          { lead: "Policies", text: "Privacy, terms and accessibility pages." },
+        ],
+        media: [],
+      },
+      {
+        label: "Outcome",
+        heading: "One Place For The Work And The People Doing It.",
+        body: [
+          "Psychologists for Racial Justice has a website that explains its mission, brings people to its conference, supports its CE programme, and gives every visitor a way to take part.",
+        ],
+        items: [
+          { text: "A website organised around the four pillars of PRJ’s work." },
+          { text: "A conference page, with registration." },
+          { text: "A continuing education page, from registration to certificate." },
+          { text: "Donations, newsletter sign-up and contact across the site." },
+        ],
+        media: [],
+      },
+    ],
+  },
+
+  /* PLACEHOLDER — the café, its address and its menu are taken from its
+     delivery listing (KariBites) and its Instagram. The deliverables (logo,
+     palette, menu, packaging, gift cards, signage and social templates) and
+     how the identity looks are written to what a café brand needs, not from
+     the project record: confirm or correct them in the Studio. */
+  "brown-girl-cafe": {
+    hero: plate("#5a2e1b", "wide"),
+    headline: "A brand for a Grenadian café where people came to eat, study and work",
+    facts: [
+      { label: "Client", value: "Brown Girl Café" },
+      { label: "Location", value: "L’Anse aux Épines, Grenada" },
+      { label: "Industry", value: "Food And Hospitality" },
+      { label: "Partnership", value: "Engage" },
+      {
+        label: "Scope",
+        value: "Brand Identity, Menu Design, Packaging And Gift Cards, Signage, And Social Media.",
+      },
+    ],
+    tags: ["Brand", "Print", "Social"],
+    overview: [
+      "Brown Girl Café opened in Cinnamon Plaza, L’Anse aux Épines, as a café and a place to work and study. It served what it called “Brown Girl” style culinary twists: all-day breakfast, waffles, chebaffles and spring rolls, with a signature sauce of its own.",
+      "The café needed a brand as personal as its food: one that carried the confidence of its name, felt warm enough to stay in for an afternoon, and worked everywhere from the counter to a delivery app.",
+      "What we did:",
+      "Created the Brown Girl Café identity: logo, colour and type.",
+      "Designed the menu around the café’s signature dishes.",
+      "Carried the brand onto packaging, gift cards and signage.",
+      "Set the look for the café’s social media and delivery listings.",
+    ],
+    feature: plate("#f3d9c4"),
+    chapters: [
+      {
+        label: "Identity",
+        heading: "A Name With Confidence, And A Brand To Match.",
+        body: [
+          "Brown Girl is a name that says who is behind it. We built the identity to carry it with warmth and pride, from a wordmark on the shopfront to a profile picture on a phone.",
+        ],
+        items: [
+          { text: "Designed the Brown Girl Café logo and its variations." },
+          { text: "Set a colour palette and type system for print and screens." },
+          { text: "Wrote guidelines so the brand stays consistent as the café grows." },
+        ],
+        media: [
+          [plate("#5a2e1b", "wide")],
+          [plate("#f3d9c4", "portrait"), plate("#5a2e1b", "portrait")],
+        ],
+      },
+      {
+        label: "Menu",
+        heading: "A Menu As Distinctive As The Food.",
+        body: [
+          "Brown Girl’s dishes have names of their own: the Chebaffle, the Big Boy Chicken and Waffles, the BG Triple Stacked Waffles. We designed the menu to give them room, from breakfast to the dishes built to fill you up.",
+        ],
+        items: [
+          { lead: "All-day breakfast", text: "Breakfast spring rolls, chebaffles, waffles and quesadilla wraps." },
+          { lead: "Light bites", text: "Fries, spring rolls and chicken strips." },
+          { lead: "Tummy fillers", text: "The signature waffles, alfredo, sandwiches and wraps." },
+        ],
+        media: [[plate("#f3d9c4")]],
+      },
+      {
+        label: "In the café",
+        heading: "Somewhere To Stay A While.",
+        body: [
+          "Brown Girl Café was a place to work and study as much as to eat. The brand carries into the space and out of the door, so it feels as considered at the table as it does on the menu.",
+        ],
+        items: [
+          { text: "Applied the identity to signage and the counter." },
+          { text: "Designed takeaway packaging for food and treats." },
+          { text: "Designed Brown Girl gift cards." },
+        ],
+        media: [[plate("#5a2e1b", "portrait"), plate("#f3d9c4", "portrait")]],
+      },
+      {
+        label: "Social",
+        heading: "The Brand, Online Every Day.",
+        body: [
+          "Much of the café’s audience found it on Instagram and through delivery. We set a look for both, so every post, promotion and order looked like Brown Girl.",
+        ],
+        items: [
+          { text: "Designed templates for posts, promotions and new items." },
+          { text: "Designed the profile and highlight covers." },
+          { text: "Set the look of the café’s delivery listings." },
+        ],
+        media: [[plate("#5a2e1b")]],
+      },
+      {
+        label: "Outcome",
+        heading: "A Café People Recognised Before They Walked In.",
+        body: [
+          "Brown Girl Café opened with a brand as personal as its food, consistent from the menu to the shopfront to the feed.",
+        ],
+        items: [
+          { text: "A brand identity: logo, colour and type." },
+          { text: "A menu designed around the signature dishes." },
+          { text: "Packaging, gift cards and signage." },
+          { text: "A social media look and templates." },
         ],
         media: [],
       },

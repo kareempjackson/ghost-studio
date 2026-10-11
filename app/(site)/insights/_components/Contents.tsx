@@ -1,18 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LABEL } from "../../_components/StudioStrip";
 
 export interface ContentsItem {
   readonly id: string;
   readonly label: string;
 }
 
+/** The label face, as every label in the margin is set. */
+const MONO = "font-label text-[0.6875rem] leading-none tracking-[0.06em] uppercase";
+
 /**
- * The insight's sections, down the margin beside the text. The one being
- * read is set in ink with a vermilion tick; the rest are a click away. The
- * same reading line as the case studies' parts bar: a section is current
- * once its heading has passed the upper third of the screen.
+ * The insight's sections, down the margin beside the text: each numbered,
+ * the numbers in a column of their own so the titles line up. The one being
+ * read is set in ink with its number in vermilion, the one signal on the
+ * screen; the rest wait in grey, a click away. The same reading line as the
+ * case studies' parts bar: a section is current once its heading has passed
+ * the upper third of the screen.
  */
 export function Contents({ label, items }: { label: string; items: readonly ContentsItem[] }) {
   const [current, setCurrent] = useState<string | null>(null);
@@ -40,8 +44,8 @@ export function Contents({ label, items }: { label: string; items: readonly Cont
 
   return (
     <nav aria-label={label}>
-      <p className={`${LABEL} text-ink-950`}>{label}</p>
-      <ol className="mt-6 space-y-1 border-l border-edge-subtle">
+      <p className={`${MONO} text-ink-500`}>{label}</p>
+      <ol className="mt-7 space-y-3.5">
         {items.map((item, index) => {
           const on = item.id === current;
           return (
@@ -49,16 +53,22 @@ export function Contents({ label, items }: { label: string; items: readonly Cont
               <a
                 href={`#${item.id}`}
                 aria-current={on ? "location" : undefined}
-                className={`-ml-px flex gap-3 border-l py-1.5 pl-4 text-[0.875rem] leading-[1.35] tracking-[-0.01em] transition-colors duration-200 ${
-                  on
-                    ? "border-surface-accent text-ink-950"
-                    : "border-transparent text-ink-500 hover:text-ink-950"
-                }`}
+                className="group grid grid-cols-[1.75rem_minmax(0,1fr)] items-baseline text-[0.875rem] leading-[1.4] tracking-[-0.01em]"
               >
-                <span className="font-label text-[0.6875rem] leading-[1.75] tracking-[0.06em] text-ink-400 tabular-nums">
+                <span
+                  className={`${MONO} tabular-nums transition-colors duration-200 ${
+                    on ? "text-accent" : "text-ink-400 group-hover:text-ink-950"
+                  }`}
+                >
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <span>{item.label}</span>
+                <span
+                  className={`transition-colors duration-200 ${
+                    on ? "text-ink-950" : "text-ink-500 group-hover:text-ink-950"
+                  }`}
+                >
+                  {item.label}
+                </span>
               </a>
             </li>
           );

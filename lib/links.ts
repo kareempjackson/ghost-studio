@@ -23,7 +23,7 @@ export const families = [
 
 export type FamilySlug = (typeof families)[number]["slug"];
 
-/** A story's own page, under its family: /ghost-labs/low-signal. */
+/** A story's own page, under its family: /ghost-labs/vynl. */
 export const storyHref = (family: string, slug: string) => `/${family}/${slug}`;
 
 /** An audience's anchor on /who-we-serve, from its name: "funded-startups-and-founders". */

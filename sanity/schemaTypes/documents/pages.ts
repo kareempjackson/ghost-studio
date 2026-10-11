@@ -358,6 +358,17 @@ export const familyPage = defineType({
       lines("heading"),
       para("deck"),
       list("items", [...step, colour()], stepPreview),
+      object(
+        "empty",
+        [
+          text("heading", { required: false, description: "e.g. No cohorts yet. Nothing here yet if empty." }),
+          para("body", { required: false, description: "A line under it." }),
+        ],
+        {
+          title: "While it is empty",
+          description: "Shown in place of the archive until it has a story or a plate.",
+        },
+      ),
     ]),
     object("ask", [text("label"), lines("heading"), para("summary"), action()]),
     object("family", [text("label"), lines("heading")]),

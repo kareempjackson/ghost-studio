@@ -3,6 +3,7 @@
  *
  *   npm run seed:projects -- --dry   # print what would be written
  *   npm run seed:projects
+ *   npm run seed:projects -- --only island-innovators   # one project only
  *
  * For every project in sanity/seed/content/work.ts after BPI: a project
  * that already exists gets the case study fields it does not have yet,
@@ -23,6 +24,8 @@ import { caseStudies, projects } from "./content/work";
 import { caseStudy, keyed } from "./shape";
 
 const dry = process.argv.includes("--dry");
+/** `--only <slug>`: that project and no other, e.g. to add one new client. */
+const only = process.argv.includes("--only") ? process.argv[process.argv.indexOf("--only") + 1] : null;
 
 const token = process.env.SANITY_API_WRITE_TOKEN;
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
@@ -53,7 +56,12 @@ async function main() {
   const tx = client.transaction();
   const added: string[] = [];
 
-  for (const project of projects.filter((p) => p.slug !== "barbados-pharmaceuticals")) {
+  const chosen = projects.filter((p) =>
+    only ? p.slug === only : p.slug !== "barbados-pharmaceuticals",
+  );
+  if (only && !chosen.length) throw new Error(`No project "${only}" in sanity/seed/content/work.ts.`);
+
+  for (const project of chosen) {
     /* The card, without the seed's poster: the picture is uploaded in the Studio. */
     const { slug, name, scope, tagline, location, sector, disciplines, ground } = project;
     const card = { name, scope, tagline, location, sector, disciplines, ground };

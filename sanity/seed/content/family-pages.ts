@@ -5,7 +5,8 @@
  * One shape, set from their comps: the claim with notes stuck around it, a
  * band on what it is, the ask, and the rest of the family.
  *
- * PLACEHOLDER: the archive plates are stand-ins, as the comps' own decks say.
+ * The archives hold no plates of their own: what each family has done is its
+ * stories (family-stories.ts). Ghost U has none yet, so its archive says so.
  * The cover card is the basketball “Ghost” poster in the comps; it is not
  * exported yet. Drop it into `public/images/` at 2x and set `card.src`.
  */
@@ -40,6 +41,8 @@ export interface FamilyPageData {
     readonly heading: readonly string[];
     readonly deck: string;
     readonly items: readonly Experiment[];
+    /** Shown in place of the archive while it has nothing in it. */
+    readonly empty?: { readonly heading: string; readonly body?: string };
   };
   readonly ask: {
     readonly label: string;
@@ -92,14 +95,6 @@ const family = {
   heading: ["Room for work", "beyond the brief."],
 } as const;
 
-/** The plates both comps set, word for word, until each has its own. */
-const placeholderItems: readonly Experiment[] = [
-  { title: "Product experiments", body: "Details to come.", ground: VERMILION },
-  { title: "Tools for the studio", body: "Details to come.", ground: LILAC },
-  { title: "Early prototypes", body: "Details to come.", ground: ACID },
-  { title: "Open questions", body: "Details to come.", ground: LILAC },
-];
-
 export const labsPage: FamilyPageData = {
   href: "/ghost-labs",
   title: "Ghost Labs",
@@ -119,8 +114,8 @@ export const labsPage: FamilyPageData = {
   archive: {
     label: "Experiment archive",
     heading: ["A place for what", "we’re exploring."],
-    deck: "A preview of the direction. These are placeholders, not published projects or available programmes.",
-    items: placeholderItems,
+    deck: "Products and prototypes the studio has built on its own time, to try an idea before anyone pays for it.",
+    items: [],
   },
   ask: {
     label: "Stay in the conversation",
@@ -166,7 +161,11 @@ export const ghostUPage: FamilyPageData = {
     label: "Programme in development",
     heading: ["Better questions can", "be taught."],
     deck: "Ghost U is the learning side of the studio. The proposed programme focuses on defining problems and making decisions before starting to build.",
-    items: placeholderItems,
+    items: [],
+    empty: {
+      heading: "No cohorts yet.",
+      body: "The first programme is still being shaped. When it runs, its story will be here.",
+    },
   },
   ask: {
     label: "Stay in the conversation",
@@ -212,7 +211,7 @@ export const givesPage: FamilyPageData = {
     label: "Programme in development",
     heading: ["Make room for", "useful work."],
     deck: "Ghost Gives is a space for the studio to contribute its skills beyond commercial engagements. The programme format and eligibility are still being shaped.",
-    items: placeholderItems,
+    items: [],
   },
   ask: {
     label: "Stay in the conversation",

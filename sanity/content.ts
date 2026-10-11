@@ -589,7 +589,11 @@ export async function getFamilyPage(slug: string): Promise<FamilyPageData> {
     `{
       "href": "/" + slug, ${SEO},
       cover{heading, summary, action${link}, notes[]{text, ground}, "card": ${pic("card")}},
-      archive{label, heading, deck, "items": coalesce(items[]{title, body, ground}, [])},
+      archive{
+        label, heading, deck,
+        "items": coalesce(items[]{title, body, ground}, []),
+        "empty": {"heading": coalesce(empty.heading, "Nothing here yet."), "body": empty.body}
+      },
       ask{label, heading, summary, action${link}},
       family{label, heading},
       "itemLabel": coalesce(stories.itemLabel, "Story"),

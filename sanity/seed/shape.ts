@@ -61,7 +61,7 @@ export function story(seed: StorySeed) {
   };
 }
 
-/** A story's document id, from its family and slug: familyStory-ghost-labs-low-signal. */
+/** A story's document id, from its family and slug: familyStory-ghost-labs-vynl. */
 export const storyId = (seed: Pick<StorySeed, "family" | "slug">) =>
   `familyStory-${seed.family}-${seed.slug}`;
 

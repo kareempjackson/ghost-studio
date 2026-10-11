@@ -142,41 +142,56 @@ export async function FamilyPage({ data }: { data: FamilyPageData }) {
             deck={archive.deck}
           />
 
-          {/* Two columns, the right one dropped, so the plates step down
-              the page rather than line up as a grid of products. The
-              stories lead; what has no story yet follows, as a plate. */}
-          <ul className="mt-16 grid gap-y-14 sm:grid-cols-2 sm:gap-x-5 lg:mt-28 lg:gap-x-8 lg:gap-y-24">
-            {stories.map((story, index) => (
-              <li key={story.slug} className={dropFor(index)}>
-                <StoryCard
-                  story={story}
-                  plate={plateFor(index)}
-                  sizes="(min-width: 640px) 50vw, 100vw"
-                />
-              </li>
-            ))}
-            {archive.items.map((item, i) => {
-              const index = stories.length + i;
-              return (
-                <li key={item.title} className={dropFor(index)}>
-                  <div
-                    aria-hidden
-                    style={{ backgroundColor: item.ground }}
-                    className={plateFor(index)}
+          {/* Nothing in it yet: say so, in the space the plates will fill,
+              rather than leave the heading over an empty band. */}
+          {stories.length + archive.items.length === 0 ? (
+            <div className="mt-16 grid min-h-[18rem] place-content-center justify-items-center rounded-[0.75rem] border border-dashed border-ink-300 px-6 py-16 text-center lg:mt-28 lg:min-h-[24rem]">
+              <p className="text-primary" style={STORY_TITLE_STYLE}>
+                {archive.empty.heading}
+              </p>
+              {archive.empty.body && (
+                <div className="mt-3 max-w-[26rem] text-[0.9375rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-4">
+                  <Rich value={archive.empty.body} />
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Two columns, the right one dropped, so the plates step down
+               the page rather than line up as a grid of products. The
+               stories lead; what has no story yet follows, as a plate. */
+            <ul className="mt-16 grid gap-y-14 sm:grid-cols-2 sm:gap-x-5 lg:mt-28 lg:gap-x-8 lg:gap-y-24">
+              {stories.map((story, index) => (
+                <li key={story.slug} className={dropFor(index)}>
+                  <StoryCard
+                    story={story}
+                    plate={plateFor(index)}
+                    sizes="(min-width: 640px) 50vw, 100vw"
                   />
-                  <h3
-                    className="mt-6 text-primary lg:mt-8"
-                    style={STORY_TITLE_STYLE}
-                  >
-                    {item.title}
-                  </h3>
-                  <div className="mt-3 text-[0.875rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-4">
-                    <Rich value={item.body} />
-                  </div>
                 </li>
-              );
-            })}
-          </ul>
+              ))}
+              {archive.items.map((item, i) => {
+                const index = stories.length + i;
+                return (
+                  <li key={item.title} className={dropFor(index)}>
+                    <div
+                      aria-hidden
+                      style={{ backgroundColor: item.ground }}
+                      className={plateFor(index)}
+                    />
+                    <h3
+                      className="mt-6 text-primary lg:mt-8"
+                      style={STORY_TITLE_STYLE}
+                    >
+                      {item.title}
+                    </h3>
+                    <div className="mt-3 text-[0.875rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-4">
+                      <Rich value={item.body} />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </section>
 
         <FamilyAsk ask={ask} />

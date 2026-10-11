@@ -11,6 +11,7 @@ import { ChatLauncher } from "../../_components/ChatLauncher";
 import { ContactBand } from "../../_components/ContactBand";
 import { Rich } from "../../_components/Rich";
 import { RichText, outline } from "../../_components/RichText";
+import { MONO } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
 import { LABEL } from "../../_components/StudioStrip";
@@ -161,7 +162,7 @@ export default async function InsightPage({ params }: PageProps<"/insights/[slug
             </div>
 
             {/* The record: when, how long, and ways to pass it on. */}
-            <div className="mt-12 flex flex-wrap items-end justify-between gap-x-10 gap-y-6 border-t border-edge-subtle pt-6 lg:mt-16">
+            <div className="mt-12 flex flex-wrap items-end justify-between gap-x-10 gap-y-6 lg:mt-16">
               <dl className="flex flex-wrap gap-x-10 gap-y-4">
                 {published && (
                   <div>
@@ -225,8 +226,8 @@ export default async function InsightPage({ params }: PageProps<"/insights/[slug
               <div className="lg:col-span-7 lg:col-start-5">
                 {/* Under lg the margin is gone: the contents fold above the text. */}
                 {hasContents && (
-                  <details className="group mb-12 border-y border-edge-subtle lg:hidden">
-                    <summary className={`${LABEL} flex cursor-pointer list-none items-center justify-between py-4 text-ink-950 [&::-webkit-details-marker]:hidden`}>
+                  <details className="group mb-12 lg:hidden">
+                    <summary className={`${MONO} flex cursor-pointer list-none items-center justify-between py-4 text-ink-950 [&::-webkit-details-marker]:hidden`}>
                       On this page
                       <span aria-hidden className="transition-transform duration-200 group-open:rotate-45">
                         +
@@ -252,7 +253,7 @@ export default async function InsightPage({ params }: PageProps<"/insights/[slug
 
                 <RichText id="insight-body" value={article.body} className="max-w-[42rem]" />
 
-                <div className="mt-20 flex max-w-[42rem] flex-wrap items-center justify-between gap-6 border-t border-edge-subtle pt-6 lg:mt-24">
+                <div className="mt-20 flex max-w-[42rem] flex-wrap items-center justify-between gap-6 lg:mt-24">
                   <p className={`${LABEL} text-ink-950`}>Share this insight</p>
                   <Share title={stegaClean(name)} />
                 </div>
@@ -266,11 +267,9 @@ export default async function InsightPage({ params }: PageProps<"/insights/[slug
             aria-labelledby="more-heading"
             className="px-5 pt-24 sm:px-8 lg:px-12 lg:pt-36"
           >
-            <div className="border-t border-edge-subtle pt-8 lg:pt-10">
-              <h2 id="more-heading" className={`${LABEL} text-ink-950`}>
-                More insights
-              </h2>
-            </div>
+            <h2 id="more-heading" className={`${LABEL} text-ink-950`}>
+              More insights
+            </h2>
             <ul className="mt-10 grid gap-x-8 gap-y-16 md:grid-cols-2 lg:mt-12">
               {more.map((entry) => (
                 <li key={entry.slug}>
@@ -308,7 +307,7 @@ export default async function InsightPage({ params }: PageProps<"/insights/[slug
         <div className="px-5 pt-16 pb-24 sm:px-8 lg:px-12 lg:pt-24 lg:pb-36">
           <Link
             href="/insights"
-            className="group inline-flex items-center gap-3 border-t border-edge-subtle pt-8 text-[0.9375rem] leading-none tracking-[-0.01em] text-secondary transition-colors duration-200 hover:text-accent"
+            className="group inline-flex items-center gap-3 text-[0.9375rem] leading-none tracking-[-0.01em] text-secondary transition-colors duration-200 hover:text-accent"
           >
             <span
               aria-hidden

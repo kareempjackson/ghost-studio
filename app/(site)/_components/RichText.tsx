@@ -66,7 +66,7 @@ function components(value: RichTextValue): PortableTextComponents {
       h2: ({ children, value: block }) => (
         <h2
           id={headingId(textOf(block as Block))}
-          className={`${ANCHOR} mt-16 border-t border-edge-subtle pt-8 text-[1.625rem] leading-[1.15] font-medium tracking-[-0.035em] text-ink-950 first:mt-0 lg:mt-20 lg:pt-10 lg:text-[2.125rem]`}
+          className={`${ANCHOR} mt-16 text-[1.625rem] leading-[1.15] font-medium tracking-[-0.035em] text-ink-950 first:mt-0 lg:mt-20 lg:text-[2.125rem]`}
         >
           {sections.has(block._key) && (
             <span aria-hidden className={`${MONO} mb-5 block text-ink-400 lg:mb-6`}>
