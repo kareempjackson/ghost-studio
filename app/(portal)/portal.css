@@ -1,0 +1,145 @@
+/* ---------------------------------------------------------------------------
+   The portal: the site's tokens, laid on a softer ground.
+
+   The site is a printed sheet — white paper, black ink. The portal is the
+   desk that sheet sits on: a warm grey canvas with white cards on it, so a
+   screen full of working parts still reads as a few calm objects. Every
+   colour and type token is the site's; this file only adds the canvas, the
+   display face, and the few patterns the portal repeats.
+--------------------------------------------------------------------------- */
+
+@import "../(site)/globals.css";
+
+@theme {
+  /* The desk. The site's leaf-card grey, promoted to the ground. */
+  --color-canvas: #f0efed;
+  /* One step down from the canvas, for wells sunk into it. */
+  --color-canvas-deep: #e6e4e0;
+  /* The vermilion the site actually sets (not signal-500): attention. */
+  --color-alert: #eb5b32;
+
+  --font-display:
+    var(--font-dm-sans-display), var(--font-dm-sans), "Helvetica Neue",
+    Helvetica, Arial, sans-serif;
+
+  /* Flat: nothing floats. Every edge is a hairline, never a shadow, so the
+     shadow utilities — the site's too — all draw the same quiet line. */
+  --shadow-card: 0 0 0 1px rgb(14 13 11 / 0.06);
+  --shadow-lift: 0 0 0 1px rgb(14 13 11 / 0.08);
+  --shadow-float: 0 0 0 1px rgb(14 13 11 / 0.08);
+  --shadow-raised: 0 0 0 1px rgb(14 13 11 / 0.08);
+  --shadow-overlay: 0 0 0 1px rgb(14 13 11 / 0.08);
+
+  /* One curve for everything that moves: it eases out long, with no
+     overshoot. Every transition without its own timing takes it. */
+  --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
+  --default-transition-duration: 240ms;
+  --default-transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* In the components layer, so a utility on the same element (a hover, a
+   one-off background) still wins. */
+@layer components {
+  /* The desk: one flat, warm grey. */
+  .gs-desk {
+    background-color: var(--color-canvas);
+  }
+
+  /* Every card: white, and a hairline to say where it ends. */
+  .gs-card {
+    background-color: #ffffff;
+    box-shadow: 0 0 0 1px rgb(14 13 11 / 0.06);
+  }
+
+  /* The black controls: flat ink. */
+  .gs-ink {
+    background-color: var(--color-ink-950);
+    color: #ffffff;
+  }
+
+  /* Controls change colour, smoothly, and nothing else: no lift, no squash.
+     Pressed, they dim a touch. */
+  .gs-press {
+    transition:
+      background-color 260ms var(--ease-smooth),
+      color 260ms var(--ease-smooth),
+      box-shadow 260ms var(--ease-smooth),
+      opacity 160ms var(--ease-smooth);
+  }
+  .gs-press:active {
+    opacity: 0.82;
+  }
+
+  /* What is still to come: a milestone's remaining time, an unpaid balance.
+     Drawn in currentColor, so `text-ink-300 gs-hatch` sets its ink. */
+  .gs-hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      currentColor 0 1px,
+      transparent 1px 7px
+    );
+  }
+}
+
+/* Cards arrive in reading order, once, on first paint. Each sets its place
+   in the queue with `[--i:N]`. */
+.gs-rise {
+  animation: gs-rise 560ms var(--ease-smooth) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+@keyframes gs-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* A scroller that keeps its scrollbar to itself. */
+.gs-no-bar {
+  scrollbar-width: none;
+}
+.gs-no-bar::-webkit-scrollbar {
+  display: none;
+}
+
+/* The portal's sheets: native <dialog>, sliding in from the right on a wide
+   screen and up from the foot on a phone. */
+.gs-sheet {
+  margin: 0;
+  max-height: none;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.gs-sheet::backdrop {
+  background: rgb(14 13 11 / 0.22);
+}
+.gs-sheet[open] > .gs-sheet-panel {
+  animation: gs-sheet-up 380ms var(--ease-smooth) both;
+}
+@media (min-width: 48rem) {
+  .gs-sheet[open] > .gs-sheet-panel {
+    animation-name: gs-sheet-in;
+  }
+}
+@keyframes gs-sheet-up {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+}
+@keyframes gs-sheet-in {
+  from {
+    transform: translateX(10px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gs-rise,
+  .gs-sheet[open] > .gs-sheet-panel {
+    animation: none;
+  }
+}

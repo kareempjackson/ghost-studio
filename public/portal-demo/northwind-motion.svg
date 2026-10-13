@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <rect width="1600" height="1000" fill="#1c130d"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <g transform="translate(80 300)">
+      <rect width="330" height="330" rx="24" fill="#f4ecdc"/>
+      <g transform="translate(165 110) rotate(-22)"><ellipse rx="26" ry="32" fill="#3b2416"/><path d="M-4 -29c11 15-10 32 3 58" fill="none" stroke="#f4ecdc" stroke-width="5" stroke-linecap="round"/></g>
+      <path d="M165 160v60" stroke="#c9a77c" stroke-width="3" stroke-dasharray="6 8"/>
+    </g>
+    <g transform="translate(450 300)">
+      <rect width="330" height="330" rx="24" fill="#f4ecdc"/>
+      <circle cx="165" cy="165" r="90" fill="#3b2416"/>
+      <g transform="translate(165 165) rotate(-22)"><ellipse rx="26" ry="32" fill="#f4ecdc"/></g>
+    </g>
+    <g transform="translate(820 300)">
+      <rect width="330" height="330" rx="24" fill="#f4ecdc"/>
+      <g transform="translate(165 165) rotate(-12)"><circle r="90" fill="#3b2416"/><path d="M-36 46v-92h18l50 64v-64h17v92h-18l-50-64v64z" fill="#f4ecdc"/></g>
+    </g>
+    <g transform="translate(1190 300)">
+      <rect width="330" height="330" rx="24" fill="#f4ecdc"/>
+      <circle cx="80" cy="165" r="44" fill="#3b2416"/>
+      <path d="M62 188v-46h9l25 32v-32h8v46h-9l-25-32v32z" fill="#f4ecdc"/>
+      <text x="140" y="182" font-weight="700" font-size="44" letter-spacing="-1" fill="#3b2416">northw</text>
+      <rect x="274" y="140" width="40" height="50" fill="#f4ecdc" opacity="0.7"/>
+    </g>
+    <g font-size="18" letter-spacing="3" fill="#c9a77c">
+      <text x="80" y="680">00:00 — BEAN DROPS</text><text x="450" y="680">00:01.5 — SETTLES</text><text x="820" y="680">00:03 — MARK TURNS</text><text x="1190" y="680">00:04.5 — WORDMARK</text>
+    </g>
+    <text x="80" y="200" font-size="18" letter-spacing="3" fill="#8a7a6a">NORTHWIND — LOGO ANIMATION — STORYBOARD — V01</text>
+  </g>
+</svg>

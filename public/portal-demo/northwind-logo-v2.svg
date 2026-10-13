@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <rect width="1600" height="1000" fill="#f4ecdc"/>
+  <circle cx="410" cy="500" r="150" fill="#3b2416"/>
+  <path d="M342 582V418h44l70 104V418h42v164h-44l-70-104v104z" fill="#f4ecdc"/>
+  <text x="650" y="560" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="150" letter-spacing="-4" fill="#3b2416">northwind</text>
+  <text x="64" y="944" font-family="Arial, Helvetica, sans-serif" font-size="18" letter-spacing="3" fill="#9a8a7a">NORTHWIND — PRIMARY LOCKUP — V02</text>
+</svg>

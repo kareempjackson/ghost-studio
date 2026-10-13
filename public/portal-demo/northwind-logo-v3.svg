@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <rect width="1600" height="1000" fill="#f4ecdc"/>
+  <circle cx="410" cy="500" r="150" fill="#3b2416"/>
+  <path d="M348 578V422h30l86 112V422h28v156h-30l-86-112v112z" fill="#f4ecdc"/>
+  <text x="650" y="560" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="150" letter-spacing="-4" fill="#3b2416">n</text>
+  <g transform="translate(775 518) rotate(-22)">
+    <ellipse rx="38" ry="46" fill="#3b2416"/>
+    <path d="M-6 -42c16 22-14 46 4 84" fill="none" stroke="#f4ecdc" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <text x="818" y="560" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="150" letter-spacing="-4" fill="#3b2416">rthwind</text>
+  <text x="64" y="944" font-family="Arial, Helvetica, sans-serif" font-size="18" letter-spacing="3" fill="#9a8a7a">NORTHWIND — PRIMARY LOCKUP — V03</text>
+</svg>

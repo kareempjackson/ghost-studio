@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <rect width="1600" height="1000" fill="#faf6ee"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="120" y="220" width="252" height="520" rx="28" fill="#3b2416"/>
+    <rect x="397" y="220" width="252" height="520" rx="28" fill="#f4ecdc" stroke="#e5dccb" stroke-width="2"/>
+    <rect x="674" y="220" width="252" height="520" rx="28" fill="#c9a77c"/>
+    <rect x="951" y="220" width="252" height="520" rx="28" fill="#7fcf9f"/>
+    <rect x="1228" y="220" width="252" height="520" rx="28" fill="#e0643a"/>
+    <g font-size="30" fill="#2b1d14"><text x="146" y="800">Roast</text><text x="423" y="800">Crema</text><text x="700" y="800">Kraft</text><text x="977" y="800">1986 Green</text><text x="1254" y="800">Ember</text></g>
+    <g font-size="18" letter-spacing="2" fill="#8a7a6a"><text x="146" y="836">#3B2416</text><text x="423" y="836">#F4ECDC</text><text x="700" y="836">#C9A77C</text><text x="977" y="836">#7FCF9F</text><text x="1254" y="836">#E0643A</text></g>
+    <text x="120" y="150" font-size="18" letter-spacing="3" fill="#9a8a7a">NORTHWIND — COLOUR — V01</text>
+  </g>
+</svg>

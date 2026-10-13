@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { arial, dmSans } from "@/app/fonts";
 import { typekit } from "@/lib/brand";
 import { introScript } from "@/lib/intro";
 import { Suspense } from "react";
@@ -12,57 +12,11 @@ import { ChromeProvider } from "./_components/ChromeProvider";
 import { PageTransition } from "./_components/PageTransition";
 import "./globals.css";
 
-/**
- * DM Sans carries the page and Arial the labels. Both are self-hosted
- * from public/fonts through next/font/local, so they are subset, preloaded and
- * served from our own origin. Hardcover VF, the editorial guest, is still
- * served by Adobe Fonts and cannot be self-hosted, so that kit stays linked
- * below.
- *
- * Only the weights the site sets are loaded, because every file here is
- * preloaded on every page. The rest of the family (and the 18/24/36pt optical
- * sizes) is in public/fonts: add a line to use one.
+/*
+ * DM Sans and Arial are self-hosted (app/fonts.ts). Hardcover VF, the
+ * editorial guest, is still served by Adobe Fonts and cannot be self-hosted,
+ * so that kit stays linked below.
  */
-const dmSans = localFont({
-  variable: "--font-dm-sans",
-  display: "swap",
-  src: [
-    {
-      path: "../../public/fonts/DMSans-Regular.ttf",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/DMSans-Italic.ttf",
-      weight: "400",
-      style: "italic",
-    },
-    {
-      path: "../../public/fonts/DMSans-Medium.ttf",
-      weight: "500",
-      style: "normal",
-    },
-    { path: "../../public/fonts/DMSans-Bold.ttf", weight: "700", style: "normal" },
-    {
-      path: "../../public/fonts/DMSans-BoldItalic.ttf",
-      weight: "700",
-      style: "italic",
-    },
-  ],
-});
-
-const arial = localFont({
-  variable: "--font-arial",
-  display: "swap",
-  src: [
-    {
-      path: "../../public/fonts/Arial-Regular.ttf",
-      weight: "400",
-      style: "normal",
-    },
-    { path: "../../public/fonts/Arial-Bold.ttf", weight: "700", style: "normal" },
-  ],
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const { title, description } = await getSettings();

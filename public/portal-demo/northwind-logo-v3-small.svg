@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <rect width="1600" height="1000" fill="#f4ecdc"/>
+  <g fill="#3b2416">
+    <g transform="translate(260 500)"><circle r="48"/><path d="M-20 26v-52h10l28 36v-36h9v52h-10l-28-36v36z" fill="#f4ecdc"/></g>
+    <g transform="translate(560 500)"><circle r="24"/><path d="M-10 13v-26h6l14 18v-18h5v26h-6l-14-18v18z" fill="#f4ecdc"/></g>
+    <g transform="translate(800 500)"><circle r="16"/><path d="M-7 9v-18h5l9 12v-12h4v18h-5l-9-12v12z" fill="#f4ecdc"/></g>
+    <g transform="translate(1000 500)"><circle r="12"/><path d="M-5 7v-14h4l6 9v-9h4v14h-4l-6-9v9z" fill="#f4ecdc"/></g>
+    <g transform="translate(1160 500)"><circle r="8"/><path d="M-3.5 4.5v-9h3l3.5 6v-6h2.5v9h-3l-3.5-6v6z" fill="#f4ecdc"/></g>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="18" letter-spacing="3" fill="#7a6a5c" text-anchor="middle">
+    <text x="260" y="610">96 PX</text><text x="560" y="610">48 PX</text><text x="800" y="610">32 PX</text><text x="1000" y="610">24 PX</text><text x="1160" y="610">16 PX</text>
+  </g>
+  <text x="64" y="944" font-family="Arial, Helvetica, sans-serif" font-size="18" letter-spacing="3" fill="#9a8a7a">NORTHWIND — SMALL SIZES — V03</text>
+</svg>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <rect width="1600" height="1000" fill="#eef2f8"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <g transform="translate(130 150)">
+      <rect width="290" height="600" rx="40" fill="#ffffff"/><rect x="24" y="60" width="242" height="240" rx="24" fill="#c9d6fb"/>
+      <text x="24" y="360" font-size="30" fill="#1b2442">Care, calmly.</text><rect x="24" y="390" width="200" height="12" rx="6" fill="#dfe5f2"/><rect x="24" y="412" width="160" height="12" rx="6" fill="#dfe5f2"/>
+      <rect x="24" y="520" width="242" height="52" rx="26" fill="#1b2442"/>
+    </g>
+    <g transform="translate(470 150)">
+      <rect width="290" height="600" rx="40" fill="#ffffff"/><text x="24" y="90" font-size="26" fill="#1b2442">Your consent</text>
+      <g fill="#dfe5f2"><rect x="24" y="120" width="242" height="12" rx="6"/><rect x="24" y="142" width="220" height="12" rx="6"/><rect x="24" y="164" width="230" height="12" rx="6"/></g>
+      <g><rect x="24" y="220" width="242" height="64" rx="16" fill="#eef2f8"/><circle cx="240" cy="252" r="12" fill="#8fa8f7"/><rect x="24" y="300" width="242" height="64" rx="16" fill="#eef2f8"/><circle cx="240" cy="332" r="12" fill="#8fa8f7"/></g>
+      <rect x="24" y="520" width="242" height="52" rx="26" fill="#1b2442"/>
+    </g>
+    <g transform="translate(810 150)">
+      <rect width="290" height="600" rx="40" fill="#ffffff"/><text x="24" y="90" font-size="26" fill="#1b2442">Find care</text>
+      <rect x="24" y="116" width="242" height="48" rx="24" fill="#eef2f8"/>
+      <g fill="#eef2f8"><rect x="24" y="190" width="242" height="90" rx="18"/><rect x="24" y="296" width="242" height="90" rx="18"/><rect x="24" y="402" width="242" height="90" rx="18"/></g>
+      <g fill="#8fa8f7"><circle cx="64" cy="235" r="22"/><circle cx="64" cy="341" r="22"/><circle cx="64" cy="447" r="22"/></g>
+    </g>
+    <g transform="translate(1150 150)">
+      <rect width="290" height="600" rx="40" fill="#ffffff"/><text x="24" y="90" font-size="26" fill="#1b2442">Book</text>
+      <g fill="#eef2f8"><rect x="24" y="120" width="70" height="70" rx="16"/><rect x="110" y="120" width="70" height="70" rx="16" fill="#8fa8f7"/><rect x="196" y="120" width="70" height="70" rx="16"/></g>
+      <g fill="#eef2f8"><rect x="24" y="220" width="114" height="44" rx="22"/><rect x="152" y="220" width="114" height="44" rx="22" fill="#1b2442"/><rect x="24" y="278" width="114" height="44" rx="22"/><rect x="152" y="278" width="114" height="44" rx="22"/></g>
+      <rect x="24" y="520" width="242" height="52" rx="26" fill="#1b2442"/>
+    </g>
+    <text x="130" y="100" font-size="18" letter-spacing="3" fill="#7c8ca4">HALCYON — ONBOARDING — WELCOME, CONSENT, FIND, BOOK</text>
+  </g>
+</svg>
