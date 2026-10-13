@@ -56,6 +56,8 @@ export const integratePage = {
         body: "Custom data systems and AI where they earn their place in the workflow.",
       },
     ],
+    nextLead: "Need us to keep it running?",
+    next: { label: "See Managed Services", href: "/integrate/managed-services" },
   },
   process: {
     label: "Working together",

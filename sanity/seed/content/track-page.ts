@@ -38,6 +38,10 @@ export interface TrackPageData {
     readonly label: string;
     readonly heading: string;
     readonly items: readonly Step[];
+    /** Optional: set before the link under the items. */
+    readonly nextLead?: string;
+    /** Optional: a way on from the work. */
+    readonly next?: { readonly label: string; readonly href: string };
   };
   readonly process: {
     readonly label: string;

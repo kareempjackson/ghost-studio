@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { stegaClean } from "next-sanity";
 import { pageMetadata } from "@/lib/seo";
-import Image from "next/image";
 import type { CSSProperties } from "react";
 import { getEngagement } from "@/sanity/content";
 import type { TrackPageData } from "@/sanity/types";
@@ -14,7 +13,7 @@ import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 import { LABEL } from "./StudioStrip";
 import { Questions } from "../build/_components/Questions";
-import { Visual } from "./Visual";
+import { WordmarkPlate } from "./WordmarkPlate";
 import { Rich } from "./Rich";
 
 /** Metadata for a track page, from its document in Sanity. */
@@ -91,29 +90,7 @@ export async function TrackPage({
         />
 
         {/* Edge to edge, the wordmark across it. */}
-        <div
-          data-ground="dark"
-          style={{ backgroundColor: plate.ground || PLATE }}
-          className="relative aspect-[4/3] overflow-hidden sm:aspect-[16/9] lg:aspect-[1512/760]"
-          {...(plate.src || plate.video ? {} : { role: "img", "aria-label": plate.alt })}
-        >
-          {(plate.src || plate.video) && (
-            <Visual
-              src={plate.src}
-              video={plate.video}
-              alt={plate.alt}
-              sizes="100vw"
-              className="object-cover"
-            />
-          )}
-          <Image
-            src="/logos/wordmark-flat.svg"
-            alt=""
-            width={923}
-            height={204}
-            className="absolute top-1/2 left-1/2 w-[62%] -translate-x-1/2 -translate-y-1/2 lg:w-[54%]"
-          />
-        </div>
+        <WordmarkPlate plate={plate} ground={PLATE} />
 
         {/* The terms, straight after the picture: what it costs, how long. */}
         <div className="flex flex-col gap-4 px-5 pt-14 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12 lg:pt-20">
@@ -160,6 +137,31 @@ export async function TrackPage({
               </li>
             ))}
           </ol>
+
+          {/* A way on from the work, where the track has one. */}
+          {shape.next && (
+            <p className="mt-14 text-[1rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-20 lg:text-[1.0625rem]">
+              {shape.next.lead && <>{shape.next.lead} </>}
+              <a
+                href={shape.next.href}
+                className="group inline-flex items-center gap-2 text-primary underline decoration-ink-300 underline-offset-4 transition-colors duration-200 hover:text-accent hover:decoration-current"
+              >
+                {shape.next.label}
+                <svg
+                  aria-hidden
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-1"
+                >
+                  <path d="M3 8h10M9 4l4 4-4 4" />
+                </svg>
+              </a>
+            </p>
+          )}
         </section>
 
         <section

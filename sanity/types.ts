@@ -531,12 +531,40 @@ export interface TrackPageData extends Seo, Cover {
   readonly plate: { readonly src: string | null; readonly video: Film; readonly alt: string; readonly ground: string | null };
   readonly terms: { readonly price: string; readonly minimum: string; readonly compare: Link };
   readonly who: { readonly label: string; readonly heading: Lines; readonly deck: Rich };
-  readonly shape: { readonly label: string; readonly heading: string; readonly items: readonly Step[] };
+  readonly shape: {
+    readonly label: string;
+    readonly heading: string;
+    readonly items: readonly Step[];
+    /** A way on under the items, where the track has one: Integrate's to Managed services. */
+    readonly next: { readonly lead: string | null; readonly label: string; readonly href: string } | null;
+  };
   readonly process: { readonly label: string; readonly heading: Lines; readonly items: readonly Step[] };
   readonly questions: { readonly label: string; readonly heading: string; readonly items: readonly Question[] };
   readonly others: { readonly label: string };
   /** The project the page closes on; null only with no project to show. */
   readonly featured: Project | null;
+}
+
+/** One of the things managed services covers: the line a client would say, what we do, and what's included. */
+export interface ManagedService {
+  readonly title: Lines;
+  readonly quote: string;
+  readonly body: Rich;
+  readonly covered: readonly string[];
+}
+
+export interface ManagedServicesPage extends Seo, Cover {
+  readonly plate: { readonly src: string | null; readonly video: Film; readonly alt: string; readonly ground: string | null };
+  readonly who: { readonly heading: string; readonly items: readonly { readonly title: Lines; readonly body: Rich }[] };
+  readonly included: {
+    readonly label: string;
+    readonly heading: Lines;
+    readonly coveredLabel: string;
+    readonly services: readonly ManagedService[];
+  };
+  readonly setup: { readonly heading: Lines; readonly body: Rich; readonly aside: Rich };
+  readonly pricing: { readonly heading: string; readonly body: Rich };
+  readonly questions: { readonly heading: Lines; readonly items: readonly Question[] };
 }
 
 export interface Note {

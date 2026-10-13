@@ -18,6 +18,7 @@ export const resolve: PresentationPluginOptions["resolve"] = {
     { route: "/", filter: `_id == "homePage"` },
     { route: "/about", filter: `_id == "aboutPage"` },
     { route: "/services", filter: `_id == "servicesPage"` },
+    { route: "/integrate/managed-services", filter: `_id == "managedServicesPage"` },
     { route: "/who-we-serve", filter: `_id == "whoWeServePage"` },
     { route: "/work", filter: `_id == "workPage"` },
     { route: "/insights", filter: `_id == "insightsPage"` },
@@ -58,6 +59,7 @@ export const resolve: PresentationPluginOptions["resolve"] = {
       ],
     }),
     aboutPage: defineLocations(at("About", "/about")),
+    managedServicesPage: defineLocations(at("Managed services", "/integrate/managed-services")),
     servicesPage: defineLocations({
       locations: [
         { title: "Services", href: "/services" },

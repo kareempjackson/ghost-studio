@@ -310,6 +310,59 @@ export const contactPage = defineType({
   preview: single("Contact page"),
 });
 
+/**
+ * `/integrate/managed-services`: IT support as a monthly service. Its own design: who
+ * it is for, the four things it covers (each with the line a client would
+ * say, what we do, and what's covered), why it runs best after Integrate,
+ * how it's priced, and the questions left over.
+ */
+export const managedServicesPage = defineType({
+  name: "managedServicesPage",
+  title: "Managed services",
+  type: "document",
+  fields: [
+    ...seo(),
+    ...cover,
+    object("plate", [picture("image"), colour("ground", { required: false })], {
+      description: "Edge to edge under the cover, the wordmark across it.",
+    }),
+    object("who", [
+      text("heading"),
+      list("items", [lines("title"), para("body")], {
+        preview: { select: { title: "title.0", subtitle: "title.1" } },
+      }),
+    ]),
+    object("included", [
+      text("label"),
+      lines("heading"),
+      text("coveredLabel", { description: "Over each service's list, e.g. What's covered." }),
+      list(
+        "services",
+        [
+          lines("title"),
+          text("quote", { description: "What a client would say. Set in quotation marks under the title." }),
+          para("body"),
+          lines("covered", { description: "One item per line." }),
+        ],
+        { preview: { select: { title: "title.0", subtitle: "quote" } } },
+      ),
+    ]),
+    object(
+      "setup",
+      [lines("heading"), para("body"), para("aside", { description: "The shorter column at the right." })],
+      { title: "Set up by us", description: "The dark band: why it runs best on systems we set up." },
+    ),
+    object("pricing", [text("heading"), para("body")]),
+    object("questions", [
+      lines("heading"),
+      list("items", [text("question"), para("answer")], {
+        preview: { select: { title: "question" } },
+      }),
+    ]),
+  ],
+  preview: single("Managed services"),
+});
+
 export const trackPage = defineType({
   name: "trackPage",
   title: "Track page",
@@ -321,7 +374,21 @@ export const trackPage = defineType({
     object("plate", [picture("image"), colour("ground", { required: false })]),
     object("terms", [text("price"), text("minimum"), action("compare")]),
     object("who", [text("label"), lines("heading"), para("deck")]),
-    object("shape", [text("label"), text("heading"), list("items", step, stepPreview)]),
+    object("shape", [
+      text("label"),
+      text("heading"),
+      list("items", step, stepPreview),
+      text("nextLead", {
+        required: false,
+        title: "Line before the link",
+        description: "Optional. Set before the link under the items, e.g. Need us to keep it running?",
+      }),
+      action("next", {
+        required: false,
+        title: "Link under the items",
+        description: "Optional. A way on from the work, e.g. See Managed Services → /integrate/managed-services.",
+      }),
+    ]),
     object("process", [text("label"), lines("heading"), list("items", step, stepPreview)]),
     object("questions", [
       text("label"),

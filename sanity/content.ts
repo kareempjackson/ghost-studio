@@ -34,6 +34,7 @@ import type {
   HomePage,
   InsightsPage,
   LegalDocument,
+  ManagedServicesPage,
   Navigation,
   PointOfView,
   Process,
@@ -571,13 +572,28 @@ export const getTrackPage = (slug: string) =>
       "plate": {"src": ${url("plate.image")}, "video": ${vid("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
       terms{price, minimum, compare${link}},
       who{label, heading, deck},
-      shape{label, heading, ${STEPS}},
+      shape{label, heading, ${STEPS}, "next": select(defined(next.href) => {"lead": nextLead, "label": next.label, "href": next.href})},
       process{label, heading, ${STEPS}},
       questions{label, heading, items[]{question, answer}},
       others{label},
       "featured": ${featured("featured")}
     }`,
     ["homePage", "project"],
+  );
+
+export const getManagedServicesPage = () =>
+  single<ManagedServicesPage>(
+    "managedServicesPage",
+    `{
+      ${SEO}, ${COVER},
+      "plate": {"src": ${url("plate.image")}, "video": ${vid("plate.image")}, "alt": coalesce(plate.image.alt, ""), "ground": plate.ground},
+      who{heading, "items": coalesce(items[]{title, body}, [])},
+      included{label, heading, coveredLabel, "services": coalesce(services[]{title, quote, body, "covered": coalesce(covered, [])}, [])},
+      setup{heading, body, aside},
+      pricing{heading, body},
+      questions{heading, "items": coalesce(items[]{question, answer}, [])}
+    }`,
+    [],
   );
 
 export async function getFamilyPage(slug: string): Promise<FamilyPageData> {
@@ -1046,6 +1062,7 @@ const PAGE_PATHS: Record<string, string> = {
   homePage: "/",
   aboutPage: "/about",
   servicesPage: "/services",
+  managedServicesPage: "/integrate/managed-services",
   whoWeServePage: "/who-we-serve",
   workPage: "/work",
   insightsPage: "/insights",

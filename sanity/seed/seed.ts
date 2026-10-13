@@ -37,6 +37,7 @@ import { articles, insightsPage, topics } from "./content/insights";
 import { integratePage } from "./content/integrate";
 import { journal } from "./content/journal";
 import { legalDocuments } from "./content/legal";
+import { managedServicesPage } from "./content/managed-services";
 import { menuContact, menuFeatureLabel, siteNavigation, ventureNavigation } from "./content/navigation";
 import { pointOfView } from "./content/point-of-view";
 import { process as processSteps } from "./content/process";
@@ -303,6 +304,14 @@ async function documents() {
   });
 
   add("servicesPage", "servicesPage", servicesPage);
+
+  {
+    const { plate, ...page } = managedServicesPage;
+    add("managedServicesPage", "managedServicesPage", {
+      ...page,
+      plate: { image: await image(plate.src, plate.alt), ground: plate.ground },
+    });
+  }
 
   /* Each audience is its own document: its card on /who-we-serve, and its
      page at /who-we-serve/[slug] where it has one. */

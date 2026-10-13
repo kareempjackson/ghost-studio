@@ -7,6 +7,7 @@ const PAGES = [
   "homePage",
   "aboutPage",
   "servicesPage",
+  "managedServicesPage",
   "whoWeServePage",
   "workPage",
   "contactPage",
