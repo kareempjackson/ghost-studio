@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
-import { projectHref } from "@/lib/links";
+import { currentFor, projectHref } from "@/lib/links";
 import { Visual } from "./Visual";
 import { useChrome } from "./ChromeProvider";
 import { Mark } from "./Mark";
@@ -46,9 +46,11 @@ export interface SiteMenuProps {
   open: boolean;
   /** Must be referentially stable — the dialog's own close event calls it. */
   onClose: () => void;
+  /** Where the reader is, to mark its route; null while it is not known. */
+  pathname: string | null;
 }
 
-export function SiteMenu({ id, open, onClose }: SiteMenuProps) {
+export function SiteMenu({ id, open, onClose, pathname }: SiteMenuProps) {
   const {
     settings: { email },
     navigation,
@@ -229,6 +231,7 @@ export function SiteMenu({ id, open, onClose }: SiteMenuProps) {
                         <a
                           href={item.href}
                           onClick={onClose}
+                          aria-current={currentFor(pathname, item.href)}
                           className="gs-menu-item inline-flex py-1"
                         >
                           <span className={word}>{item.label}</span>
@@ -278,6 +281,7 @@ export function SiteMenu({ id, open, onClose }: SiteMenuProps) {
                         href={item.href}
                         aria-expanded={isOpen}
                         aria-controls={panelId}
+                        aria-current={currentFor(pathname, item.href)}
                         onClick={(event) => {
                           if (window.matchMedia("(hover: hover)").matches) {
                             onClose();
@@ -327,6 +331,7 @@ export function SiteMenu({ id, open, onClose }: SiteMenuProps) {
                                 <a
                                   href={child.href}
                                   onClick={onClose}
+                                  aria-current={currentFor(pathname, child.href)}
                                   className="gs-menu-item flex items-center py-1.5 pl-5 lg:py-2.5 lg:pl-0"
                                 >
                                   <span className="gs-menu-word text-[1.125rem] leading-[1.25] tracking-[-0.02em] first-letter:uppercase lg:text-[1.1875rem]">

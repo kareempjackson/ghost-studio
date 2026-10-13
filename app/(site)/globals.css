@@ -291,7 +291,9 @@
   transition: color 240ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.gs-nav-link:hover {
+/* Hovered, and while the reader is on its page or in its section. */
+.gs-nav-link:hover,
+.gs-nav-link[aria-current] {
   color: var(--gs-accent-signal);
 }
 
@@ -377,9 +379,11 @@ button:hover > .gs-nav-muted {
   color: rgb(255 255 255 / 0.7);
 }
 
-/* Hovered, a link goes vermilion over the reel as it does on paper. */
+/* Hovered or current, a link stays vermilion over the reel as it does on paper. */
 [data-hero-over="1"] .gs-nav-link:hover,
-.gs-header[data-over-dark="true"] .gs-nav-link:hover {
+[data-hero-over="1"] .gs-nav-link[aria-current],
+.gs-header[data-over-dark="true"] .gs-nav-link:hover,
+.gs-header[data-over-dark="true"] .gs-nav-link[aria-current] {
   color: var(--gs-accent-signal);
 }
 
@@ -559,6 +563,12 @@ button:hover > .gs-nav-muted {
   color: var(--color-ink-950);
 }
 
+/* The route the reader is on, or in, holds the hover's vermilion. While the
+   pointer is on another, it recedes with the rest (below). */
+.gs-menu-item[aria-current] .gs-menu-word {
+  color: var(--gs-accent-signal);
+}
+
 .gs-menu-back {
   color: var(--color-ink-950);
 }
@@ -647,6 +657,19 @@ button:hover > .gs-nav-muted {
     .gs-menu-item:not(:hover):not(:focus-visible)
     .gs-menu-word {
     color: var(--color-ink-950);
+  }
+
+  /* The current route in an open group keeps its vermilion, not ink. */
+  .gs-menu-list
+    .gs-menu-group:hover
+    > .gs-menu-item[aria-current]:not(:hover):not(:focus-visible)
+    .gs-menu-word,
+  .gs-menu-list
+    .gs-menu-group:hover
+    .gs-menu-sub
+    .gs-menu-item[aria-current]:not(:hover):not(:focus-visible)
+    .gs-menu-word {
+    color: var(--gs-accent-signal);
   }
 
   .gs-menu-list

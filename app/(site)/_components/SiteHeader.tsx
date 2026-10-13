@@ -3,10 +3,12 @@
 import Link from "next/link";
 import type { RefObject } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { currentFor } from "@/lib/links";
 import { ArrowPill } from "./ArrowPill";
 import { useChrome } from "./ChromeProvider";
 import { Mark } from "./Mark";
 import { SiteMenu } from "./SiteMenu";
+import { WithPathname } from "./WithPathname";
 
 /**
  * Which ground the row is standing on.
@@ -90,6 +92,8 @@ function useGroundInk(ref: RefObject<HTMLElement | null>) {
  * Nav links are set in mono: 12px, upper case, 8% tracking, at full ink. Small
  * and open rather than large and loud — the row is chrome, and the links read
  * as an index. The pill beside them is the one thing that asks for anything.
+ * The link for where the reader is holds the vermilion it takes on hover
+ * (`aria-current`, coloured in globals.css).
  */
 const NAV_LINK_CLASS =
   "gs-nav-link block font-label text-[0.75rem] leading-none tracking-[0.08em] uppercase transition-colors duration-150";
@@ -141,15 +145,23 @@ export function SiteHeader() {
 
           <div className="flex items-center gap-3 lg:gap-6 xl:gap-7">
             <nav aria-label="Primary" className="hidden lg:block">
-              <ul className="flex items-center gap-8 xl:gap-12">
-                {headerNavigation.map((item) => (
-                  <li key={item.href}>
-                    <a href={item.href} className={NAV_LINK_CLASS}>
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <WithPathname>
+                {(pathname) => (
+                  <ul className="flex items-center gap-8 xl:gap-12">
+                    {headerNavigation.map((item) => (
+                      <li key={item.href}>
+                        <a
+                          href={item.href}
+                          aria-current={currentFor(pathname, item.href)}
+                          className={NAV_LINK_CLASS}
+                        >
+                          {item.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </WithPathname>
             </nav>
 
             <ArrowPill href={cta.href} size="sm" className="hidden lg:flex">
@@ -189,7 +201,11 @@ export function SiteHeader() {
         and stacks above the row regardless of where it is written. The
         header keeps the button; the plate keeps its own way out.
       */}
-      <SiteMenu id={MENU_ID} open={open} onClose={close} />
+      <WithPathname>
+        {(pathname) => (
+          <SiteMenu id={MENU_ID} open={open} onClose={close} pathname={pathname} />
+        )}
+      </WithPathname>
     </>
   );
 }

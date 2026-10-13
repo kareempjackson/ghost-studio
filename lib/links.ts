@@ -8,6 +8,19 @@ export const projectHref = (slug: string) => `/work/${slug}`;
 /** An insight's own page. The journal band on the home page links here too. */
 export const insightHref = (slug: string) => `/insights/${slug}`;
 
+/**
+ * Whether a link in the navigation is for where the reader is, as
+ * aria-current takes it: "page" on the page itself, "true" in the section it
+ * heads, so Work stays marked on a project. An anchor or another site is
+ * never current, and nothing is while the address is not yet known.
+ */
+export function currentFor(pathname: string | null, href: string): "page" | "true" | undefined {
+  if (!pathname || !href.startsWith("/") || href.includes("#")) return undefined;
+  const path = href.split("?")[0].replace(/(.)\/$/, "$1");
+  if (pathname === path) return "page";
+  return path !== "/" && pathname.startsWith(`${path}/`) ? "true" : undefined;
+}
+
 /** The way in from a discipline, carrying what the reader was reading. */
 export const serviceEnquiryHref = (slug: string) => `/contact?need=${slug}`;
 
