@@ -59,11 +59,14 @@ function CornerArrow() {
 function ProjectCard({
   project,
   previewLabel,
+  partOf,
   featured = false,
   side = "left",
 }: {
   project: Project;
   previewLabel: string;
+  /** Before the larger project's name, on a card that is one part of it. */
+  partOf: string;
   featured?: boolean;
   side?: "left" | "right";
 }) {
@@ -124,8 +127,12 @@ function ProjectCard({
       <p className="mt-2 text-[0.9375rem] leading-[1.5] text-secondary lg:text-[1rem]">
         {project.tagline}
       </p>
+      {/* Where it was and what for — or, for one part of a larger
+          project, which: the rest it shares with that project. */}
       <p className={`mt-5 text-ink-500 lg:mt-6 ${MONO}`}>
-        {project.location} / {project.sector}
+        {project.parent
+          ? `${partOf} ${project.parent.name}`
+          : `${project.location} / ${project.sector}`}
       </p>
     </a>
   );
@@ -143,12 +150,14 @@ export function WorkGallery({
   projects,
   all,
   previewLabel,
+  partOf,
   empty,
 }: {
   projects: readonly Project[];
   /** The filter's first pill, and the index's hidden heading. */
   all: string;
   previewLabel: string;
+  partOf: string;
   /** What shows when the filter leaves nothing standing. */
   empty: string;
 }) {
@@ -226,7 +235,12 @@ export function WorkGallery({
                 exit={{ opacity: 0, y: -16 }}
                 transition={{ duration: 0.5, ease: EASE_OUT }}
               >
-                <ProjectCard project={lead} previewLabel={previewLabel} featured />
+                <ProjectCard
+                  project={lead}
+                  previewLabel={previewLabel}
+                  partOf={partOf}
+                  featured
+                />
               </motion.div>
             </AnimatePresence>
 
@@ -255,6 +269,7 @@ export function WorkGallery({
                       <ProjectCard
                         project={project}
                         previewLabel={previewLabel}
+                        partOf={partOf}
                         side={index % 2 ? "right" : "left"}
                       />
                     </motion.li>

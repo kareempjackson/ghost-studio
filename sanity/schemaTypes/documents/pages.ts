@@ -246,6 +246,29 @@ export const workPage = defineType({
           title: "Client feedback heading",
           description: "Over the quote, e.g. In their words.",
         }),
+        text("partOf", {
+          required: false,
+          title: "Part of label",
+          description: "Over the larger project, on a case study that is one part of it. Part of if empty.",
+        }),
+        object(
+          "inDepth",
+          [
+            text("label", { required: false, description: "In depth if empty." }),
+            text("heading", {
+              required: false,
+              description: "Over the parts listed after a project's chapters. The work, in full. if empty.",
+            }),
+            text("action", {
+              required: false,
+              description: "What the link at the end of a chapter says, for screen readers. Read the full case study if empty.",
+            }),
+          ],
+          {
+            title: "In depth",
+            description: "A project's own parts, each told in full as a case study of its own.",
+          },
+        ),
         object("more", [text("label"), text("heading"), action()], {
           title: "More work",
           description: "The two projects at the foot of every case study.",

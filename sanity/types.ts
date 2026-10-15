@@ -150,6 +150,8 @@ export interface Project {
   /** Fill crops to the card; fit shows the whole picture on the card's ground. */
   readonly fit: "cover" | "contain";
   readonly imageAlt: string;
+  /** The larger project this one is part of, told in full; null for one of its own. */
+  readonly parent: { readonly slug: string; readonly name: string } | null;
 }
 
 /** An insight's topic, by name: the topics are documents editors add. */
@@ -186,6 +188,8 @@ export interface Chapter {
   readonly listHeading: string | null;
   readonly items: readonly { readonly lead: string | null; readonly text: Rich }[];
   readonly media: readonly (readonly Media[])[];
+  /** One of the project's own parts that tells this chapter in full: linked at its end. */
+  readonly deepDive: Project | null;
 }
 
 /** A project's own page: the card's record, and the case study if written. */
@@ -200,6 +204,8 @@ export interface ProjectDetail extends Project {
   readonly website: string | null;
   readonly feature: Media | null;
   readonly chapters: readonly Chapter[];
+  /** Its own parts that no chapter links to, listed after the chapters. */
+  readonly inDepth: readonly Project[];
   readonly testimonial: ClientTestimonial | null;
   readonly more: readonly Project[];
 }
@@ -481,6 +487,10 @@ export interface CaseStudyLabels {
   /** Beside a project's testimonial, and over its quote. */
   readonly feedbackLabel: string;
   readonly feedbackHeading: string;
+  /** Over the larger project, on a case study that is one part of it. */
+  readonly partOf: string;
+  /** A project's own parts: linked from its chapters, and listed after them. */
+  readonly inDepth: { readonly label: string; readonly heading: string; readonly action: string };
   readonly more: { readonly label: string; readonly heading: string; readonly action: Link };
 }
 

@@ -74,43 +74,48 @@ const plate = (name: string, o: { title?: string; description?: string; group?: 
  * story. Each part is its words and then its pictures, and a stop on the bar
  * that runs along the page.
  */
-const chapters = defineField({
-  name: "chapters",
-  type: "array",
-  description: "The story, part by part. Each one is a stop on the bar that runs along the page.",
-  of: [
-    defineArrayMember({
-      type: "object",
-      name: "chapter",
-      fields: [
-        text("label", { description: "The stop on the bar, and the label beside the heading." }),
-        phrase("heading"),
-        paras("body"),
-        text("listHeading", { required: false, description: "Over the list. What We Did if empty." }),
-        defineField({
-          name: "items",
-          type: "array",
-          description: "What we did, one per line. A lead is set in bold before the line.",
-          of: [
-            defineArrayMember({
-              type: "object",
-              fields: [text("lead", { required: false }), phrase("text")],
-              preview: { select: { title: "text", subtitle: "lead" } },
-            }),
-          ],
-        }),
-        defineField({
-          name: "media",
-          type: "array",
-          title: "Plates",
-          description: "Set after the text, before the next part.",
-          of: [defineArrayMember({ type: "mediaRow" })],
-        }),
-      ],
-      preview: { select: { title: "label", subtitle: "heading" } },
-    }),
-  ],
-});
+const chapters = (extra: ReturnType<typeof defineField>[] = []) =>
+  defineField({
+    name: "chapters",
+    type: "array",
+    description: "The story, part by part. Each one is a stop on the bar that runs along the page.",
+    of: [
+      defineArrayMember({
+        type: "object",
+        name: "chapter",
+        fields: [
+          text("label", { description: "The stop on the bar, and the label beside the heading." }),
+          phrase("heading"),
+          paras("body"),
+          text("listHeading", { required: false, description: "Over the list. What We Did if empty." }),
+          defineField({
+            name: "items",
+            type: "array",
+            description: "What we did, one per line. A lead is set in bold before the line.",
+            of: [
+              defineArrayMember({
+                type: "object",
+                fields: [text("lead", { required: false }), phrase("text")],
+                preview: { select: { title: "text", subtitle: "lead" } },
+              }),
+            ],
+          }),
+          defineField({
+            name: "media",
+            type: "array",
+            title: "Plates",
+            description: "Set after the text, before the next part.",
+            of: [defineArrayMember({ type: "mediaRow" })],
+          }),
+          ...extra,
+        ],
+        preview: { select: { title: "label", subtitle: "heading" } },
+      }),
+    ],
+  });
+
+/** A document's own id, as a reference filter needs it: without "drafts.". */
+const ownId = (document: { _id: string }) => document._id.replace(/^drafts\./, "");
 
 export const project = defineType({
   name: "project",
@@ -123,6 +128,22 @@ export const project = defineType({
   fields: [
     text("name", { description: "The client, as they write it themselves.", group: "card" }),
     { ...slug("name"), group: "card" },
+    defineField({
+      name: "parent",
+      title: "Part of",
+      type: "reference",
+      to: [{ type: "project" }],
+      group: "card",
+      description:
+        "Optional. The larger project this is one part of, told in full: the IT, automation or integration work within a client's wider engagement, say. It keeps its own card on /work and its own page; the larger project links to it, and it links back. Empty for a project of its own.",
+      options: {
+        /* One level: a project that is itself part of another can't be one. */
+        filter: ({ document }) => ({
+          filter: "!defined(parent) && !(_id in [$id, 'drafts.' + $id])",
+          params: { id: ownId(document) },
+        }),
+      },
+    }),
     text("scope", { description: "What the studio did, in three words or fewer.", group: "card" }),
     text("tagline", { description: "The job in one line.", group: "card" }),
     text("location", { group: "card" }),
@@ -208,7 +229,25 @@ export const project = defineType({
       description: "The client's live site, for Visit site.",
     }),
     plate("feature", { group: "story", description: "The plate between the opening and the chapters." }),
-    { ...chapters, group: "story" },
+    {
+      ...chapters([
+        defineField({
+          name: "deepDive",
+          title: "In depth",
+          type: "reference",
+          to: [{ type: "project" }],
+          description:
+            "Optional. One of this project's own parts (a project set Part of this one) that tells this chapter in full: linked at the end of it. Parts no chapter links to are listed after the chapters.",
+          options: {
+            filter: ({ document }) => ({
+              filter: "parent._ref == $id",
+              params: { id: ownId(document) },
+            }),
+          },
+        }),
+      ]),
+      group: "story",
+    },
     object(
       "testimonial",
       [
@@ -237,7 +276,14 @@ export const project = defineType({
       validation: (r) => r.max(2),
     }),
   ],
-  preview: { select: { title: "name", subtitle: "scope", media: "image" } },
+  preview: {
+    select: { title: "name", scope: "scope", parent: "parent.name", media: "image" },
+    prepare: ({ title, scope, parent, media }) => ({
+      title,
+      subtitle: parent ? `Part of ${parent}` : scope,
+      media,
+    }),
+  },
 });
 
 /**
@@ -333,7 +379,7 @@ export const familyStory = defineType({
       description: "Optional. A way out to the thing itself: the prototype, the partner's site, the showcase.",
     }),
     plate("feature", { group: "story", description: "The plate between the opening and the chapters." }),
-    { ...chapters, group: "story" },
+    { ...chapters(), group: "story" },
     object(
       "outcome",
       [

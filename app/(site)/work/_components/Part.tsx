@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { CSSProperties } from "react";
+import { projectHref } from "@/lib/links";
 import type { Chapter } from "@/sanity/types";
 import { MONO } from "../../_components/SectionHead";
 import { Rich } from "../../_components/Rich";
@@ -26,16 +28,23 @@ const pad = (n: number) => String(n).padStart(2, "0");
  * `number` sets the part's place before its label, for a story read in
  * order: a Ghost family story's chapters, where a case study's parts are
  * trades that can be read in any.
+ *
+ * A chapter that names one of the project's own parts — the same work told
+ * in full, as a case study of its own — ends on the way to it.
  */
 export function Part({
   chapter,
   listHeading,
   number,
+  inDepth,
 }: {
   chapter: Chapter;
   listHeading: string;
   number?: number;
+  /** The words on the way to a part told in full; needed where a chapter names one. */
+  inDepth?: { readonly label: string; readonly action: string };
 }) {
+  const deep = chapter.deepDive;
   const headingId = `${chapter.id}-heading`;
   return (
     <section
@@ -74,6 +83,39 @@ export function Part({
                 ))}
               </ul>
             </>
+          )}
+          {deep && inDepth && (
+            <Link
+              href={projectHref(deep.slug)}
+              aria-label={`${inDepth.action}: ${deep.name}`}
+              className="group mt-14 flex items-center justify-between gap-6 rounded-[0.75rem] bg-ink-100 py-5 pr-5 pl-6 transition-colors duration-200 hover:bg-ink-200 lg:mt-20 lg:py-7 lg:pr-7 lg:pl-8"
+            >
+              <span className="min-w-0">
+                <span className={`${MONO} block text-ink-500`}>{inDepth.label}</span>
+                <span className="mt-3 block text-[1.25rem] leading-[1.2] tracking-[-0.03em] text-ink-950 lg:mt-4 lg:text-[1.5rem]">
+                  {deep.name}
+                </span>
+                <span className="mt-1.5 block text-[0.9375rem] leading-[1.45] tracking-[-0.01em] text-secondary">
+                  {deep.tagline}
+                </span>
+              </span>
+              <span
+                aria-hidden
+                className="grid size-11 shrink-0 place-items-center rounded-full bg-white text-ink-950 transition-colors duration-200 group-hover:bg-ink-950 group-hover:text-white lg:size-12"
+              >
+                <svg
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                >
+                  <path d="M4.5 11.5l7-7M5.5 4.5h6v6" />
+                </svg>
+              </span>
+            </Link>
           )}
         </div>
       </div>

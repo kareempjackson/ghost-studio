@@ -88,7 +88,8 @@ const PROJECT = `{
   "image": ${url("image")},
   "imageVideo": ${vid("image")},
   "fit": coalesce(fit, "cover"),
-  "imageAlt": coalesce(image.alt, "")
+  "imageAlt": coalesce(image.alt, ""),
+  "parent": select(defined(parent->slug.current) => parent->{"slug": slug.current, name})
 }`;
 
 /**
@@ -136,7 +137,8 @@ const CHAPTERS = `coalesce(chapters[]{
   "body": coalesce(body, []),
   listHeading,
   "items": coalesce(items[]{lead, text}, []),
-  "rows": coalesce(media[]{"items": coalesce(items[]${MEDIA}, [])}, [])
+  "rows": coalesce(media[]{"items": coalesce(items[]${MEDIA}, [])}, []),
+  "deepDive": select(defined(deepDive->slug.current) => deepDive->${PROJECT})
 }, [])`;
 
 /** A family story's card. Its address and number are set by `numbered`. */
@@ -427,6 +429,12 @@ export const getWorkPage = () =>
         back, overview, readMore, readLess, visit, listHeading, partsLabel,
         "feedbackLabel": coalesce(feedbackLabel, "Client feedback"),
         "feedbackHeading": coalesce(feedbackHeading, "In their words."),
+        "partOf": coalesce(partOf, "Part of"),
+        "inDepth": {
+          "label": coalesce(inDepth.label, "In depth"),
+          "heading": coalesce(inDepth.heading, "The work, in full."),
+          "action": coalesce(inDepth.action, "Read the full case study")
+        },
         more{label, heading, action${link}}
       }
     }`,
@@ -804,6 +812,12 @@ export async function getProjectSlugs(): Promise<string[]> {
  * A project's page. The "more work" at its foot is what the project names,
  * or else the next two on /work, wrapping round, so every page ends on
  * somewhere to go.
+ *
+ * A project can be one part of a larger one, told in full: the IT work
+ * within a client's wider engagement, say. The larger project links to each
+ * of its parts — from the chapter that names it, or, for a part no chapter
+ * names, from the band after the chapters — and a part's own "more work"
+ * leads with the project it belongs to and that project's other parts.
  */
 export async function getProject(slug: string): Promise<ProjectDetail | null> {
   const data = (await sanityFetch({
@@ -826,7 +840,10 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
           "portrait": portrait${PORTRAIT},
           "portraitAlt": coalesce(portrait.alt, "")
         }),
-        "more": coalesce(more[defined(@->slug.current)]->${PROJECT}, [])
+        "more": coalesce(more[defined(@->slug.current)]->${PROJECT}, []),
+        "parentCard": select(defined(parent->slug.current) => parent->${PROJECT}),
+        "siblings": select(defined(parent._ref) => *[_type == "project" && defined(slug.current) && parent._ref == ^.parent._ref && slug.current != $slug] | order(_createdAt asc) ${PROJECT}, []),
+        "parts": *[_type == "project" && defined(slug.current) && parent._ref == ^._id] | order(_createdAt asc) ${PROJECT}
       },
       "order": *[_id == "workPage"][0]{"list": [
         ...coalesce(projects[defined(@->slug.current)]->${PROJECT}, []),
@@ -837,7 +854,10 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
     tags: ["project", "workPage"],
   })) as {
     project:
-      | (Omit<ProjectDetail, "chapters" | "testimonial"> & {
+      | (Omit<ProjectDetail, "chapters" | "testimonial" | "inDepth"> & {
+          parentCard: Project | null;
+          siblings: Project[];
+          parts: Project[];
           chapters: ChapterRow[];
           testimonial:
             | (Omit<NonNullable<ProjectDetail["testimonial"]>, "portrait"> & {
@@ -851,18 +871,36 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
   if (!data.project) return null;
 
   const { project, order } = data;
+  const { parentCard, siblings, parts: own, ...rest } = project;
   const at = order.findIndex((p) => p.slug === slug);
   const others = [...order.slice(at + 1), ...order.slice(0, Math.max(at, 0))].filter(
     (p) => p.slug !== slug,
   );
+  const chapters = parts(project.chapters);
+
+  /* The parts no chapter links to, listed after the chapters. */
+  const linked = new Set(chapters.map((c) => c.deepDive && stegaClean(c.deepDive.slug)));
+  const inDepth = own.filter((p) => !linked.has(stegaClean(p.slug)));
+
+  /* A part's own family first; the parts a project already links to are not
+     offered again at its foot. */
+  const ownSlugs = new Set(own.map((p) => stegaClean(p.slug)));
+  const seen = new Set<string>();
+  const fallback = [...(parentCard ? [parentCard, ...siblings] : []), ...others].filter((p) => {
+    const key = stegaClean(p.slug);
+    if (key === slug || ownSlugs.has(key) || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 
   return {
-    ...project,
-    chapters: parts(project.chapters),
+    ...rest,
+    chapters,
+    inDepth,
     testimonial: project.testimonial
       ? { ...project.testimonial, portrait: portraitUrl(project.testimonial.portrait) }
       : null,
-    more: project.more.length ? project.more : others.slice(0, 2),
+    more: project.more.length ? project.more : fallback.slice(0, 2),
   };
 }
 

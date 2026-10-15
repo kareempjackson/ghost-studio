@@ -72,6 +72,7 @@ export default async function Work() {
           projects={workPage.projects}
           all={workPage.all}
           previewLabel={workPage.previewLabel}
+          partOf={workPage.caseStudy.partOf}
           empty={workPage.empty}
         />
 

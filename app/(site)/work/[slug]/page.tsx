@@ -1,3 +1,4 @@
+import { projectHref } from "@/lib/links";
 import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { Picture } from "../../_components/Picture";
@@ -111,8 +112,30 @@ export default async function ProjectPage({
             >
               <span aria-hidden>←</span> {labels.back}
             </Link>
+            {/* One part of a larger project: the way to it, before the record. */}
+            {project.parent && (
+              <div className="mt-12 lg:mt-20">
+                <p className={`${MONO} text-ink-500`}>{labels.partOf}</p>
+                <Link
+                  href={projectHref(project.parent.slug)}
+                  className="group mt-3 inline-flex items-baseline gap-2 text-[1.125rem] leading-[1.3] tracking-[-0.02em] text-ink-950 transition-colors duration-200 hover:text-accent lg:text-[1.25rem]"
+                >
+                  {project.parent.name}
+                  <span
+                    aria-hidden
+                    className="text-[0.875em] transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  >
+                    ↗
+                  </span>
+                </Link>
+              </div>
+            )}
             {project.facts.length > 0 && (
-              <dl className="mt-12 max-w-[26rem] space-y-5 text-[0.9375rem] leading-[1.6] tracking-[-0.01em] text-primary lg:mt-20">
+              <dl
+                className={`max-w-[26rem] space-y-5 text-[0.9375rem] leading-[1.6] tracking-[-0.01em] text-primary ${
+                  project.parent ? "mt-10 lg:mt-12" : "mt-12 lg:mt-20"
+                }`}
+              >
                 {project.facts.map((fact) => (
                   <div key={fact.label}>
                     <dt className="inline font-semibold">{fact.label}:</dt>{" "}
@@ -185,9 +208,39 @@ export default async function ProjectPage({
                 key={chapter.id}
                 chapter={chapter}
                 listHeading={chapter.listHeading || labels.listHeading}
+                inDepth={labels.inDepth}
               />
             ))}
           </div>
+        )}
+
+        {/* Its own parts, each told in full, that no chapter has linked to. */}
+        {project.inDepth.length > 0 && (
+          <section
+            aria-labelledby="in-depth-heading"
+            className="px-5 pt-24 sm:px-8 lg:px-12 lg:pt-36"
+          >
+            <p className={`${MONO} text-ink-500`}>{labels.inDepth.label}</p>
+            <h2
+              id="in-depth-heading"
+              className="mt-6 text-primary lg:mt-8"
+              style={MORE_STYLE}
+            >
+              {labels.inDepth.heading}
+            </h2>
+            <ul className="mt-10 grid gap-x-6 gap-y-14 md:grid-cols-2 lg:mt-12">
+              {project.inDepth.map((part) => (
+                <li key={part.slug}>
+                  <ProjectCard
+                    project={part}
+                    aspect="aspect-[10/7]"
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    previewLabel={workPage.previewLabel}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         {/* What the client said: the story's close, once they have said it. */}
