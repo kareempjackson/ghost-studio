@@ -23,6 +23,7 @@ export function Visual({
   sizes,
   className = "object-cover",
   priority = false,
+  position,
 }: {
   src: string | null | undefined;
   video?: FilmUrl;
@@ -31,7 +32,15 @@ export function Visual({
   /** Classes for the picture or the film: fit, transforms. */
   className?: string;
   priority?: boolean;
+  /**
+   * Where the picture sits in its slot, as `object-position`: from
+   * coverPosition in lib/sanity-image.ts, so a cover crop keeps the face the
+   * editor marked in frame. The middle if unset. A film is framed by its own
+   * export, so it takes none.
+   */
+  position?: string;
 }) {
+  const style = position ? { objectPosition: position } : undefined;
   if (video) {
     /* The film bleeds 2px past its slot on every side, which the slot
        clips: exported films often carry a dark row or two at their edges,
@@ -48,5 +57,7 @@ export function Visual({
     );
   }
   if (!src) return null;
-  return <Picture src={src} alt={alt} fill sizes={sizes} preload={priority} className={className} />;
+  return (
+    <Picture src={src} alt={alt} fill sizes={sizes} preload={priority} className={className} style={style} />
+  );
 }

@@ -682,6 +682,50 @@ button:hover > .gs-nav-muted {
 }
 
 /* ---------------------------------------------------------------------------
+   The team's portraits, on /about.
+
+   Monochrome at rest, the photographs set in the brand's ink so the grid
+   reads as one. The one under the pointer comes forward: it takes its colour
+   and leans in toward the eye line, a third of the way down the square where
+   the portrait is framed, while the rest of the team recedes, as the menu's
+   routes do. Only where there is a pointer to hover with; on touch every
+   portrait keeps its colour. With reduced motion it does not lean in, but
+   still comes forward in colour.
+--------------------------------------------------------------------------- */
+
+.gs-portrait {
+  transform-origin: 50% 33%;
+  transition:
+    filter 640ms cubic-bezier(0.4, 0, 0.2, 1),
+    scale 640ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@media (hover: hover) {
+  .gs-team > li {
+    transition: opacity 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .gs-portrait {
+    filter: grayscale(1);
+  }
+
+  .gs-team > li:hover .gs-portrait {
+    filter: grayscale(0);
+    scale: 1.04;
+  }
+
+  .gs-team:has(> li:hover) > li:not(:hover) {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gs-team > li:hover .gs-portrait {
+    scale: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    The intro.
 
    Once per page load of the home page, decided before first paint by the

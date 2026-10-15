@@ -28,3 +28,33 @@ export const isSizable = (src: string) =>
 export function sanityImage(src: string, width: number, quality = 75) {
   return isSizable(src) ? `${src}?w=${width}&q=${quality}&fit=max&auto=format` : src;
 }
+
+/** A point on a picture, 0 to 1 across and down: the hotspot an editor set. */
+export interface Focus {
+  readonly x: number;
+  readonly y: number;
+}
+
+/**
+ * Where to set a picture in a frame of another shape, as `object-position`,
+ * so `focus` lands at `place` in the frame — its centre, unless asked
+ * otherwise — as near as the picture allows without showing past its edges.
+ * Cropping in the page rather than in the picture's address keeps it one
+ * address, sized for each screen.
+ *
+ * `object-position` alone does not put a point anywhere — 30% sets the
+ * picture's 30% line on the frame's — so the point is turned into the share
+ * of the overflow to hide before it, on each axis that overflows.
+ */
+export function coverPosition(
+  focus: Focus,
+  pictureAspect: number,
+  frameAspect: number,
+  place: Focus = { x: 0.5, y: 0.5 },
+) {
+  const along = (at: number, shown: number, to: number) =>
+    shown >= 1 ? 50 : Math.round(Math.min(Math.max((at - shown * to) / (1 - shown), 0), 1) * 1000) / 10;
+  const x = along(focus.x, pictureAspect > frameAspect ? frameAspect / pictureAspect : 1, place.x);
+  const y = along(focus.y, pictureAspect < frameAspect ? pictureAspect / frameAspect : 1, place.y);
+  return `${x}% ${y}%`;
+}

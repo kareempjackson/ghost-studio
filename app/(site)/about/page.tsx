@@ -1,4 +1,5 @@
 import { FAMILY_ON_SHOW, isFamilyHref } from "@/lib/links";
+import { coverPosition, type Focus } from "@/lib/sanity-image";
 import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { stegaClean } from "next-sanity";
@@ -39,6 +40,20 @@ const FAMILY_STYLE: CSSProperties = {
 const BAND = "px-5 py-24 sm:px-8 lg:px-12 lg:py-36";
 
 const pad = (n: number) => String(n).padStart(2, "0");
+
+/**
+ * How a portrait is framed in its square, as a portrait photographer frames
+ * one: the hotspot is the eye line, set a third of the way down. With none
+ * set, the square keeps the top of the photo, so a tall one keeps the top of
+ * the head rather than losing it to an even crop.
+ */
+const EYE_LINE: Focus = { x: 0.5, y: 1 / 3 };
+const portraitPosition = (member: { focus: Focus | null; aspect: number | null }) =>
+  !member.aspect
+    ? undefined
+    : member.focus
+      ? coverPosition(member.focus, member.aspect, 1, EYE_LINE)
+      : "50% 0%";
 
 /**
  * `/about` — who the studio is.
@@ -100,7 +115,9 @@ export default async function About() {
             deck={team.deck}
           />
 
-          <ul className="mt-14 grid grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-5 lg:mt-24 lg:grid-cols-3 lg:gap-y-16">
+          {/* gs-team and gs-portrait: the portraits come forward in
+              colour on hover while the rest recede (globals.css). */}
+          <ul className="gs-team mt-14 grid grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-5 lg:mt-24 lg:grid-cols-3 lg:gap-y-16">
             {team.members.map((member, index) => (
               <li key={member.name}>
                 <div
@@ -108,13 +125,16 @@ export default async function About() {
                   className="relative aspect-square overflow-hidden"
                 >
                   {(member.portrait || member.portraitVideo) ? (
-                    <Visual
-                      src={member.portrait}
-                      video={member.portraitVideo}
-                      alt={member.name}
-                      sizes="(min-width: 1024px) 31vw, 50vw"
-                      className="object-cover"
-                    />
+                    <div className="gs-portrait absolute inset-0">
+                      <Visual
+                        src={member.portrait}
+                        video={member.portraitVideo}
+                        alt={member.portraitAlt || member.name}
+                        position={portraitPosition(member)}
+                        sizes="(min-width: 1024px) 31vw, 50vw"
+                        className="object-cover"
+                      />
+                    </div>
                   ) : (
                     <span
                       aria-hidden

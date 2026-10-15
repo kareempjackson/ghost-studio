@@ -62,11 +62,35 @@ export const aboutPage = defineType({
       lines("heading"),
       para("deck"),
       text("portraitLabel", { description: "Shown in a plate with no portrait yet." }),
-      list(
-        "members",
-        [text("name"), text("role"), picture("portrait"), colour()],
-        { preview: { select: { title: "name", subtitle: "role", media: "portrait" } } },
-      ),
+      defineField({
+        name: "members",
+        type: "array",
+        description:
+          "In order, as the page sets them. Open a card to upload its portrait; drag one to move it.",
+        /* Cards, each showing its portrait, rather than a list of names:
+           who still needs a photo is plain at a glance. */
+        options: { layout: "grid" },
+        of: [
+          /* Unnamed, as the list it replaces was: the members already
+             stored carry no type of their own. */
+          defineArrayMember({
+            type: "object",
+            fields: [
+              picture("portrait", {
+                required: false,
+                description:
+                  "A photo, set square on the page. Click the crop icon and drag the hotspot onto the eyes: the square sets them a third of the way down, on every screen. With no hotspot it keeps the top of the photo. A film plays in its place if one is added.",
+              }),
+              text("name"),
+              text("role"),
+              colour("ground", {
+                description: "Behind the portrait, and in its place until one is uploaded, e.g. #e7e6e1.",
+              }),
+            ],
+            preview: { select: { title: "name", subtitle: "role", media: "portrait" } },
+          }),
+        ],
+      }),
     ]),
     object("expect", [text("label"), text("heading"), list("items", step, stepPreview)]),
     object("family", [

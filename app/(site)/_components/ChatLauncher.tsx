@@ -37,6 +37,12 @@ function Bubble() {
   );
 }
 
+/**
+ * Whether the pill is on show. Off for launch: every page still places it,
+ * but it draws nothing until this is turned back on.
+ */
+const CHAT_ON_SHOW = false;
+
 /** The band the pill must never sit on top of: the close and the footer. */
 const CLOSE_SELECTOR = '[aria-labelledby="contact-heading"]';
 
@@ -96,7 +102,7 @@ function useOutOfTheWay() {
  * It shows only over the middle of the page: not over the cover, whose own
  * sign-off sits in this corner, and not over the close or the footer.
  */
-export function ChatLauncher() {
+function Launcher() {
   const { launcher } = useChrome().chat;
   const [open, setOpen] = useState(false);
   const shown = useOutOfTheWay();
@@ -169,4 +175,9 @@ export function ChatLauncher() {
       </motion.button>
     </div>
   );
+}
+
+/** The pill, while it is on show (see CHAT_ON_SHOW). */
+export function ChatLauncher() {
+  return CHAT_ON_SHOW ? <Launcher /> : null;
 }

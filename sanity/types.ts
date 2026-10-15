@@ -398,6 +398,12 @@ export interface TeamMember {
   readonly role: string;
   readonly portrait: string | null;
   readonly portraitVideo: Film;
+  /** The portrait's alt text; the name is used if empty. */
+  readonly portraitAlt: string;
+  /** The hotspot set on the portrait, 0 to 1 across and down; null if none. */
+  readonly focus: { readonly x: number; readonly y: number } | null;
+  /** The portrait's width over its height, to crop it round the hotspot; null with none. */
+  readonly aspect: number | null;
   readonly ground: string;
 }
 

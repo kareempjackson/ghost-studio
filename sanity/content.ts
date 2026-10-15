@@ -381,7 +381,7 @@ export const getAboutPage = () =>
     `{
       ${SEO}, ${COVER},
       who{label, heading, deck, body},
-      team{label, heading, deck, portraitLabel, members[]{name, role, "portrait": ${url("portrait")}, "portraitVideo": ${vid("portrait")}, ground}},
+      team{label, heading, deck, portraitLabel, members[]{name, role, "portrait": ${url("portrait")}, "portraitVideo": ${vid("portrait")}, "portraitAlt": coalesce(portrait.alt, ""), "focus": portrait.hotspot{x, y}, "aspect": portrait.asset->metadata.dimensions.aspectRatio, ground}},
       expect{label, heading, ${STEPS}},
       family{label, heading, members[]{name, statement, href}}
     }`,
