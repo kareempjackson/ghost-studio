@@ -1,12 +1,15 @@
 "use client";
 
-import { stegaClean } from "next-sanity";
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, useTransition, type FormEvent } from "react";
 import { ArrowPill } from "./ArrowPill";
 import { useChrome } from "./ChromeProvider";
+import { subscribe } from "./subscribe";
 
-/** Loose on purpose: the mail app is the real check. */
+/** Loose on purpose: whether the address is real is the mail server's call. */
 const LOOKS_LIKE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Until the Footer says it in its own words. */
+const FAILED = "That didn't go through. Try again in a moment.";
 
 /**
  * The newsletter sign-up, in the footer's top-left corner.
@@ -17,46 +20,62 @@ const LOOKS_LIKE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * outline is the only thing that moves when the field is in use. Under it, the one line of small
  * print a sign-up owes: what the address is for and how to take it back.
  *
- * Nothing is posted. Like the contact form, it hands a pre-written request to
- * the visitor's own mail app; when a mailing list is connected, `onSubmit` is
- * the one thing that changes.
+ * Sent, the address goes on the studio's list and its owner gets a welcome
+ * (./subscribe.ts). The line under the field says how it went.
  */
 export function NewsletterSignup() {
   const {
-    settings: { email },
     footer: { newsletter },
   } = useChrome();
   const id = useId();
   const [value, setValue] = useState("");
-  const [status, setStatus] = useState<"idle" | "invalid" | "done">("idle");
+  const [website, setWebsite] = useState("");
+  const [status, setStatus] = useState<"idle" | "invalid" | "done" | "failed">("idle");
+  const [sending, startSending] = useTransition();
+  const startedAt = useRef(0);
+
+  /* Set on the client, once the form is shown, not when it was rendered. */
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (sending) return;
     const address = value.trim();
     if (!LOOKS_LIKE_EMAIL.test(address)) {
       setStatus("invalid");
       return;
     }
-    const body = `Please add ${address} to the Ghost Savvy newsletter.`;
-    window.location.href = `mailto:${email}?subject=${encodeURIComponent(
-      stegaClean(newsletter.subject),
-    )}&body=${encodeURIComponent(body)}`;
-    setStatus("done");
+    startSending(async () => {
+      const result = await subscribe({ email: address, website, startedAt: startedAt.current }).catch(
+        () => ({ ok: false as const }),
+      );
+      if (!result.ok) {
+        setStatus("failed");
+        return;
+      }
+      setValue("");
+      setStatus("done");
+    });
   }
 
   const message =
     status === "invalid"
       ? newsletter.invalid
-      : status === "done"
-        ? newsletter.done
-        : null;
+      : status === "failed"
+        ? (newsletter.failed ?? FAILED)
+        : status === "done"
+          ? newsletter.done
+          : null;
 
   return (
     <form
       onSubmit={onSubmit}
       noValidate
       aria-labelledby={`${id}-heading`}
-      className="max-w-[30rem]"
+      aria-busy={sending}
+      className="relative max-w-[30rem]"
     >
       <p
         id={`${id}-heading`}
@@ -64,6 +83,21 @@ export function NewsletterSignup() {
       >
         {newsletter.heading}
       </p>
+
+      {/* Only a bot fills this: it is off the page, out of the tab order and
+          hidden from assistive tech. */}
+      <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
+        <label htmlFor={`${id}-website`}>Website</label>
+        <input
+          id={`${id}-website`}
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={website}
+          onChange={(event) => setWebsite(event.target.value)}
+        />
+      </div>
 
       <div className="mt-6 flex h-14 items-center gap-3 rounded-pill border border-white/15 pr-2 pl-6 transition-colors duration-300 focus-within:border-white/60 hover:border-white/30 focus-within:hover:border-white/60">
         <label htmlFor={`${id}-email`} className="sr-only">
@@ -86,7 +120,7 @@ export function NewsletterSignup() {
           aria-describedby={`${id}-note${message ? ` ${id}-message` : ""}`}
           className="min-w-0 flex-1 bg-transparent text-[1rem] leading-none tracking-[-0.01em] text-white caret-[#eb5b32] outline-none placeholder:text-ink-500 lg:text-[1.0625rem]"
         />
-        <ArrowPill submit tone="signal" size="sm" className="flex shrink-0">
+        <ArrowPill submit disabled={sending} tone="signal" size="sm" className="flex shrink-0">
           {newsletter.action}
         </ArrowPill>
       </div>
@@ -108,7 +142,7 @@ export function NewsletterSignup() {
         id={`${id}-message`}
         role="status"
         className={`mt-2 text-[0.8125rem] leading-[1.5] ${
-          status === "invalid" ? "text-[#f2875f]" : "text-ink-400"
+          status === "invalid" || status === "failed" ? "text-[#f2875f]" : "text-ink-400"
         }`}
       >
         {message}

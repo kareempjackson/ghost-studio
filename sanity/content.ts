@@ -12,7 +12,7 @@ import "server-only";
 import { sanityFetch } from "./lib/live";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { stegaClean } from "next-sanity";
-import { families, storyHref } from "../lib/links";
+import { FAMILY_ON_SHOW, families, isFamilyHref, storyHref } from "../lib/links";
 import { dataset, projectId } from "./env";
 import type {
   AboutPage,
@@ -36,6 +36,7 @@ import type {
   LegalDocument,
   ManagedServicesPage,
   Navigation,
+  NewsletterCopy,
   PointOfView,
   Process,
   ProjectDetail,
@@ -171,6 +172,15 @@ async function single<T>(id: string, projection: string, tags: string[]): Promis
 
 /* ---- Site ------------------------------------------------------------------ */
 
+/**
+ * Links, without the Ghost family's while it is not on show (see
+ * FAMILY_ON_SHOW): the menu and the footer drop them, and come back with
+ * them, without anything changing in the Studio. Clean, as an href may carry
+ * edit marks in draft mode.
+ */
+const shown = <T extends { href: string }>(links: readonly T[]): T[] =>
+  FAMILY_ON_SHOW ? [...links] : links.filter((link) => !isFamilyHref(stegaClean(link.href)));
+
 export const getSettings = () =>
   single<SiteSettings>(
     "siteSettings",
@@ -196,14 +206,15 @@ export async function getNavigation(): Promise<Navigation> {
     ["homePage", "whoWeServePage", "audience", "project"],
   );
 
-  const { audiences, items, ...rest } = data;
+  const { audiences, items, ventures, ...rest } = data;
   return {
     ...rest,
+    ventures: { ...ventures, links: shown(ventures.links) },
     /* An item set to open onto the audiences lists them, so the menu and
        /who-we-serve cannot disagree about who the studio works with. Each
        goes to its own page once it has one, and to its place on the list
        until then. */
-    items: items.map(({ audiences: opens, children, intro, ...item }) => {
+    items: shown(items).map(({ audiences: opens, children, intro, ...item }) => {
       const list = opens
         ? audiences.map((audience) => ({
             label: audience.name.join(" "),
@@ -211,7 +222,7 @@ export async function getNavigation(): Promise<Navigation> {
               ? `/who-we-serve/${audience.slug}`
               : `/who-we-serve#${audience.slug}`,
           }))
-        : children;
+        : children && shown(children);
       return {
         ...item,
         ...(intro ? { intro } : {}),
@@ -221,17 +232,31 @@ export async function getNavigation(): Promise<Navigation> {
   };
 }
 
-export const getFooter = () =>
-  single<Footer>(
+export async function getFooter(): Promise<Footer> {
+  const footer = await single<Footer>(
     "footer",
     `{
       contactBand{eyebrow, heading, action${link}},
       explore{label, links[]${link}},
-      newsletter{heading, placeholder, inputLabel, action, subject, note{before, link${link}, after}, done, invalid},
+      newsletter{heading, placeholder, inputLabel, action, note{before, link${link}, after}, done, invalid, failed},
       legal[]${link},
       top
     }`,
     [],
+  );
+  return { ...footer, explore: { ...footer.explore, links: shown(footer.explore.links) } };
+}
+
+/** The newsletter's welcome email, and who it's from. */
+export const getNewsletterCopy = () =>
+  single<NewsletterCopy>(
+    "footer",
+    `{
+      "studioEmail": *[_id == "siteSettings"][0].email,
+      "siteName": coalesce(*[_id == "siteSettings"][0].title, "Ghost Savvy Studios"),
+      "welcome": newsletter.welcome{subject, body, signoff}
+    }`,
+    ["siteSettings"],
   );
 
 export const getChat = () => single<Chat>("chat", `{...}`, []);
@@ -598,7 +623,13 @@ export const getManagedServicesPage = () =>
 
 export async function getFamilyPage(slug: string): Promise<FamilyPageData> {
   const { stories, itemLabel, ...page } = await fixed<
-    Omit<FamilyPageData, "stories"> & { stories: StoryRow[]; itemLabel: string }
+    Omit<FamilyPageData, "stories" | "archive"> & {
+      archive: Omit<FamilyPageData["archive"], "empty"> & {
+        empty: Omit<FamilyPageData["archive"]["empty"], "first">;
+      };
+      stories: StoryRow[];
+      itemLabel: string;
+    }
   >(
     "familyPage",
     slug,
@@ -617,7 +648,12 @@ export async function getFamilyPage(slug: string): Promise<FamilyPageData> {
     }`,
     ["familyStory"],
   );
-  return { ...page, stories: numbered(stories, stories, itemLabel) };
+  return {
+    ...page,
+    /* The slot the family's first story will take, as its card will name it. */
+    archive: { ...page.archive, empty: { ...page.archive.empty, first: `${itemLabel} ${pad(1)}` } },
+    stories: numbered(stories, stories, itemLabel),
+  };
 }
 
 /* ---- Family stories --------------------------------------------------------- */
@@ -1073,7 +1109,8 @@ const PAGE_PATHS: Record<string, string> = {
 /**
  * Every published page with the time it last changed, for the sitemap: the
  * pages, every insight, project and family story, and the audiences and
- * phases that have a page of their own.
+ * phases that have a page of their own. The Ghost family's pages and stories
+ * only while it is on show (see FAMILY_ON_SHOW).
  */
 export async function getSitemapEntries(): Promise<{ path: string; updatedAt: string }[]> {
   const data = (await sanityFetch({
@@ -1119,5 +1156,5 @@ export async function getSitemapEntries(): Promise<{ path: string; updatedAt: st
     ...under("/who-we-serve", data.audiences),
     ...under("/our-approach", data.phases),
     ...data.stories.map((row) => ({ path: storyHref(row.family, row.slug), updatedAt: row.updatedAt })),
-  ];
+  ].filter((entry) => FAMILY_ON_SHOW || !isFamilyHref(entry.path));
 }

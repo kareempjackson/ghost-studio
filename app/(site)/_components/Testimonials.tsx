@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import Image from "next/image";
+import { Picture } from "./Picture";
 import type { CSSProperties } from "react";
 import { useState } from "react";
 import type { Link, Testimonials as TestimonialsData } from "@/sanity/types";
@@ -192,7 +192,7 @@ export function Testimonials({
                 <div className="flex items-center gap-4">
                   <span className="relative grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-ink-200 font-label text-[0.6875rem] leading-none">
                     {item.portrait ? (
-                      <Image src={item.portrait} alt={item.portraitAlt} fill sizes="40px" className="object-cover" />
+                      <Picture src={item.portrait} alt={item.portraitAlt} fill sizes="40px" className="object-cover" />
                     ) : (
                       <span aria-hidden>{initials(item.name)}</span>
                     )}

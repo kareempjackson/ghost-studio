@@ -389,30 +389,33 @@ export function SiteMenu({ id, open, onClose, pathname }: SiteMenuProps) {
             )}
 
             {/* The studio's other ventures, as pills at the foot of the
-                routes: part of the menu, not in competition with it. */}
-            <nav
-              aria-label={ventureNavigation.label}
-              className="gs-menu-row lg:col-start-1 lg:row-start-2 lg:self-end"
-              style={tail}
-            >
-              <p className="font-label text-[0.6875rem] leading-none tracking-[0.04em] text-ink-950 uppercase">
-                {ventureNavigation.label}
-              </p>
-              <ul className="mt-4 flex flex-wrap gap-2.5">
-                {ventureNavigation.links.map((link) => (
-                  <li key={link.href}>
-                    <a
-                      href={link.href}
-                      onClick={onClose}
-                      style={{ backgroundColor: link.ground, color: link.ink }}
-                      className="inline-flex h-9 items-center rounded-pill px-7 text-[0.9375rem] leading-none tracking-[-0.03em] transition-[translate,filter] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:brightness-95"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+                routes: part of the menu, not in competition with it. Left
+                out while there are none to show (see FAMILY_ON_SHOW). */}
+            {ventureNavigation.links.length > 0 && (
+              <nav
+                aria-label={ventureNavigation.label}
+                className="gs-menu-row lg:col-start-1 lg:row-start-2 lg:self-end"
+                style={tail}
+              >
+                <p className="font-label text-[0.6875rem] leading-none tracking-[0.04em] text-ink-950 uppercase">
+                  {ventureNavigation.label}
+                </p>
+                <ul className="mt-4 flex flex-wrap gap-2.5">
+                  {ventureNavigation.links.map((link) => (
+                    <li key={link.href}>
+                      <a
+                        href={link.href}
+                        onClick={onClose}
+                        style={{ backgroundColor: link.ground, color: link.ink }}
+                        className="inline-flex h-9 items-center rounded-pill px-7 text-[0.9375rem] leading-none tracking-[-0.03em] transition-[translate,filter] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:brightness-95"
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
 
             <div
               className="gs-menu-row lg:col-start-2 lg:row-start-2 lg:self-end"

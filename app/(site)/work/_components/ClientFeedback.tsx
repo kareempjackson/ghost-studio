@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { Picture } from "../../_components/Picture";
 import type { CSSProperties } from "react";
 import type { ClientTestimonial } from "@/sanity/types";
 import { Rich } from "../../_components/Rich";
@@ -72,7 +72,7 @@ export function ClientFeedback({
           <figcaption className="mt-10 flex items-center gap-5 lg:mt-12">
             <span className="relative grid size-14 shrink-0 place-items-center overflow-hidden rounded-full bg-ink-200 font-label text-[0.8125rem] text-ink-700 lg:size-16">
               {portrait ? (
-                <Image src={portrait} alt={portraitAlt} fill sizes="64px" className="object-cover" />
+                <Picture src={portrait} alt={portraitAlt} fill sizes="64px" className="object-cover" />
               ) : (
                 <span aria-hidden>{initials(name)}</span>
               )}

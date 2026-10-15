@@ -40,20 +40,25 @@ export const footer = {
       { label: "Ghost Labs", href: "/ghost-labs" },
     ],
   },
-  /* PLACEHOLDER — no mailing list is connected yet. The sign-up hands a
-     pre-written request to the visitor's own mail app, addressed to `email`. */
+  /* The sign-up adds the address to the studio's list in Resend and sends
+     the welcome below (app/(site)/_components/subscribe.ts). */
   newsletter: {
     heading: "Notes from the studio, once a month.",
     placeholder: "Your email address",
     action: "Subscribe",
-    subject: "Newsletter sign-up",
     note: {
       before: "By signing up you agree to our",
       link: { label: "Privacy Policy", href: "/privacy" },
       after: "We look after your data. Unsubscribe anytime.",
     },
-    done: "Your mail app has the request ready. Send it and you're on the list.",
+    done: "You're on the list. A welcome note is on its way to your inbox.",
     invalid: "That doesn't look like an email address yet.",
+    failed: "That didn't go through. Try again in a moment.",
+    welcome: {
+      subject: "You’re on the list",
+      body: "Thanks for signing up. Once a month we’ll send a short note from the studio: what we’ve been making, what we’ve learned along the way, and the odd thing we think is worth your time.\n\nThat’s all it will ever be. Every issue has a link at the foot to unsubscribe, and you can reply to any of them to reach us.",
+      signoff: ["Speak soon,", "Ghost Savvy Studios"],
+    },
   },
   /* PLACEHOLDER — none of these pages exist yet; each link 404s until it does. */
   legal: [

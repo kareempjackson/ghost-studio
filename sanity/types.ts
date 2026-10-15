@@ -80,13 +80,22 @@ export interface Footer {
     readonly placeholder: string;
     readonly inputLabel: string;
     readonly action: string;
-    readonly subject: string;
     readonly note: { readonly before: string; readonly link: Link; readonly after: string };
     readonly done: string;
     readonly invalid: string;
+    /** When the address couldn't be added. Null until it's set in the Studio. */
+    readonly failed: string | null;
   };
   readonly legal: readonly Link[];
   readonly top: string;
+}
+
+/** What the newsletter sign-up needs to send its welcome (app/(site)/_components/subscribe.ts). */
+export interface NewsletterCopy {
+  readonly studioEmail: string;
+  readonly siteName: string;
+  /** Null until it's written in the Studio: no welcome is sent until then. */
+  readonly welcome: { readonly subject: string; readonly body: string; readonly signoff: Lines } | null;
 }
 
 export interface Chat {
@@ -593,7 +602,12 @@ export interface FamilyPageData extends Seo {
     readonly deck: Rich;
     readonly items: readonly Experiment[];
     /** What the archive says while it has no story and no plate. */
-    readonly empty: { readonly heading: string; readonly body: Rich | null };
+    readonly empty: {
+      readonly heading: string;
+      readonly body: Rich | null;
+      /** The slot the first story will take, as its card will name it: Cohort 01. */
+      readonly first: string;
+    };
   };
   readonly ask: FamilyAsk;
   readonly family: FamilyBand;

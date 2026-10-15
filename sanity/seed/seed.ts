@@ -247,7 +247,6 @@ async function documents() {
         article: { _type: "reference", _ref: articleId(journal.featured.slug) },
         label: journal.featured.label,
         action: journal.featured.action,
-        image: await image(journal.featured.image.src, journal.featured.image.alt),
       },
       entries: journal.entries.map((e) => ref(articleId(e.slug))),
     },

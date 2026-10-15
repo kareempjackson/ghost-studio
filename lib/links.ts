@@ -36,7 +36,19 @@ export const families = [
 
 export type FamilySlug = (typeof families)[number]["slug"];
 
-/** A story's own page, under its family: /ghost-labs/vynl. */
+/**
+ * Whether the Ghost family is on show. Off for launch: its pages still answer
+ * at their addresses, for previewing, but nothing on the site links to them —
+ * not the menu, the footer or the About page — and the sitemap leaves them
+ * out. Turn it on and every link comes back as it is set in the Studio.
+ */
+export const FAMILY_ON_SHOW = false;
+
+/** Whether a link goes to the Ghost family: one of its pages, or anything under one. */
+export const isFamilyHref = (href: string) =>
+  families.some(({ slug }) => new RegExp(`^/${slug}(?:[/?#]|$)`).test(href));
+
+/** A story's own page, under its family:/ghost-labs/vynl. */
 export const storyHref = (family: string, slug: string) => `/${family}/${slug}`;
 
 /** An audience's anchor on /who-we-serve, from its name: "funded-startups-and-founders". */

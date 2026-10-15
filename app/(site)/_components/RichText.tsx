@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { Picture } from "./Picture";
 import { Visual } from "./Visual";
 import { PortableText, stegaClean, type PortableTextComponents } from "next-sanity";
 import type { RichText as RichTextValue } from "@/sanity/types";
@@ -152,7 +152,7 @@ function components(value: RichTextValue): PortableTextComponents {
                 />
               </div>
             ) : (
-              <Image
+              <Picture
                 src={image.src as string}
                 alt={image.alt ?? ""}
                 width={image.width ?? 1600}

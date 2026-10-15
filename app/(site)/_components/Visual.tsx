@@ -1,6 +1,7 @@
-import Image from "next/image";
 import type { Film as FilmUrl } from "@/sanity/types";
+import { sanityImage } from "@/lib/sanity-image";
 import { Film } from "./Film";
+import { Picture } from "./Picture";
 
 /**
  * A picture from Sanity, or the film uploaded to play in its place. Fills
@@ -11,6 +12,9 @@ import { Film } from "./Film";
  * less motion. Stacking the two let the picture underneath show as a
  * hairline round the film's edges, so they are never layered. The slot it
  * fills must clip it (overflow-hidden), as every plate on the site does.
+ *
+ * Both wait until the reader comes near them, unless `priority` marks the
+ * one at the top of the page, which is fetched first.
  */
 export function Visual({
   src,
@@ -31,16 +35,18 @@ export function Visual({
   if (video) {
     /* The film bleeds 2px past its slot on every side, which the slot
        clips: exported films often carry a dark row or two at their edges,
-       and at a card's size that reads as an outline round the plate. */
+       and at a card's size that reads as an outline round the plate. The
+       poster is one size, so it is the size of the widest screen's plate. */
     return (
       <Film
         src={video}
-        poster={src}
+        poster={src ? sanityImage(src, 1920) : null}
         label={alt}
+        eager={priority}
         className={`absolute -inset-[2px] h-[calc(100%+4px)] w-[calc(100%+4px)] max-w-none ${className}`}
       />
     );
   }
   if (!src) return null;
-  return <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className={className} />;
+  return <Picture src={src} alt={alt} fill sizes={sizes} preload={priority} className={className} />;
 }

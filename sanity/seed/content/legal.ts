@@ -6,8 +6,10 @@
  * (lib/intro.ts); fonts from Adobe Fonts; pictures and live updates from
  * Sanity; films from Cloudflare R2; hosting on Vercel; and the contact form,
  * which stores an enquiry in Sanity and emails through Resend
- * (app/(site)/contact/actions.ts). The newsletter sign-up and the chat open
- * the visitor's own mail app; nothing is collected by the page itself.
+ * (app/(site)/contact/actions.ts); and the newsletter sign-up, which adds
+ * the address to a list kept by Resend and sends a welcome
+ * (app/(site)/_components/subscribe.ts). The chat opens the visitor's own
+ * mail app.
  *
  * When any of that changes — an analytics tool, a new form, a new provider —
  * these documents change with it, and their date moves.
@@ -61,7 +63,8 @@ export const legalDocuments = {
     title: "Privacy policy",
     description:
       "What personal information Ghost Savvy Studios collects when you visit our website or get in touch, how we use it, and the choices you have.",
-    updated: UPDATED,
+    /* Moved when the newsletter sign-up started keeping addresses. */
+    updated: "13 October 2026",
     intro: `This policy explains what personal information ${ENTITY}, doing business as ${TRADING} (“Ghost Savvy Studios”, “we”, “us”), collects when you visit our website or contact us, how we use it, and the choices you have. We collect very little: no advertising trackers, no analytics cookies, and we never sell your information.`,
     sections: [
       {
@@ -88,7 +91,8 @@ export const legalDocuments = {
         ],
         list: [
           "**The contact form:** your name and email address and, if you add them, your company, the services you’re interested in, your message, your budget and your timing.",
-          "**Email:** anything you include when you write to us. The chat window and the newsletter sign-up both open a message in your own email app, so what you send that way reaches us as an email.",
+          "**Email:** anything you include when you write to us. The chat window opens a message in your own email app, so what you send that way reaches us as an email.",
+          "**The newsletter:** your email address, if you sign up for it.",
           "**Working together:** business contact details and project information you share during an engagement.",
         ],
       },
@@ -130,7 +134,7 @@ export const legalDocuments = {
         list: [
           "**Vercel**, which hosts the website.",
           "**Sanity**, which stores the website’s content and the messages sent through the contact form.",
-          "**Resend**, which delivers the emails sent when you use the contact form.",
+          "**Resend**, which delivers the emails sent when you use the contact form, and keeps our newsletter’s list of subscribers and sends each issue.",
           "**Cloudflare**, which stores and delivers the website’s video.",
           "**Adobe**, which serves the website’s fonts.",
           "**Our email and business software providers**, which hold our correspondence and records.",
@@ -158,7 +162,7 @@ export const legalDocuments = {
         id: "your-rights",
         title: "Your rights and choices",
         paragraphs: [
-          "Depending on where you live, you may have the right to access the personal information we hold about you, to correct it, to have it deleted, to restrict or object to how we use it, to receive a copy in a portable format, and to withdraw your consent at any time. You can stop the newsletter whenever you like by replying to any issue or emailing us.",
+          "Depending on where you live, you may have the right to access the personal information we hold about you, to correct it, to have it deleted, to restrict or object to how we use it, to receive a copy in a portable format, and to withdraw your consent at any time. You can stop the newsletter whenever you like with the unsubscribe link in any issue, or by emailing us.",
           "**In the European Economic Area or the United Kingdom**, you also have the right to complain to your local data protection authority. We’d welcome the chance to put things right first.",
           "**In California**, you have the right to know what personal information we collect, use and disclose; to have it corrected or deleted; and not to be treated differently for exercising these rights. We don’t sell or share personal information as California law defines those terms.",
           `To make a request, email ${mail}. We may ask you to confirm your identity before we act on it, and we’ll respond within one month.`,

@@ -1,5 +1,7 @@
+import { FAMILY_ON_SHOW, isFamilyHref } from "@/lib/links";
 import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
+import { stegaClean } from "next-sanity";
 import type { CSSProperties } from "react";
 import { getAboutPage, getStudioStrip } from "@/sanity/content";
 import { ChatLauncher } from "../_components/ChatLauncher";
@@ -51,6 +53,11 @@ export default async function About() {
     getStudioStrip(),
   ]);
   const { who, team, expect, family } = aboutPage;
+  /* The Ghost family, while it is on show (see FAMILY_ON_SHOW); with none of
+     it to link to, the band is left out. */
+  const members = family.members.filter(
+    (member) => FAMILY_ON_SHOW || !isFamilyHref(stegaClean(member.href)),
+  );
 
   return (
     <>
@@ -148,39 +155,41 @@ export default async function About() {
           </ol>
         </section>
 
-        <section aria-labelledby="family-heading" className={BAND}>
-          <SectionHead
-            id="family-heading"
-            label={family.label}
-            heading={family.heading}
-          />
+        {members.length > 0 && (
+          <section aria-labelledby="family-heading" className={BAND}>
+            <SectionHead
+              id="family-heading"
+              label={family.label}
+              heading={family.heading}
+            />
 
-          <ul className="mt-14 grid gap-y-14 sm:grid-cols-3 sm:gap-x-5 lg:mt-24">
-            {family.members.map((member) => (
-              <li key={member.name}>
-                <a
-                  href={member.href}
-                  className="group flex flex-col text-primary"
-                >
-                  <span className={`${LABEL} text-ink-950`}>{member.name}</span>
-                  <span
-                    className="mt-8 transition-colors duration-200 group-hover:text-accent lg:mt-12"
-                    style={FAMILY_STYLE}
+            <ul className="mt-14 grid gap-y-14 sm:grid-cols-3 sm:gap-x-5 lg:mt-24">
+              {members.map((member) => (
+                <li key={member.name}>
+                  <a
+                    href={member.href}
+                    className="group flex flex-col text-primary"
                   >
-                    {member.statement.map((line) => (
-                      <span key={line} className="block">
-                        {line}
-                      </span>
-                    ))}
-                  </span>
-                  <span className="mt-10 transition-colors duration-200 group-hover:text-accent lg:mt-16">
-                    <UpRight />
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
+                    <span className={`${LABEL} text-ink-950`}>{member.name}</span>
+                    <span
+                      className="mt-8 transition-colors duration-200 group-hover:text-accent lg:mt-12"
+                      style={FAMILY_STYLE}
+                    >
+                      {member.statement.map((line) => (
+                        <span key={line} className="block">
+                          {line}
+                        </span>
+                      ))}
+                    </span>
+                    <span className="mt-10 transition-colors duration-200 group-hover:text-accent lg:mt-16">
+                      <UpRight />
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </main>
       {/* The close sits over the footer, not inside the page, so its rounded
           corners open onto the footer beneath it. */}

@@ -14,6 +14,7 @@ import {
   wordmarkSplit,
   wordmarkSplitCss,
 } from "@/lib/brand";
+import { sanityImage } from "@/lib/sanity-image";
 import type { HomePage } from "@/sanity/types";
 import { CursorPlay } from "./CursorPlay";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
@@ -353,7 +354,7 @@ export function Hero({
                 <video
                   ref={videoRef}
                   className="size-full object-cover"
-                  poster={hero.poster ?? "/media/hero-poster.jpg"}
+                  poster={hero.poster ? sanityImage(hero.poster, 1920) : "/media/hero-poster.jpg"}
                   preload="metadata"
                   muted
                   loop

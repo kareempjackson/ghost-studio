@@ -46,6 +46,7 @@ export function ArrowPill({
   className = "",
   ariaLabel,
   external = false,
+  disabled = false,
 }: {
   /** Where it goes. Leave it off and set `submit` to send a form instead. */
   href?: string;
@@ -59,6 +60,8 @@ export function ArrowPill({
   className?: string;
   /** Another site: opens in a new tab, without handing it this one. */
   external?: boolean;
+  /** A submit button held while its form sends. */
+  disabled?: boolean;
 }) {
   const spec = SIZE[size];
   const classes = `${TONE[tone]} group relative items-center rounded-pill font-label leading-none uppercase transition-colors duration-300 ${spec.pill} ${className || "inline-flex"}`;
@@ -87,7 +90,12 @@ export function ArrowPill({
   );
 
   return submit ? (
-    <button type="submit" aria-label={ariaLabel} className={classes}>
+    <button
+      type="submit"
+      aria-label={ariaLabel}
+      disabled={disabled}
+      className={`${classes} disabled:cursor-progress disabled:opacity-70`}
+    >
       {inner}
     </button>
   ) : (

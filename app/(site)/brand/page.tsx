@@ -135,7 +135,7 @@ function Cover() {
             width={logos.wordmark.width}
             height={logos.wordmark.height}
             unoptimized
-            priority
+            preload
             className="h-6 w-auto sm:h-7"
           />
           <Type role="label" className="text-ink-400">

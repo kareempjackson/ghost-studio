@@ -1,6 +1,6 @@
 import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
-import Image from "next/image";
+import { Picture } from "../../_components/Picture";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
@@ -126,7 +126,7 @@ export default async function ProjectPage({
           {/* The claim, and the opening. */}
           <div>
             {project.logo.src && (
-              <Image
+              <Picture
                 src={project.logo.src}
                 alt={project.logo.alt || project.name}
                 width={240}

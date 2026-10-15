@@ -8,7 +8,7 @@ import { ArrowPill } from "./ArrowPill";
 import { ChatLauncher } from "./ChatLauncher";
 import { ContactBand } from "./ContactBand";
 import { BAND, FamilyAsk, FamilyMembers, StickyNote } from "./FamilyBands";
-import { SectionHead } from "./SectionHead";
+import { MONO, SectionHead } from "./SectionHead";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 import { STORY_TITLE_STYLE, StoryCard } from "./StoryCard";
@@ -26,6 +26,14 @@ const COVER_STYLE: CSSProperties = {
   fontWeight: 600,
   letterSpacing: "-0.06em",
   lineHeight: 0.94,
+};
+
+/** 44px at 390 to 80px at 1440, held there. The empty archive's word, set as a plate's name. */
+const EMPTY_STYLE: CSSProperties = {
+  fontSize: "clamp(2.75rem, 1.9143rem + 3.429vw, 5rem)",
+  fontWeight: 500,
+  letterSpacing: "-0.055em",
+  lineHeight: 0.95,
 };
 
 /**
@@ -142,18 +150,27 @@ export async function FamilyPage({ data }: { data: FamilyPageData }) {
             deck={archive.deck}
           />
 
-          {/* Nothing in it yet: say so, in the space the plates will fill,
-              rather than leave the heading over an empty band. */}
+          {/* Nothing in it yet: the space the first story will take, as a
+              plate still on its ground — the way a project waits for its
+              artwork — with the slot it will fill pinned in the corner, as
+              a story card pins its number, and the page's word set large. */}
           {stories.length + archive.items.length === 0 ? (
-            <div className="mt-16 grid min-h-[18rem] place-content-center justify-items-center rounded-[0.75rem] border border-dashed border-ink-300 px-6 py-16 text-center lg:mt-28 lg:min-h-[24rem]">
-              <p className="text-primary" style={STORY_TITLE_STYLE}>
-                {archive.empty.heading}
-              </p>
-              {archive.empty.body && (
-                <div className="mt-3 max-w-[26rem] text-[0.9375rem] leading-[1.5] tracking-[-0.01em] text-secondary lg:mt-4">
-                  <Rich value={archive.empty.body} />
-                </div>
-              )}
+            <div className="mt-16 flex min-h-[22rem] flex-col justify-between gap-24 rounded-[0.75rem] bg-ink-100 p-5 sm:p-8 lg:mt-28 lg:min-h-[30rem] lg:p-10">
+              <span
+                className={`inline-flex self-start rounded-pill bg-white px-3.5 py-2 text-ink-950 ${MONO}`}
+              >
+                {archive.empty.first}
+              </span>
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-end lg:gap-8">
+                <p className="text-balance text-ink-950" style={EMPTY_STYLE}>
+                  {archive.empty.heading}
+                </p>
+                {archive.empty.body && (
+                  <div className="max-w-[24rem] text-[0.9375rem] leading-[1.5] tracking-[-0.01em] text-ink-600 lg:justify-self-end lg:text-[1rem]">
+                    <Rich value={archive.empty.body} />
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             /* Two columns, the right one dropped, so the plates step down

@@ -27,12 +27,12 @@ export interface Email {
   readonly text: string;
 }
 
-const INK = "#0e0d0b";
+export const INK = "#0e0d0b";
 const MUTED = "#6b6862";
 const RULE = "#e7e6e1";
-const FONT = "Helvetica, Arial, sans-serif";
+export const FONT = "Helvetica, Arial, sans-serif";
 
-const escape = (value: string) =>
+export const escape = (value: string) =>
   value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -41,7 +41,7 @@ const escape = (value: string) =>
     .replace(/'/g, "&#39;");
 
 /** Line breaks kept, as the sender typed them. */
-const block = (value: string) => escape(value).replace(/\r?\n/g, "<br>");
+export const block = (value: string) => escape(value).replace(/\r?\n/g, "<br>");
 
 const fill = (template: string, values: Record<string, string>) =>
   template.replace(/\{(\w+)\}/g, (whole, key: string) => values[key] ?? whole);
@@ -76,7 +76,7 @@ const recapText = (rows: [string, string][]) =>
   rows.map(([label, value]) => `${label}\n${value}`).join("\n\n");
 
 /** The page every email is set on: a white sheet, the studio's name at the top. */
-function layout(siteName: string, inner: string) {
+export function layout(siteName: string, inner: string) {
   return `<!doctype html>
 <html lang="en">
   <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escape(siteName)}</title></head>

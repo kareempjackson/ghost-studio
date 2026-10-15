@@ -3,9 +3,9 @@
  *
  * One featured piece at full width, then two more as cards side by side.
  *
- * PLACEHOLDER: the featured image points at the hero poster. Export the
- * comp's plate (the profile card, browser and app icons on the dark ground)
- * to `public/images/` and change `featured.image`. Of the two cards, the
+ * PLACEHOLDER: the featured piece's cover is the hero poster. It goes on the
+ * article, not the home page, so a cover uploaded to the article shows here
+ * too; the home page's own Image is left empty for an override. Of the two cards, the
  * engineering one borrows the intro's laptop still; the design one is its
  * lilac ground until the comp's render (the purple folded shapes) is
  * exported. The excerpts are drafts until the articles are written. Every
@@ -34,10 +34,7 @@ export const journal = {
     summary:
       "Before choosing a direction, ask a better question. A shared understanding of the problem changes everything that follows.",
     action: "Read the story",
-    image: {
-      src: "/media/hero-poster.jpg",
-      alt: "",
-    },
+    cover: { src: "/media/hero-poster.jpg", alt: "", ground: "#16151b" },
   },
   entries: [
     {
@@ -67,7 +64,7 @@ export const journal = {
     title: readonly string[];
     summary: string;
     action: string;
-    image: { src: string; alt: string };
+    cover: JournalEntry["cover"];
   };
   entries: readonly JournalEntry[];
 };

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { sanityImage } from "@/lib/sanity-image";
+import { useNearScreen } from "./useNearScreen";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
 /**
@@ -15,6 +17,9 @@ import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
  *
  * Reduced motion gets the poster frame and no loop — the reel still plays in
  * full when it is asked for.
+ *
+ * It sits far down the page, so the loop loads only as the reader comes to
+ * it, and rests once they've scrolled past.
  */
 export function ShowreelButton({
   label = "Play showreel",
@@ -31,16 +36,17 @@ export function ShowreelButton({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const reduced = usePrefersReducedMotion();
+  const { near, shown } = useNearScreen(videoRef);
 
   useEffect(() => {
     const el = videoRef.current;
-    if (!el) return;
-    if (reduced) {
+    if (!el || !near || document.fullscreenElement === el) return;
+    if (reduced || !shown) {
       el.pause();
       return;
     }
     void el.play().catch(() => {});
-  }, [reduced]);
+  }, [reduced, near, shown]);
 
   /* Leaving full screen puts the crop back the way it was found. */
   useEffect(() => {
@@ -81,17 +87,16 @@ export function ShowreelButton({
     >
       <video
         ref={videoRef}
+        src={near ? (video ?? "/media/hero.mp4") : undefined}
         className="size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
-        poster={poster ?? "/media/hero-poster.jpg"}
-        preload="metadata"
+        poster={poster ? sanityImage(poster, 800) : "/media/hero-poster.jpg"}
+        preload={near ? "metadata" : "none"}
         muted
         loop
         playsInline
         aria-hidden
         tabIndex={-1}
-      >
-        <source src={video ?? "/media/hero.mp4"} type="video/mp4" />
-      </video>
+      />
 
       {/* The plate says what it is, in the same corner hand as the process
           plates: mono, quiet, bottom left. */}
