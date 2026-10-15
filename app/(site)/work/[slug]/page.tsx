@@ -13,6 +13,7 @@ import { SiteFooter } from "../../_components/SiteFooter";
 import { ProjectCard } from "../../_components/ProjectCard";
 import { SiteHeader } from "../../_components/SiteHeader";
 import { ClientFeedback } from "../_components/ClientFeedback";
+import { InDepth } from "../_components/InDepth";
 import { Overview } from "../_components/Overview";
 import { Part } from "../_components/Part";
 import { PartsBar } from "../_components/PartsBar";
@@ -216,31 +217,7 @@ export default async function ProjectPage({
 
         {/* Its own parts, each told in full, that no chapter has linked to. */}
         {project.inDepth.length > 0 && (
-          <section
-            aria-labelledby="in-depth-heading"
-            className="px-5 pt-24 sm:px-8 lg:px-12 lg:pt-36"
-          >
-            <p className={`${MONO} text-ink-500`}>{labels.inDepth.label}</p>
-            <h2
-              id="in-depth-heading"
-              className="mt-6 text-primary lg:mt-8"
-              style={MORE_STYLE}
-            >
-              {labels.inDepth.heading}
-            </h2>
-            <ul className="mt-10 grid gap-x-6 gap-y-14 md:grid-cols-2 lg:mt-12">
-              {project.inDepth.map((part) => (
-                <li key={part.slug}>
-                  <ProjectCard
-                    project={part}
-                    aspect="aspect-[10/7]"
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                    previewLabel={workPage.previewLabel}
-                  />
-                </li>
-              ))}
-            </ul>
-          </section>
+          <InDepth parts={project.inDepth} labels={labels.inDepth} />
         )}
 
         {/* What the client said: the story's close, once they have said it. */}
