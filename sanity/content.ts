@@ -388,7 +388,7 @@ export const getAboutPage = () =>
         "label": coalesce(label, "Partners"),
         "heading": coalesce(heading, ["Good work is", "rarely done alone."]),
         deck,
-        "items": items[]{name, role, href, "logo": ${url("logo")}, "logoAlt": coalesce(logo.alt, name)}
+        "items": items[]{name, role, href, "logo": ${url("logo")}, "logoAlt": select(length(logo.alt) > 0 => logo.alt, name)}
       }),
       expect{label, heading, ${STEPS}},
       family{label, heading, members[]{name, statement, href}}
