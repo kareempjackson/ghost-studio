@@ -95,6 +95,15 @@ export const aboutPage = {
     ],
   },
 
+  /* PLACEHOLDER — six partners by number, until the real ones and their
+     logos are in. Each tile shows its name until its logo is uploaded. */
+  partners: {
+    label: "Partners",
+    heading: ["Good work is", "rarely done alone."],
+    deck: "The organisations we work alongside to deliver for our clients.",
+    items: ["01", "02", "03", "04", "05", "06"].map((n) => ({ name: `Partner ${n}` })),
+  },
+
   expect: {
     label: "How we work",
     heading: "What you can expect.",
@@ -153,6 +162,12 @@ export const aboutPage = {
     deck: string;
     portraitLabel: string;
     members: readonly TeamMember[];
+  };
+  partners: {
+    label: string;
+    heading: readonly string[];
+    deck: string;
+    items: readonly { name: string; role?: string }[];
   };
   expect: { label: string; heading: string; items: readonly Expectation[] };
   family: {

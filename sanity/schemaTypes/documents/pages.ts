@@ -92,6 +92,47 @@ export const aboutPage = defineType({
         ],
       }),
     ]),
+    object(
+      "partners",
+      [
+        text("label", { required: false, description: "In the margin. Partners if empty." }),
+        lines("heading", { required: false, description: "One entry per line. Good work is rarely done alone. if empty." }),
+        para("deck", { required: false }),
+        defineField({
+          name: "items",
+          title: "Partners",
+          type: "array",
+          description: "In order, as the page sets them. Open a card to upload a logo; drag one to move it.",
+          options: { layout: "grid" },
+          of: [
+            defineArrayMember({
+              type: "object",
+              fields: [
+                picture("logo", {
+                  required: false,
+                  video: false,
+                  description:
+                    "Their logo: an SVG, or a PNG on a transparent ground, in its full colour. It is shown in grey until hovered. Their name is set in its place until one is uploaded.",
+                }),
+                text("name", { description: "As they write it. Read out in place of the logo." }),
+                text("role", { required: false, description: "Optional. A line under the logo, e.g. Technology partner." }),
+                defineField({
+                  name: "href",
+                  title: "Website",
+                  type: "url",
+                  description: "Optional. Their site: the logo links to it, in a new tab.",
+                }),
+              ],
+              preview: { select: { title: "name", subtitle: "role", media: "logo" } },
+            }),
+          ],
+        }),
+      ],
+      {
+        title: "Partners",
+        description: "The organisations the studio works alongside. Shown after the team once it has a partner.",
+      },
+    ),
     object("expect", [text("label"), text("heading"), list("items", step, stepPreview)]),
     object("family", [
       text("label"),

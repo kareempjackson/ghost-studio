@@ -428,8 +428,26 @@ export interface AboutPage extends Seo, Cover {
     readonly portraitLabel: string;
     readonly members: readonly TeamMember[];
   };
+  /** Who the studio works alongside; null until there is a partner. */
+  readonly partners: {
+    readonly label: string;
+    readonly heading: Lines;
+    readonly deck: Rich | null;
+    readonly items: readonly Partner[];
+  } | null;
   readonly expect: { readonly label: string; readonly heading: string; readonly items: readonly Step[] };
   readonly family: { readonly label: string; readonly heading: Lines; readonly members: readonly FamilyMember[] };
+}
+
+export interface Partner {
+  readonly name: string;
+  /** A line under the logo, e.g. Technology partner. */
+  readonly role: string | null;
+  /** Their site, which the logo links to. */
+  readonly href: string | null;
+  /** Null until uploaded: the name is set in its place. */
+  readonly logo: string | null;
+  readonly logoAlt: string;
 }
 
 export interface ServicesPage extends Seo, Cover {

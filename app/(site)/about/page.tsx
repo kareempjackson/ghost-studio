@@ -8,6 +8,7 @@ import { getAboutPage, getStudioStrip } from "@/sanity/content";
 import { ChatLauncher } from "../_components/ChatLauncher";
 import { ContactBand } from "../_components/ContactBand";
 import { PageCover } from "../_components/PageCover";
+import { Picture } from "../_components/Picture";
 import { MONO, SectionHead } from "../_components/SectionHead";
 import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
@@ -67,7 +68,7 @@ export default async function About() {
     getAboutPage(),
     getStudioStrip(),
   ]);
-  const { who, team, expect, family } = aboutPage;
+  const { who, team, partners, expect, family } = aboutPage;
   /* The Ghost family, while it is on show (see FAMILY_ON_SHOW); with none of
      it to link to, the band is left out. */
   const members = family.members.filter(
@@ -152,6 +153,65 @@ export default async function About() {
             ))}
           </ul>
         </section>
+
+        {/* Who the studio works alongside: each partner's logo on the paper
+            ground, in grey until hovered, as the portraits above are; its
+            name set in its place until the logo is in. */}
+        {partners && (
+          <section id="partners" aria-labelledby="partners-heading" className={BAND}>
+            <SectionHead
+              id="partners-heading"
+              label={partners.label}
+              heading={partners.heading}
+              deck={partners.deck}
+            />
+
+            <ul className="mt-14 grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-5 sm:gap-y-10 lg:mt-24">
+              {partners.items.map((partner, index) => {
+                const tile = (
+                  <>
+                    <div className="grid aspect-[2/1] place-items-center rounded-[0.75rem] bg-ink-50 px-[18%] transition-colors duration-300 group-hover:bg-ink-100">
+                      {partner.logo ? (
+                        <div className="relative h-[38%] w-full">
+                          <Picture
+                            src={partner.logo}
+                            alt={partner.logoAlt}
+                            fill
+                            sizes="(min-width: 640px) 20vw, 40vw"
+                            className="object-contain opacity-70 grayscale transition-[filter,opacity] duration-500 group-hover:opacity-100 group-hover:grayscale-0"
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-center text-[1.0625rem] leading-[1.15] tracking-[-0.03em] text-ink-500 sm:text-[1.25rem] lg:text-[1.5rem]">
+                          {partner.name}
+                        </span>
+                      )}
+                    </div>
+                    {partner.role && (
+                      <p className={`${LABEL} mt-4 text-ink-500`}>{partner.role}</p>
+                    )}
+                  </>
+                );
+                return (
+                  <li key={`${partner.name}-${index}`}>
+                    {partner.href ? (
+                      <a
+                        href={partner.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group block"
+                      >
+                        {tile}
+                      </a>
+                    ) : (
+                      <div className="group">{tile}</div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
 
         <section aria-labelledby="expect-heading" className={BAND}>
           <SectionHead

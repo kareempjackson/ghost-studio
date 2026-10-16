@@ -384,6 +384,12 @@ export const getAboutPage = () =>
       ${SEO}, ${COVER},
       who{label, heading, deck, body},
       team{label, heading, deck, portraitLabel, members[]{name, role, "portrait": ${url("portrait")}, "portraitVideo": ${vid("portrait")}, "portraitAlt": coalesce(portrait.alt, ""), "focus": portrait.hotspot{x, y}, "aspect": portrait.asset->metadata.dimensions.aspectRatio, ground}},
+      "partners": select(count(partners.items) > 0 => partners{
+        "label": coalesce(label, "Partners"),
+        "heading": coalesce(heading, ["Good work is", "rarely done alone."]),
+        deck,
+        "items": items[]{name, role, href, "logo": ${url("logo")}, "logoAlt": coalesce(logo.alt, name)}
+      }),
       expect{label, heading, ${STEPS}},
       family{label, heading, members[]{name, statement, href}}
     }`,
