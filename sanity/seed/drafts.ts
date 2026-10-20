@@ -21,7 +21,7 @@ import { createClient } from "next-sanity";
 import { richify } from "../lib/rich";
 import { schemaTypes } from "../schemaTypes";
 import { subPortfolios } from "./content/sub-portfolios";
-import { caseStudy, keyed } from "./shape";
+import { caseStudy, disciplineDoc, disciplineRefs, keyed } from "./shape";
 
 const dry = process.argv.includes("--dry");
 
@@ -55,7 +55,7 @@ async function main() {
   let writes = 0;
 
   for (const seed of subPortfolios) {
-    const { parent, slug, hero, feature, chapters, headline, facts, tags, overview, website, ...card } = seed;
+    const { parent, slug, hero, feature, chapters, headline, facts, tags, overview, website, disciplines, ...card } = seed;
     const _id = `drafts.project-${slug}`;
 
     /* Any project already at this slug, draft or published, is an editor's. */
@@ -83,6 +83,7 @@ async function main() {
     const doc = {
       ...shaped({
         ...card,
+        disciplines: disciplineRefs(disciplines),
         slug: { _type: "slug", current: slug },
         parent: { _type: "reference", _ref: parentId },
         image: { _type: "image", alt: "" },
@@ -93,6 +94,7 @@ async function main() {
     };
     console.log(`${slug}: drafts a case study Part of ${parentId}`);
     if (dry) console.log(JSON.stringify(doc, null, 2));
+    for (const title of disciplines) tx.createIfNotExists(disciplineDoc(title));
     tx.createIfNotExists(doc as never);
     writes++;
   }

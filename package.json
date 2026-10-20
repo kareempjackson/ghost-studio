@@ -15,6 +15,7 @@
     "migrate:films": "tsx --env-file=.env.local sanity/migrate/films-to-r2.ts",
     "migrate:rich": "tsx --env-file=.env.local sanity/migrate/text-to-rich.ts",
     "migrate:topics": "tsx --env-file=.env.local sanity/migrate/insight-topics.ts",
+    "migrate:disciplines": "tsx --env-file=.env.local sanity/migrate/disciplines.ts",
     "migrate:newsletter": "tsx --env-file=.env.local sanity/migrate/newsletter.ts",
     "migrate:family": "tsx --env-file=.env.local sanity/migrate/family-archives.ts"
   },

@@ -8,8 +8,6 @@ import { defineArrayMember, defineField, defineType } from "sanity";
 import { families } from "../../../lib/links";
 import { action, colour, lines, num, object, para, paras, phrase, picture, plain, text } from "../fields";
 
-export const disciplines = ["Brand", "Digital", "Systems"] as const;
-
 const slug = (source: string | ((doc: Record<string, unknown>) => string)) =>
   defineField({
     name: "slug",
@@ -152,9 +150,10 @@ export const project = defineType({
       name: "disciplines",
       type: "array",
       group: "card",
-      of: [defineArrayMember({ type: "string" })],
-      options: { list: [...disciplines], layout: "grid" },
-      validation: (r) => r.min(1),
+      description:
+        "What the work took: the filter on /work, and the card. Pick from the list, or make a new one with Create new; they are all under Projects → Disciplines.",
+      of: [defineArrayMember({ type: "reference", to: [{ type: "discipline" }] })],
+      validation: (r) => r.min(1).unique(),
     }),
     colour("ground", { description: "The card's colour on /work, and behind the picture.", group: "card" }),
     picture("image", { required: true, description: "The card's picture or film.", group: "card" }),
@@ -469,6 +468,41 @@ export const familyStory = defineType({
         .filter(Boolean)
         .join(" · "),
       media,
+    }),
+  },
+});
+
+/**
+ * What the work took — Brand, Digital, Systems, and any an editor adds: a pill
+ * in the filter on /work, and the line on a project's card. The filter shows
+ * the ones with at least one project, in this order.
+ */
+export const discipline = defineType({
+  name: "discipline",
+  title: "Discipline",
+  type: "document",
+  fields: [
+    text("title", { description: "As the filter and the cards show it, e.g. Managed IT." }),
+    num("order", {
+      required: false,
+      description: "Where the pill sits in the filter: lower comes first. Alphabetical when equal or empty.",
+    }),
+  ],
+  orderings: [
+    {
+      title: "Filter order",
+      name: "filterOrder",
+      by: [
+        { field: "order", direction: "asc" },
+        { field: "title", direction: "asc" },
+      ],
+    },
+  ],
+  preview: {
+    select: { title: "title", order: "order" },
+    prepare: ({ title, order }) => ({
+      title,
+      subtitle: order === undefined ? undefined : `Position ${order}`,
     }),
   },
 });

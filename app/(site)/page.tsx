@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { stegaClean } from "next-sanity";
+import { preload } from "react-dom";
+import { sanityImage } from "@/lib/sanity-image";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 import {
   getEngagement,
@@ -54,6 +56,15 @@ export default async function Home() {
     getSectors(),
     getTestimonials(),
   ]);
+
+  /* The reel and its poster, as the hero draws them: the intro plays the same
+     reel in its pill, over the same poster while it loads or buffers. The
+     poster is asked for early, so the pill has a picture the moment it opens. */
+  const reel = {
+    film: home.hero.video ?? "/media/hero.mp4",
+    poster: home.hero.poster ? sanityImage(home.hero.poster, 1920) : "/media/hero-poster.jpg",
+  };
+  preload(reel.poster, { as: "image" });
 
   /* Who the site belongs to, for search engines: the studio, its address,
      its mark and where else it is. */
@@ -117,7 +128,7 @@ export default async function Home() {
       <ContactBand />
       <SiteFooter />
       <ChatLauncher />
-      <IntroOverlay />
+      <IntroOverlay film={reel.film} poster={reel.poster} />
     </>
   );
 }

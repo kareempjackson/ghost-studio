@@ -70,6 +70,7 @@ export default async function Work() {
 
         <WorkGallery
           projects={workPage.projects}
+          disciplines={workPage.disciplines}
           all={workPage.all}
           previewLabel={workPage.previewLabel}
           partOf={workPage.caseStudy.partOf}

@@ -78,12 +78,23 @@ const TOPIC = `coalesce(select(defined(topic._ref) => topic->title, topic), "")`
 const asRich = (field: string) =>
   `[{"_type": "block", "_key": "plain", "style": "normal", "markDefs": [], "children": [{"_type": "span", "_key": "plain0", "text": ${field}, "marks": []}]}]`;
 
+/**
+ * A project's disciplines, by name. A discipline is a document the project
+ * refers to; one written before disciplines were documents is still the word
+ * itself, until `npm run migrate:disciplines` has moved it. A project's list
+ * is all one or all the other, so joining the two keeps its order.
+ */
+const DISCIPLINES = `array::compact([
+  ...coalesce(disciplines[defined(_ref)]->title, []),
+  ...coalesce(disciplines[!defined(_ref)], [])
+])`;
+
 /* Reference lists skip anything unpublished or deleted
    (`[defined(@->slug.current)]`), so a page never renders a null. */
 const PROJECT = `{
   "slug": slug.current,
   name, scope, tagline, location, sector,
-  "disciplines": coalesce(disciplines, []),
+  "disciplines": ${DISCIPLINES},
   ground,
   "image": ${url("image")},
   "imageVideo": ${vid("image")},
@@ -420,8 +431,10 @@ export const getWhoWeServePage = () =>
     ["audience", "homePage", "project"],
   );
 
-export const getWorkPage = () =>
-  single<WorkPage>(
+export async function getWorkPage(): Promise<WorkPage> {
+  const { disciplineOrder, ...page } = await single<
+    Omit<WorkPage, "disciplines"> & { disciplineOrder: string[] }
+  >(
     "workPage",
     `{
       ${SEO}, heading, summary,
@@ -442,10 +455,29 @@ export const getWorkPage = () =>
           "action": coalesce(inDepth.action, "Read the full case study")
         },
         more{label, heading, action${link}}
-      }
+      },
+      "disciplineOrder": *[_type == "discipline" && defined(title)] | order(coalesce(order, 1000000) asc, lower(title) asc).title
     }`,
-    ["project"],
+    ["project", "discipline"],
   );
+
+  /* The filter: every discipline with a project under it, in the order the
+     Studio gives them, then any still stored as a plain word. Compared
+     clean: in draft mode each copy of a name carries its own edit marks. */
+  const projects = page.projects.map((project) => ({
+    ...project,
+    /* Clean, so the filter matches them: a discipline's name comes from its
+       own document, and in draft mode carries that document's edit marks. */
+    disciplines: project.disciplines.map(stegaClean),
+  }));
+  const named = projects.flatMap((project) => project.disciplines);
+  const used = new Set(named);
+  const disciplines = [...new Set([...disciplineOrder.map(stegaClean), ...named])].filter((name) =>
+    used.has(name),
+  );
+
+  return { ...page, projects, disciplines };
+}
 
 export async function getInsightsPage(): Promise<InsightsPage> {
   const { topicOrder, ...page } = await single<
@@ -857,7 +889,7 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
       ]}.list
     }`,
     params: { slug },
-    tags: ["project", "workPage"],
+    tags: ["project", "workPage", "discipline"],
   })) as {
     project:
       | (Omit<ProjectDetail, "chapters" | "testimonial" | "inDepth"> & {

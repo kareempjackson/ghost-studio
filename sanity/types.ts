@@ -133,7 +133,8 @@ export interface Chrome {
 
 /* ---- Work and articles ----------------------------------------------------- */
 
-export type Discipline = "Brand" | "Digital" | "Systems";
+/** What the work took, by name: Brand, Digital, Systems, and any an editor adds. */
+export type Discipline = string;
 
 export interface Project {
   readonly slug: string;
@@ -486,6 +487,8 @@ export interface WorkPage extends Seo {
   readonly heading: Lines;
   readonly summary: Lines;
   readonly projects: readonly Project[];
+  /** The filter's pills: the disciplines with a project under them, in order. */
+  readonly disciplines: readonly Discipline[];
   readonly all: string;
   readonly previewLabel: string;
   readonly empty: string;

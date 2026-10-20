@@ -40,6 +40,16 @@ export default defineConfig({
           topic: { _type: "reference", _ref: topicId },
         }),
       },
+      /* A project started from a discipline's list, already tagged with it. */
+      {
+        id: "project-in-discipline",
+        title: "Project in this discipline",
+        schemaType: "project",
+        parameters: [{ name: "disciplineId", type: "string" }],
+        value: ({ disciplineId }: { disciplineId: string }) => ({
+          disciplines: [{ _type: "reference", _ref: disciplineId, _key: disciplineId }],
+        }),
+      },
       /* A story started from a family's list, already filed under it. */
       {
         id: "story-in-family",

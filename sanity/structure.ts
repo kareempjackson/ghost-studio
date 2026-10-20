@@ -101,6 +101,47 @@ export const structure: StructureResolver = (S) => {
         ]),
     );
 
+  /* The work in one place: every project, the projects by what the work
+     took, and the disciplines that file them. */
+  const projects = S.listItem()
+    .title("Projects")
+    .id("projects")
+    .schemaType("project")
+    .child(
+      S.list()
+        .title("Projects")
+        .items([
+          S.listItem()
+            .title("All projects")
+            .id("all-projects")
+            .schemaType("project")
+            .child(S.documentTypeList("project").title("All projects")),
+          S.listItem()
+            .title("By discipline")
+            .id("projects-by-discipline")
+            .child(
+              S.documentTypeList("discipline")
+                .title("By discipline")
+                .defaultOrdering([
+                  { field: "order", direction: "asc" },
+                  { field: "title", direction: "asc" },
+                ])
+                .child((disciplineId) =>
+                  S.documentList()
+                    .title("Projects")
+                    .schemaType("project")
+                    .filter(`_type == "project" && $disciplineId in disciplines[]._ref`)
+                    .params({ disciplineId })
+                    /* A new project started here is tagged with this discipline. */
+                    .initialValueTemplates([
+                      S.initialValueTemplateItem("project-in-discipline", { disciplineId }),
+                    ]),
+                ),
+            ),
+          S.documentTypeListItem("discipline").title("Disciplines"),
+        ]),
+    );
+
   /* The Ghost family in one place: each member's page, and the stories
      filed under it. A story started from a member's list is filed there. */
   const family = S.listItem()
@@ -174,7 +215,7 @@ export const structure: StructureResolver = (S) => {
             .defaultOrdering([{ field: "receivedAt", direction: "desc" }]),
         ),
       S.divider(),
-      S.documentTypeListItem("project").title("Projects"),
+      projects,
       insights,
       family,
       S.divider(),

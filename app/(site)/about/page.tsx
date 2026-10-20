@@ -123,7 +123,7 @@ export default async function About() {
               <li key={member.name}>
                 <div
                   style={{ backgroundColor: member.ground }}
-                  className="relative aspect-square overflow-hidden"
+                  className="relative isolate aspect-square overflow-hidden rounded-[0.75rem]"
                 >
                   {(member.portrait || member.portraitVideo) ? (
                     <div className="gs-portrait absolute inset-0">

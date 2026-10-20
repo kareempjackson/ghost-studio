@@ -68,3 +68,20 @@ export const storyId = (seed: Pick<StorySeed, "family" | "slug">) =>
 /** A topic's document, at a fixed id from its name: "Strategy" → insightTopic-strategy. */
 export const topicId = (name: string) =>
   `insightTopic-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+
+/** The order the filter on /work has always had; disciplines added later follow. */
+export const disciplineOrder = ["Brand", "Digital", "Systems"] as const;
+
+/** A discipline's document, at a fixed id from its name: "Managed IT" → discipline-managed-it. */
+export const disciplineId = (name: string) =>
+  `discipline-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+
+/** A discipline's document, in the filter's order where it has a place in it. */
+export function disciplineDoc(title: string) {
+  const order = (disciplineOrder as readonly string[]).indexOf(title);
+  return { _id: disciplineId(title), _type: "discipline", title, ...(order >= 0 ? { order } : {}) };
+}
+
+/** A project's disciplines, as its document stores them: references to them. */
+export const disciplineRefs = (names: readonly string[]) =>
+  names.map((name) => ({ _type: "reference", _ref: disciplineId(name), _key: disciplineId(name) }));

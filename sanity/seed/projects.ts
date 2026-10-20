@@ -21,7 +21,7 @@ import { createClient } from "next-sanity";
 import { richify } from "../lib/rich";
 import { schemaTypes } from "../schemaTypes";
 import { caseStudies, projects } from "./content/work";
-import { caseStudy, keyed } from "./shape";
+import { caseStudy, disciplineDoc, disciplineRefs, keyed } from "./shape";
 
 const dry = process.argv.includes("--dry");
 /** `--only <slug>`: that project and no other, e.g. to add one new client. */
@@ -64,7 +64,9 @@ async function main() {
   for (const project of chosen) {
     /* The card, without the seed's poster: the picture is uploaded in the Studio. */
     const { slug, name, scope, tagline, location, sector, disciplines, ground } = project;
-    const card = { name, scope, tagline, location, sector, disciplines, ground };
+    const card = { name, scope, tagline, location, sector, disciplines: disciplineRefs(disciplines), ground };
+    /* The disciplines it names, as documents, for any not made yet. */
+    for (const title of disciplines) tx.createIfNotExists(disciplineDoc(title));
     const _id = `project-${slug}`;
     const study = shaped(caseStudy(caseStudies[slug]));
     const existing = await client.getDocument(_id);

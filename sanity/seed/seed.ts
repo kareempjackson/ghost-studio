@@ -21,7 +21,15 @@ import { createClient } from "next-sanity";
 import { positioning } from "../../lib/brand/voice";
 import { put, videoKey } from "../../lib/r2";
 import { richify } from "../lib/rich";
-import { caseStudy, keyed, story, storyId, topicId } from "./shape";
+import {
+  caseStudy,
+  disciplineDoc,
+  disciplineRefs,
+  keyed,
+  story,
+  storyId,
+  topicId,
+} from "./shape";
 import { schemaTypes } from "../schemaTypes";
 import { audienceSlug } from "../../lib/links";
 import { aboutPage } from "./content/about";
@@ -189,10 +197,17 @@ async function documents() {
   });
 
   /* Projects and articles */
+  /* Every discipline the work names, as a document the projects refer to. */
+  for (const title of new Set(projects.flatMap((p) => p.disciplines))) {
+    const { _id, _type, ...doc } = disciplineDoc(title);
+    add(_id, _type, doc);
+  }
+
   for (const project of projects) {
-    const { slug, image: src, ...fields } = project;
+    const { slug, image: src, disciplines, ...fields } = project;
     add(projectId_(slug), "project", {
       ...fields,
+      disciplines: disciplineRefs(disciplines),
       slug: { _type: "slug", current: slug },
       image: await image(src, ""),
       ...caseStudy(caseStudies[slug]),

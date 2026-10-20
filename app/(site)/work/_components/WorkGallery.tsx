@@ -6,9 +6,6 @@ import { projectHref } from "@/lib/links";
 import { Visual } from "../../_components/Visual";
 import type { Discipline, Project } from "@/sanity/types";
 
-/** The three trades the studio sells, and the filter on `/work`. */
-const disciplines: readonly Discipline[] = ["Brand", "Digital", "Systems"];
-
 /** Quick out, long settle: the cards arrive, they do not drift in. */
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
@@ -148,12 +145,15 @@ function ProjectCard({
  */
 export function WorkGallery({
   projects,
+  disciplines,
   all,
   previewLabel,
   partOf,
   empty,
 }: {
   projects: readonly Project[];
+  /** The filter's pills after the first: the disciplines in use, in the Studio's order. */
+  disciplines: readonly Discipline[];
   /** The filter's first pill, and the index's hidden heading. */
   all: string;
   previewLabel: string;

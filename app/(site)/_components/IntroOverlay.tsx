@@ -23,13 +23,6 @@ const pct = (v: number, of: number) => `${(v / of) * 100}%`;
 
 /** The pill when the mark first opens: the O at the hero aperture's 2.58 : 1. */
 const PILL_W = H * 2.58;
-/**
- * The frame the intro holds, and where it sits in the reel: the laptop shot,
- * which runs from 5.0s to 6.3s and is followed by the reel's steadier
- * stretch, so the picture comes alive at the hand-off without a burst of
- * cuts. (The reel's opening seconds are a fast montage.)
- */
-const REEL_STILL = { src: "/media/intro-still.jpg", at: 5.3 } as const;
 
 /** The pill's own scale at the end of the grow (see `gs-intro-pill`). */
 const PILL_END = 1.1434;
@@ -131,10 +124,15 @@ function Half({ from, to, side }: { from: number; to: number; side: string }) {
  *    pill on the hero's pill.
  * 4. Grey — the letters soften from ink to the hero's watermark grey.
  *
+ * The pill plays the reel from the moment the mark opens. Under it is the
+ * reel's poster, from the home page in Sanity: it is what the pill shows
+ * until the reel has a frame to show, and again whenever it stops to
+ * buffer, so the opening never shows a black or frozen pill.
+ *
  * At that point the layer and the page under it are the same picture — the
- * hero's reel is parked on the frame the pill has been holding — and the
- * layer dissolves onto it as the reel starts to play — there
- * is no second logo to cut to. The header and the claim come in as it goes.
+ * hero's reel is set to the frame the pill's has reached and plays on with
+ * it — and the layer dissolves onto it: there is no second logo to cut to.
+ * The header and the claim come in as it goes.
  *
  * All the movement is CSS keyframes keyed to `html[data-intro]`, on transform
  * and opacity alone. The layer is held at `pre` — mark below the screen, pill
@@ -143,10 +141,21 @@ function Half({ from, to, side }: { from: number; to: number; side: string }) {
  * rather than part-way through it. The only thing measured is where the hero
  * sits, which the grow needs and which is known long before the grow begins.
  */
-export function IntroOverlay() {
+export function IntroOverlay({
+  film,
+  poster,
+}: {
+  /** The hero's reel, played in the pill. */
+  film: string;
+  /** Its poster, shown in the pill until the reel plays and while it buffers. */
+  poster: string;
+}) {
   const [done, setDone] = useState(false);
   const [growth, setGrowth] = useState<CSSProperties | null>(null);
+  /* Whether the pill's reel is showing frames; the poster shows until it is. */
+  const [rolling, setRolling] = useState(false);
   const markRef = useRef<HTMLDivElement>(null);
+  const filmRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -168,6 +177,32 @@ export function IntroOverlay() {
     const reel = document.querySelector<HTMLVideoElement>(
       ".gs-hero-aperture video",
     );
+
+    /* The pill's own reel. It is only given its source now, with the intro
+       known to be playing: the layer is in every home page's markup, and a
+       visit that skips the intro should not load the reel a second time. */
+    const own = filmRef.current;
+    if (own) {
+      own.src = film;
+      void own.play().catch(() => {});
+    }
+
+    /* The hero's reel to the frame the pill's has reached, and playing, so
+       the layer dissolves onto the same moving picture. Only a real drift is
+       corrected: a seek takes the reel a moment to land, and two reels
+       already in step would come out of it a few frames apart. */
+    const sync = () => {
+      if (!reel) return;
+      if (
+        own &&
+        own.readyState >= 2 &&
+        own.currentTime > 0 &&
+        Math.abs(reel.currentTime - own.currentTime) > 0.25
+      ) {
+        reel.currentTime = own.currentTime;
+      }
+      void reel.play().catch(() => {});
+    };
 
     const measure = () => {
       if (markRef.current) setGrowth(measureGrowth(markRef.current));
@@ -192,7 +227,7 @@ export function IntroOverlay() {
     const handOver = () => {
       if (finished) return;
       finished = true;
-      void reel?.play().catch(() => {});
+      sync();
       root.dataset.intro = "reveal";
       timers.push(window.setTimeout(() => setDone(true), 650));
       timers.push(window.setTimeout(() => delete root.dataset.intro, 1150));
@@ -204,9 +239,9 @@ export function IntroOverlay() {
       if (finished || following) return;
       following = true;
 
-      /* As soon as the grow lands, register the pill and park the hero's reel
-         on the still, so by the time the grey has settled the two are the
-         same picture and nothing waits on it. */
+      /* As soon as the grow lands, register the pill and bring the hero's
+         reel to the pill's frame, so by the time the grey has settled the two
+         are the same picture and nothing waits on it. */
       whenDone(".gs-intro-pill", () => {
         if (finished) return;
 
@@ -233,12 +268,7 @@ export function IntroOverlay() {
           pill.style.translate = `${dx}px ${dy}px`;
         }
 
-        /* Park the hero's reel on the still's frame, so the layer dissolves
-           onto the same picture — and it plays on from there as it goes. */
-        if (reel) {
-          reel.pause();
-          reel.currentTime = REEL_STILL.at;
-        }
+        sync();
       });
 
       whenDone(".gs-intro-ink", handOver);
@@ -261,7 +291,7 @@ export function IntroOverlay() {
 
     /*
       Wait for the layer's own drawings — the two copies of the mark and the
-      still — so the rise is not a blank box filling in, and give it a frame
+      reel's poster — so the rise is not a blank box filling in, and give it a frame
       on the screen before it moves. `decode` on an image already in the
       document resolves as soon as it is ready to paint; `ready` is a floor,
       for a drawing that never arrives.
@@ -295,7 +325,7 @@ export function IntroOverlay() {
       frames.forEach(cancelAnimationFrame);
       timers.forEach(clearTimeout);
     };
-  }, []);
+  }, [film]);
 
   if (done) return null;
 
@@ -324,16 +354,29 @@ export function IntroOverlay() {
               width: pct(PILL_W, W),
             }}
           >
-            {/* A still of the reel's calmest shot, so the opening shows one
-                composed picture rather than the reel's opening montage. The
-                hero's reel is parked on this same frame and plays on as the
-                layer dissolves, so the picture comes alive with no seam. */}
+            {/* The reel's poster, underneath: what the pill shows until the
+                reel has a frame to show, and whenever it stops to buffer. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={REEL_STILL.src}
+              src={poster}
               alt=""
               draggable={false}
-              className="size-full object-cover"
+              className="absolute inset-0 size-full object-cover"
+            />
+            {/* The reel itself, over it once it is playing. No source in the
+                markup: the effect gives it one when the intro plays. */}
+            <video
+              ref={filmRef}
+              muted
+              loop
+              playsInline
+              preload="none"
+              onPlaying={() => setRolling(true)}
+              onWaiting={() => setRolling(false)}
+              onEmptied={() => setRolling(false)}
+              className={`absolute inset-0 size-full object-cover transition-opacity duration-200 ${
+                rolling ? "opacity-100" : "opacity-0"
+              }`}
             />
           </div>
 

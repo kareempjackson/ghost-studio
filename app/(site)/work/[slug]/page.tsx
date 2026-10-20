@@ -215,11 +215,6 @@ export default async function ProjectPage({
           </div>
         )}
 
-        {/* Its own parts, each told in full, that no chapter has linked to. */}
-        {project.inDepth.length > 0 && (
-          <InDepth parts={project.inDepth} labels={labels.inDepth} />
-        )}
-
         {/* What the client said: the story's close, once they have said it. */}
         {project.testimonial && (
           <ClientFeedback
@@ -227,6 +222,12 @@ export default async function ProjectPage({
             label={labels.feedbackLabel}
             heading={labels.feedbackHeading}
           />
+        )}
+
+        {/* Its own parts, each told in full, that no chapter has linked to:
+            the way on, once the story has closed. */}
+        {project.inDepth.length > 0 && (
+          <InDepth parts={project.inDepth} labels={labels.inDepth} />
         )}
 
         {project.more.length > 0 && (

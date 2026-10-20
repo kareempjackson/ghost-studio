@@ -51,7 +51,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         {/* The intro's mark, fetched before it has to rise. */}
         <link rel="preload" as="image" href="/logos/logo-mark.svg" />
         <link rel="preload" as="image" href="/logos/logo-mark-grey.svg" />
-        <link rel="preload" as="image" href="/media/intro-still.jpg" />
         {typekit.preconnect.map((href) => (
           <link key={href} rel="preconnect" href={href} crossOrigin="" />
         ))}
