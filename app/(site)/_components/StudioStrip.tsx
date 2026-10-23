@@ -19,7 +19,8 @@ export const LABEL =
 /**
  * The strip under an inner page's cover: two things the studio made, the
  * principle between them. Edge to edge, so it reads as a wall and not as a
- * gallery.
+ * gallery: the corners at the screen's edge stay square, and those facing
+ * the next piece round, as the principle does.
  *
  * The page fetches the strip and hands it in, so this module stays free of
  * server-only reads: LABEL is imported from client components too.
@@ -33,7 +34,7 @@ export function StudioStrip({ strip }: { strip: StudioStripData }) {
       className="grid gap-3 sm:grid-cols-2 lg:h-[31.5vw] lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)_minmax(0,1.17fr)] lg:gap-5"
     >
       <div
-        className="relative aspect-[4/3] overflow-hidden bg-ink-100 sm:col-span-2 lg:col-span-1 lg:aspect-auto"
+        className="relative aspect-[4/3] overflow-hidden rounded-b-[0.75rem] bg-ink-100 sm:col-span-2 lg:col-span-1 lg:aspect-auto lg:rounded-bl-none lg:rounded-tr-[0.75rem]"
         {...(tee.src || tee.video ? {} : { role: "img", "aria-label": tee.alt })}
       >
         {(tee.src || tee.video) && (
@@ -49,7 +50,7 @@ export function StudioStrip({ strip }: { strip: StudioStripData }) {
 
       <figure
         style={{ backgroundColor: VERMILION }}
-        className="flex aspect-square flex-col p-6 text-ink-950 sm:aspect-auto lg:p-7"
+        className="flex aspect-square flex-col rounded-[0.75rem] p-6 text-ink-950 sm:aspect-auto lg:p-7"
       >
         <p className={LABEL}>{principle.label}</p>
         <blockquote className="my-auto py-10" style={PRINCIPLE_STYLE}>
@@ -63,7 +64,7 @@ export function StudioStrip({ strip }: { strip: StudioStripData }) {
       </figure>
 
       <div
-        className="relative aspect-square overflow-hidden bg-[#1a1111] sm:aspect-auto sm:min-h-[20rem] lg:min-h-0"
+        className="relative aspect-square overflow-hidden rounded-t-[0.75rem] bg-[#1a1111] sm:aspect-auto sm:min-h-[20rem] sm:rounded-tr-none sm:rounded-bl-[0.75rem] lg:min-h-0"
         {...(tote.src || tote.video ? {} : { role: "img", "aria-label": tote.alt })}
       >
         {/* PLACEHOLDER — the comp sets the “Work over noise” tote here. */}
