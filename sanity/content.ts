@@ -449,6 +449,7 @@ export async function getWorkPage(): Promise<WorkPage> {
         "feedbackLabel": coalesce(feedbackLabel, "Client feedback"),
         "feedbackHeading": coalesce(feedbackHeading, "In their words."),
         "partOf": coalesce(partOf, "Part of"),
+        "family": coalesce(family, "Ghost family"),
         "inDepth": {
           "label": coalesce(inDepth.label, "In depth"),
           "heading": coalesce(inDepth.heading, "The work, in full."),
@@ -668,13 +669,14 @@ export const getManagedServicesPage = () =>
   );
 
 export async function getFamilyPage(slug: string): Promise<FamilyPageData> {
-  const { stories, itemLabel, ...page } = await fixed<
+  const { stories, itemLabel, workOrder, ...page } = await fixed<
     Omit<FamilyPageData, "stories" | "archive"> & {
       archive: Omit<FamilyPageData["archive"], "empty"> & {
         empty: Omit<FamilyPageData["archive"]["empty"], "first">;
       };
       stories: StoryRow[];
       itemLabel: string;
+      workOrder: string[];
     }
   >(
     "familyPage",
@@ -687,15 +689,32 @@ export async function getFamilyPage(slug: string): Promise<FamilyPageData> {
         "items": coalesce(items[]{title, body, ground}, []),
         "empty": {"heading": coalesce(empty.heading, "Nothing here yet."), "body": empty.body}
       },
+      "projects": {
+        "label": coalesce(projects.label, "Projects"),
+        "heading": coalesce(projects.heading, ["The work it led to."]),
+        "items": *[_type == "project" && defined(slug.current) && ^.slug in families] | order(_createdAt desc) ${PROJECT},
+        "previewLabel": *[_id == "workPage"][0].previewLabel
+      },
       ask{label, heading, summary, action${link}},
       family{label, heading},
       "itemLabel": coalesce(stories.itemLabel, "Story"),
-      "stories": ${familyStories("^.slug")}
+      "stories": ${familyStories("^.slug")},
+      "workOrder": coalesce(*[_id == "workPage"][0].projects[]->slug.current, [])
     }`,
-    ["familyStory"],
+    ["familyStory", "project", "workPage", "discipline"],
   );
+  /* As /work orders them: the ones it lists, in its order, then the rest
+     newest first. Compared clean, as each copy of a slug carries its own
+     edit marks in draft mode. */
+  const listed = workOrder.map(stegaClean);
+  const at = (slug: string) => {
+    const index = listed.indexOf(stegaClean(slug));
+    return index < 0 ? listed.length : index;
+  };
   return {
     ...page,
+    /* Array sort is stable: those /work doesn't list stay newest first. */
+    projects: { ...page.projects, items: [...page.projects.items].sort((a, b) => at(a.slug) - at(b.slug)) },
     /* The slot the family's first story will take, as its card will name it. */
     archive: { ...page.archive, empty: { ...page.archive.empty, first: `${itemLabel} ${pad(1)}` } },
     stories: numbered(stories, stories, itemLabel),
@@ -856,6 +875,10 @@ export async function getProjectSlugs(): Promise<string[]> {
  * of its parts — from the chapter that names it, or, for a part no chapter
  * names, from the band after the chapters — and a part's own "more work"
  * leads with the project it belongs to and that project's other parts.
+ *
+ * A project can also have come through the Ghost family: given away by
+ * Ghost Gives, say. Its page names each member ticked, and each member's
+ * page lists it (see `getFamilyPage`).
  */
 export async function getProject(slug: string): Promise<ProjectDetail | null> {
   const data = (await sanityFetch({
@@ -870,6 +893,7 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
         "tags": coalesce(tags, []),
         "overview": coalesce(overview, []),
         website,
+        "families": *[_type == "familyPage" && slug in coalesce(^.families, [])]{"label": coalesce(title, slug), "href": "/" + slug},
         "feature": select(defined(feature) => feature${MEDIA}),
         "chapters": ${CHAPTERS},
         "testimonial": select(defined(testimonial.quote) && defined(testimonial.name) => testimonial{
@@ -889,7 +913,7 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
       ]}.list
     }`,
     params: { slug },
-    tags: ["project", "workPage", "discipline"],
+    tags: ["project", "workPage", "discipline", "familyPage"],
   })) as {
     project:
       | (Omit<ProjectDetail, "chapters" | "testimonial" | "inDepth"> & {
@@ -931,8 +955,16 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
     return true;
   });
 
+  /* The family members it came through, in the family's own order; none
+     while the family is not on show, as nothing links to it then. */
+  const rank = (href: string) => families.findIndex((f) => `/${f.slug}` === stegaClean(href));
+  const ghostFamily = FAMILY_ON_SHOW
+    ? [...project.families].sort((a, b) => rank(a.href) - rank(b.href))
+    : [];
+
   return {
     ...rest,
+    families: ghostFamily,
     chapters,
     inDepth,
     testimonial: project.testimonial

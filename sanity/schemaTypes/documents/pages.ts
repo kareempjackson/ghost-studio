@@ -292,6 +292,11 @@ export const workPage = defineType({
           title: "Part of label",
           description: "Over the larger project, on a case study that is one part of it. Part of if empty.",
         }),
+        text("family", {
+          required: false,
+          title: "Ghost family label",
+          description: "Over the Ghost family members a project came through, in its margin. Ghost family if empty.",
+        }),
         object(
           "inDepth",
           [
@@ -525,6 +530,17 @@ export const familyPage = defineType({
         },
       ),
     ]),
+    object(
+      "projects",
+      [
+        text("label", { required: false, description: "Projects if empty." }),
+        lines("heading", { required: false, description: "One entry per line. The work it led to. if empty." }),
+      ],
+      {
+        description:
+          "The projects ticked for this page under Ghost family, after the archive. Shows once there is one.",
+      },
+    ),
     object("ask", [text("label"), lines("heading"), para("summary"), action()]),
     object("family", [text("label"), lines("heading")]),
     object(

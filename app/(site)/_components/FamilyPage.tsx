@@ -8,6 +8,7 @@ import { ArrowPill } from "./ArrowPill";
 import { ChatLauncher } from "./ChatLauncher";
 import { ContactBand } from "./ContactBand";
 import { BAND, FamilyAsk, FamilyMembers, StickyNote } from "./FamilyBands";
+import { ProjectCard } from "./ProjectCard";
 import { MONO, SectionHead } from "./SectionHead";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
@@ -50,12 +51,14 @@ const dropFor = (index: number) => (index % 2 ? "sm:mt-24 lg:mt-36" : undefined)
  * notes and a poster, pinned at angles, so the cover reads as a bench and not
  * a brochure. Then the archive, staggered in two columns — the family's
  * stories first, each a way into its own page, then what is still on the
- * bench — the ask, and the rest of the family.
+ * bench — the projects it went into, the ask, and the rest of the family.
  */
 export async function FamilyPage({ data }: { data: FamilyPageData }) {
-  const { cover, archive, ask, stories } = data;
+  const { cover, archive, projects, ask, stories } = data;
   /* Two notes, if both are set; the wall goes without one that is not. */
   const [high, low] = cover.notes;
+  /* One project goes across the page; more sit two to a row. */
+  const single = projects.items.length === 1;
 
   return (
     <>
@@ -210,6 +213,26 @@ export async function FamilyPage({ data }: { data: FamilyPageData }) {
             </ul>
           )}
         </section>
+
+        {/* The projects ticked for this family under Ghost family, in their
+            order on /work. */}
+        {projects.items.length > 0 && (
+          <section aria-labelledby="projects-heading" className={BAND}>
+            <SectionHead id="projects-heading" label={projects.label} heading={projects.heading} />
+            <ul className="mt-14 grid gap-x-6 gap-y-14 md:grid-cols-2 lg:mt-20 lg:gap-x-8">
+              {projects.items.map((project) => (
+                <li key={project.slug} className={single ? "md:col-span-2" : undefined}>
+                  <ProjectCard
+                    project={project}
+                    aspect={single ? "aspect-[4/3] sm:aspect-[1436/756]" : "aspect-[10/7]"}
+                    sizes={single ? "100vw" : "(min-width: 768px) 50vw, 100vw"}
+                    previewLabel={projects.previewLabel}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <FamilyAsk ask={ask} />
 

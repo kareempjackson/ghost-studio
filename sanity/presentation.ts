@@ -91,11 +91,15 @@ export const resolve: PresentationPluginOptions["resolve"] = {
       }),
     }),
     project: defineLocations({
-      select: { title: "name", slug: "slug.current" },
+      select: { title: "name", slug: "slug.current", families: "families" },
       resolve: (doc) => ({
         locations: [
           { title: doc?.title || "Project", href: `/work/${doc?.slug}` },
           { title: "Work", href: "/work" },
+          /* The Ghost family pages it is ticked for, which list it. */
+          ...families
+            .filter((f) => (doc?.families as string[] | undefined)?.includes(f.slug))
+            .map((f) => ({ title: f.title, href: `/${f.slug}` })),
         ],
       }),
     }),

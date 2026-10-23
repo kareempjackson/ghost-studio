@@ -51,6 +51,21 @@ const HEADLINE_STYLE: CSSProperties = {
   lineHeight: 1.08,
 };
 
+/** A way on from the margin: the larger project, or a Ghost family member. Sits in a `group`. */
+const MARGIN_LINK =
+  "inline-flex items-baseline gap-2 text-[1.125rem] leading-[1.3] tracking-[-0.02em] text-ink-950 transition-colors duration-200 hover:text-accent lg:text-[1.25rem]";
+
+function MarginArrow() {
+  return (
+    <span
+      aria-hidden
+      className="text-[0.875em] transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+    >
+      ↗
+    </span>
+  );
+}
+
 /** 32px at 390 to 42px at 1440, held there. The close's heading. */
 const MORE_STYLE: CSSProperties = {
   fontSize: "clamp(2rem, 1.7679rem + 0.952vw, 2.625rem)",
@@ -80,6 +95,9 @@ export default async function ProjectPage({
   ]);
   if (!project) notFound();
   const labels = workPage.caseStudy;
+  /* The margin's first block sits well under the way back; the rest closer. */
+  const first = "mt-12 lg:mt-20";
+  const next = "mt-10 lg:mt-12";
 
   return (
     <>
@@ -115,26 +133,37 @@ export default async function ProjectPage({
             </Link>
             {/* One part of a larger project: the way to it, before the record. */}
             {project.parent && (
-              <div className="mt-12 lg:mt-20">
+              <div className={first}>
                 <p className={`${MONO} text-ink-500`}>{labels.partOf}</p>
                 <Link
                   href={projectHref(project.parent.slug)}
-                  className="group mt-3 inline-flex items-baseline gap-2 text-[1.125rem] leading-[1.3] tracking-[-0.02em] text-ink-950 transition-colors duration-200 hover:text-accent lg:text-[1.25rem]"
+                  className={`group mt-3 ${MARGIN_LINK}`}
                 >
                   {project.parent.name}
-                  <span
-                    aria-hidden
-                    className="text-[0.875em] transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                  >
-                    ↗
-                  </span>
+                  <MarginArrow />
                 </Link>
+              </div>
+            )}
+            {/* The Ghost family members the work came through. */}
+            {project.families.length > 0 && (
+              <div className={project.parent ? next : first}>
+                <p className={`${MONO} text-ink-500`}>{labels.family}</p>
+                <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
+                  {project.families.map((family) => (
+                    <li key={family.href}>
+                      <Link href={family.href} className={`group ${MARGIN_LINK}`}>
+                        {family.label}
+                        <MarginArrow />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
             {project.facts.length > 0 && (
               <dl
                 className={`max-w-[26rem] space-y-5 text-[0.9375rem] leading-[1.6] tracking-[-0.01em] text-primary ${
-                  project.parent ? "mt-10 lg:mt-12" : "mt-12 lg:mt-20"
+                  project.parent || project.families.length > 0 ? next : first
                 }`}
               >
                 {project.facts.map((fact) => (

@@ -142,6 +142,20 @@ export const project = defineType({
         }),
       },
     }),
+    defineField({
+      name: "families",
+      title: "Ghost family",
+      type: "array",
+      group: "card",
+      description:
+        "Optional. The Ghost family members the work came through: a project Ghost Gives gave away, say, or a Ghost Labs experiment taken on for a client. Its page names them in the margin, and each one's page lists it under Projects.",
+      of: [defineArrayMember({ type: "string" })],
+      options: {
+        list: families.map(({ slug, title }) => ({ title, value: slug })),
+        layout: "grid",
+      },
+      validation: (r) => r.unique(),
+    }),
     text("scope", { description: "What the studio did, in three words or fewer.", group: "card" }),
     text("tagline", { description: "The job in one line.", group: "card" }),
     text("location", { group: "card" }),

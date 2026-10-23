@@ -203,6 +203,8 @@ export interface ProjectDetail extends Project {
   readonly tags: Lines;
   readonly overview: Rich;
   readonly website: string | null;
+  /** The Ghost family members the work came through, each a way to its page; none while the family is not on show. */
+  readonly families: readonly Link[];
   readonly feature: Media | null;
   readonly chapters: readonly Chapter[];
   /** Its own parts that no chapter links to, listed after the chapters. */
@@ -510,6 +512,8 @@ export interface CaseStudyLabels {
   readonly feedbackHeading: string;
   /** Over the larger project, on a case study that is one part of it. */
   readonly partOf: string;
+  /** Over the Ghost family members a project came through, in its margin. */
+  readonly family: string;
   /** A project's own parts: linked from its chapters, and listed after them. */
   readonly inDepth: { readonly label: string; readonly heading: string; readonly action: string };
   readonly more: { readonly label: string; readonly heading: string; readonly action: Link };
@@ -645,6 +649,14 @@ export interface FamilyPageData extends Seo {
       /** The slot the first story will take, as its card will name it: Cohort 01. */
       readonly first: string;
     };
+  };
+  /** The projects ticked for this family, in their order on /work. */
+  readonly projects: {
+    readonly label: string;
+    readonly heading: Lines;
+    readonly items: readonly Project[];
+    /** Under the name on a plate with no picture yet. */
+    readonly previewLabel: string;
   };
   readonly ask: FamilyAsk;
   readonly family: FamilyBand;
