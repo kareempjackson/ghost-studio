@@ -40,6 +40,13 @@ const FAMILY_STYLE: CSSProperties = {
 
 const BAND = "px-5 py-24 sm:px-8 lg:px-12 lg:py-36";
 
+/**
+ * Whether the Partners section is on show. Off for now: the partners stay in
+ * the Studio as they are, and the page leaves the section out. Turn it on and
+ * it comes back as it is set there.
+ */
+const PARTNERS_ON_SHOW = false;
+
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
@@ -156,8 +163,9 @@ export default async function About() {
 
         {/* Who the studio works alongside: each partner's logo on the paper
             ground, in grey until hovered, as the portraits above are; its
-            name set in its place until the logo is in. */}
-        {partners && (
+            name set in its place until the logo is in. Left out while
+            PARTNERS_ON_SHOW is off. */}
+        {PARTNERS_ON_SHOW && partners && (
           <section id="partners" aria-labelledby="partners-heading" className={BAND}>
             <SectionHead
               id="partners-heading"
