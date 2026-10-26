@@ -22,6 +22,10 @@ export default defineConfig({
   basePath: studioUrl,
   projectId,
   dataset,
+  /* Signed in by token, never by Sanity's cookie alone: the film fields send
+     the editor's token to /api/r2, which asks Sanity who they are, and a
+     session held only in a cookie has no token to send. */
+  auth: { loginMethod: "token" },
   schema: {
     types: schemaTypes,
     /* No "new" button for a page that exists once, or once per fixed route. */
