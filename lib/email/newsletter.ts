@@ -13,15 +13,18 @@ export function welcomeEmail(siteName: string, welcome: NonNullable<NewsletterCo
     .map((p) => p.trim())
     .filter(Boolean);
 
+  /* A letter with no sign-off written yet goes without one. */
+  const signoff = welcome.signoff.length > 0;
+
   const html = layout(
     siteName,
     `
       ${paragraphs.map((p) => `<p style="margin:0 0 18px;font:15px/1.6 ${FONT};color:${INK};">${block(p)}</p>`).join("")}
-      <p style="margin:18px 0 0;font:15px/1.6 ${FONT};color:${INK};">${welcome.signoff.map(escape).join("<br>")}</p>
+      ${signoff ? `<p style="margin:18px 0 0;font:15px/1.6 ${FONT};color:${INK};">${welcome.signoff.map(escape).join("<br>")}</p>` : ""}
     `,
   );
 
-  const text = [...paragraphs, welcome.signoff.join("\n")].join("\n\n");
+  const text = [...paragraphs, ...(signoff ? [welcome.signoff.join("\n")] : [])].join("\n\n");
 
   return { subject: welcome.subject, html, text };
 }

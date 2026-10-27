@@ -94,7 +94,7 @@ export interface Footer {
 export interface NewsletterCopy {
   readonly studioEmail: string;
   readonly siteName: string;
-  /** Null until it's written in the Studio: no welcome is sent until then. */
+  /** Null until its subject and letter are written in the Studio: no welcome is sent until then. The sign-off may be empty. */
   readonly welcome: { readonly subject: string; readonly body: string; readonly signoff: Lines } | null;
 }
 

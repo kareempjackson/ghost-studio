@@ -267,7 +267,10 @@ export const getNewsletterCopy = () =>
     `{
       "studioEmail": *[_id == "siteSettings"][0].email,
       "siteName": coalesce(*[_id == "siteSettings"][0].title, "Ghost Savvy Studios"),
-      "welcome": newsletter.welcome{subject, body, signoff}
+      "welcome": select(
+        defined(newsletter.welcome.subject) && defined(newsletter.welcome.body) =>
+          newsletter.welcome{subject, body, "signoff": coalesce(signoff, [])}
+      )
     }`,
     ["siteSettings"],
   );

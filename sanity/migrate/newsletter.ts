@@ -16,7 +16,8 @@
  * sign-up opens your mail app, that Resend only sends the contact form's
  * emails, and how to stop the newsletter, are each replaced only where they
  * still read exactly as seeded; a line for the newsletter's address is added
- * under them; and its "last updated" date moves, if anything changed.
+ * under them; and its "last updated" date moves to the day of the run, if
+ * anything changed.
  *
  * Each document is patched against the revision it was read at: one edited
  * meanwhile makes the run fail without writing it; run it again.
@@ -27,7 +28,6 @@
 import { randomUUID } from "node:crypto";
 import { createClient } from "next-sanity";
 import { footer } from "../seed/content/footer";
-import { legalDocuments } from "../seed/content/legal";
 
 const dry = process.argv.includes("--dry");
 
@@ -48,6 +48,9 @@ const client = createClient({
   apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2026-10-01",
   useCdn: false,
 });
+
+/** The policy's "last updated", as it reads: the day it changes, e.g. 26 October 2026. */
+const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
 const OLD_DONE = "Your mail app has the request ready. Send it and you're on the list.";
 
@@ -145,13 +148,9 @@ async function migratePrivacy(id: string) {
     console.log(`${id}: up to date.`);
     return;
   }
-  console.log(`${id}: ${changes.join("; ")}; dated ${legalDocuments.privacy.updated}.`);
+  console.log(`${id}: ${changes.join("; ")}; dated ${today}.`);
   if (dry) return;
-  await client
-    .patch(id)
-    .ifRevisionId(doc._rev)
-    .set({ sections, updated: legalDocuments.privacy.updated })
-    .commit();
+  await client.patch(id).ifRevisionId(doc._rev).set({ sections, updated: today }).commit();
 }
 
 async function main() {
