@@ -20,8 +20,9 @@ const FAILED = "That didn't go through. Try again in a moment.";
  * outline is the only thing that moves when the field is in use. Under it, the one line of small
  * print a sign-up owes: what the address is for and how to take it back.
  *
- * Sent, the address goes on the studio's list and its owner gets a welcome
- * (./subscribe.ts). The line under the field says how it went.
+ * Sent, the address is kept in the Studio (Newsletter), goes on the studio's
+ * list, and its owner gets a welcome (./subscribe.ts). The line under the
+ * field says how it went.
  */
 export function NewsletterSignup() {
   const {
@@ -48,9 +49,12 @@ export function NewsletterSignup() {
       return;
     }
     startSending(async () => {
-      const result = await subscribe({ email: address, website, startedAt: startedAt.current }).catch(
-        () => ({ ok: false as const }),
-      );
+      const result = await subscribe({
+        email: address,
+        website,
+        startedAt: startedAt.current,
+        page: window.location.pathname,
+      }).catch(() => ({ ok: false as const }));
       if (!result.ok) {
         setStatus("failed");
         return;

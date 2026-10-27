@@ -214,6 +214,18 @@ export const structure: StructureResolver = (S) => {
             .filter('_type == "enquiry"')
             .defaultOrdering([{ field: "receivedAt", direction: "desc" }]),
         ),
+      /* Who signed up in the footer, newest first; private, as enquiries are.
+         The mailing list itself is Resend's. */
+      S.listItem()
+        .title("Newsletter")
+        .id("newsletter")
+        .child(
+          S.documentList()
+            .title("Subscribers")
+            .schemaType("subscriber")
+            .filter('_type == "subscriber"')
+            .defaultOrdering([{ field: "subscribedAt", direction: "desc" }]),
+        ),
       S.divider(),
       projects,
       insights,

@@ -15,6 +15,8 @@ import { structure } from "./sanity/structure";
 
 const singletonTypes = new Set<string>(singletons.map((s) => s.type));
 const fixedTypes = new Set<string>(fixedPages.map((p) => p.type));
+/* What the site writes, never an editor: no "new" button, no copies. */
+const siteWritten = new Set(["enquiry", "subscriber"]);
 
 export default defineConfig({
   name: "ghost-savvy",
@@ -32,7 +34,7 @@ export default defineConfig({
     templates: (templates) => [
       ...templates.filter(
         ({ schemaType }) =>
-          !singletonTypes.has(schemaType) && !fixedTypes.has(schemaType) && schemaType !== "enquiry",
+          !singletonTypes.has(schemaType) && !fixedTypes.has(schemaType) && !siteWritten.has(schemaType),
       ),
       /* An insight started from a topic's list, already filed under it. */
       {
@@ -67,8 +69,9 @@ export default defineConfig({
   document: {
     /* A singleton can be edited and published, never duplicated or deleted. */
     actions: (actions, { schemaType }) =>
-      schemaType === "enquiry"
-        ? /* The site writes enquiries: they can be filed and deleted, not copied. */
+      siteWritten.has(schemaType)
+        ? /* The site writes enquiries and subscribers: they can be filed and
+             deleted, not copied. */
           actions.filter(({ action }) => action !== "duplicate")
         : singletonTypes.has(schemaType) || fixedTypes.has(schemaType)
         ? actions.filter(
