@@ -285,8 +285,25 @@ export const project = defineType({
       group: "story",
       title: "More work",
       description: "The two projects at the foot. The next two on /work if empty.",
-      of: [defineArrayMember({ type: "reference", to: [{ type: "project" }] })],
-      validation: (r) => r.max(2),
+      of: [
+        defineArrayMember({
+          type: "reference",
+          to: [{ type: "project" }],
+          options: {
+            /* Any project but this one. */
+            filter: ({ document }) => ({
+              filter: "!(_id in [$id, 'drafts.' + $id])",
+              params: { id: ownId(document) },
+            }),
+          },
+        }),
+      ],
+      /* Two at most, checked by hand: a max() rule greys out Add item once
+         the list is full, so a project with its two read as locked. */
+      validation: (r) =>
+        r.unique().custom((value: unknown[] | undefined) =>
+          (value?.length ?? 0) <= 2 ? true : "Two at most: remove one to make room.",
+        ),
     }),
   ],
   preview: {

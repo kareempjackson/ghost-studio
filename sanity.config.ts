@@ -8,6 +8,7 @@ import { visionTool } from "@sanity/vision";
 import { defineConfig } from "sanity";
 import { presentationTool } from "sanity/presentation";
 import { structureTool } from "sanity/structure";
+import { unpublishEverywhere } from "./sanity/actions";
 import { apiVersion, dataset, projectId, studioUrl } from "./sanity/env";
 import { resolve } from "./sanity/presentation";
 import { fixedPages, schemaTypes, singletons } from "./sanity/schemaTypes";
@@ -17,6 +18,8 @@ const singletonTypes = new Set<string>(singletons.map((s) => s.type));
 const fixedTypes = new Set<string>(fixedPages.map((p) => p.type));
 /* What the site writes, never an editor: no "new" button, no copies. */
 const siteWritten = new Set(["enquiry", "subscriber"]);
+/* Unpublished, these come out of every place that shows them first. */
+const takenOutOnUnpublish = new Set(["project"]);
 
 export default defineConfig({
   name: "ghost-savvy",
@@ -77,6 +80,8 @@ export default defineConfig({
         ? actions.filter(
             ({ action }) => action && !["duplicate", "delete", "unpublish"].includes(action),
           )
+        : takenOutOnUnpublish.has(schemaType)
+        ? actions.map((Action) => (Action.action === "unpublish" ? unpublishEverywhere(Action) : Action))
         : actions,
   },
   plugins: [
