@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { arial, dmSans } from "@/app/fonts";
 import { typekit } from "@/lib/brand";
+import { gtagScript, gtagSrc, loadsAnalytics } from "@/lib/analytics";
 import { introScript } from "@/lib/intro";
 import { Suspense } from "react";
 import { draftMode } from "next/headers";
@@ -45,6 +46,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
+        {/* The Google tag. See lib/analytics.ts. */}
+        {loadsAnalytics && (
+          <>
+            <script async src={gtagSrc} />
+            <script dangerouslySetInnerHTML={{ __html: gtagScript }} />
+          </>
+        )}
         {/* Decides, before first paint, whether this tab has seen the intro.
             See lib/intro.ts. */}
         <script dangerouslySetInnerHTML={{ __html: introScript }} />
