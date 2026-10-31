@@ -3,6 +3,7 @@ import "server-only";
 import type { Metadata } from "next";
 import { stegaClean } from "next-sanity";
 import { getSettings } from "@/sanity/content";
+import { markdownHref } from "./links";
 
 /**
  * A page's metadata: its title and description, the address search engines
@@ -16,11 +17,14 @@ export async function pageMetadata({
   title,
   description,
   path,
+  markdown = false,
 }: {
   title: string;
   description?: string | null;
   /** Where the page lives, e.g. /about. */
   path: string;
+  /** Whether it has a Markdown copy for agents, linked from its head (lib/markdown.ts). */
+  markdown?: boolean;
 }): Promise<Metadata> {
   const { title: site } = await getSettings();
   const name = stegaClean(title);
@@ -28,7 +32,10 @@ export async function pageMetadata({
   return {
     title: name,
     description: summary,
-    alternates: { canonical: path },
+    alternates: {
+      canonical: path,
+      ...(markdown ? { types: { "text/markdown": markdownHref(path) } } : {}),
+    },
     openGraph: {
       type: "website",
       siteName: stegaClean(site),

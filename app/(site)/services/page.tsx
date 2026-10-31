@@ -1,5 +1,8 @@
 import { pageMetadata } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/site";
+import { toPlain } from "@/sanity/lib/rich";
 import type { Metadata } from "next";
+import { stegaClean } from "next-sanity";
 import type { CSSProperties } from "react";
 import {
   getEngagement,
@@ -15,6 +18,7 @@ import { FeaturedProject } from "../_components/ProjectCard";
 import { BAND_STYLE, MONO, SectionHead } from "../_components/SectionHead";
 import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
+import { StructuredData, studio } from "../_components/StructuredData";
 import { LABEL, StudioStrip } from "../_components/StudioStrip";
 import { Disciplines } from "./_components/Disciplines";
 import { Rich } from "../_components/Rich";
@@ -44,17 +48,54 @@ const pad = (n: number) => String(n).padStart(2, "0");
  * discipline has in common, and a project under it shows it done.
  */
 export default async function Services() {
-  const [servicesPage, studioStrip, services, engagement] = await Promise.all([
+  const [servicesPage, studioStrip, services, engagement, provider] = await Promise.all([
     getServicesPage(),
     getStudioStrip(),
     getServices(),
     getEngagement(),
+    studio(),
   ]);
   const { method } = servicesPage;
+
+  /* What the studio sells, as the page answers it: the ways to engage it,
+     each on its terms, and the disciplines. */
+  const structured = {
+    "@context": "https://schema.org",
+    ...provider,
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: servicesPage.title,
+      itemListElement: [
+        {
+          "@type": "OfferCatalog",
+          name: servicesPage.ways.heading,
+          itemListElement: engagement.models.map((model) => ({
+            "@type": "Offer",
+            description: model.terms,
+            itemOffered: {
+              "@type": "Service",
+              name: model.name,
+              description: toPlain(model.copy),
+              url: absoluteUrl(stegaClean(model.action.href)),
+            },
+          })),
+        },
+        {
+          "@type": "OfferCatalog",
+          name: servicesPage.disciplines.heading,
+          itemListElement: services.items.map((service) => ({
+            "@type": "Offer",
+            itemOffered: { "@type": "Service", name: service.name, description: service.promise },
+          })),
+        },
+      ],
+    },
+  };
 
   return (
     <>
       <SiteHeader />
+      <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">

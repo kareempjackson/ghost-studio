@@ -117,6 +117,15 @@ const featured = (...refs: string[]) =>
 /** The first project in the home page's Selected work: the menu's card when none is picked. */
 const homeLead = `*[_id == "homePage"][0].selectedWork.projects[defined(@->slug.current)][0]->${PROJECT}`;
 
+/**
+ * Every published project in /work's order, read inside the workPage
+ * document: the ones its editor placed, then the rest, newest first.
+ */
+const workOrder = (projection: string) => `[
+  ...coalesce(projects[defined(@->slug.current)]->${projection}, []),
+  ...*[_type == "project" && defined(slug.current) && !(_id in ^.projects[]._ref)] | order(_createdAt desc) ${projection}
+]`;
+
 const ARTICLE = `{
   "slug": slug.current,
   "topic": ${TOPIC}, title, excerpt,
@@ -441,10 +450,7 @@ export async function getWorkPage(): Promise<WorkPage> {
     "workPage",
     `{
       ${SEO}, heading, summary,
-      "projects": [
-        ...coalesce(projects[defined(@->slug.current)]->${PROJECT}, []),
-        ...*[_type == "project" && defined(slug.current) && !(_id in ^.projects[]._ref)] | order(_createdAt desc) ${PROJECT}
-      ],
+      "projects": ${workOrder(PROJECT)},
       all, previewLabel, empty,
       close{eyebrow, heading, action${link}},
       caseStudy{
@@ -910,10 +916,7 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
         "siblings": select(defined(parent._ref) => *[_type == "project" && defined(slug.current) && parent._ref == ^.parent._ref && slug.current != $slug] | order(_createdAt asc) ${PROJECT}, []),
         "parts": *[_type == "project" && defined(slug.current) && parent._ref == ^._id] | order(_createdAt asc) ${PROJECT}
       },
-      "order": *[_id == "workPage"][0]{"list": [
-        ...coalesce(projects[defined(@->slug.current)]->${PROJECT}, []),
-        ...*[_type == "project" && defined(slug.current) && !(_id in ^.projects[]._ref)] | order(_createdAt desc) ${PROJECT}
-      ]}.list
+      "order": *[_id == "workPage"][0]{"list": ${workOrder(PROJECT)}}.list
     }`,
     params: { slug },
     tags: ["project", "workPage", "discipline", "familyPage"],
@@ -1268,4 +1271,119 @@ export async function getSitemapEntries(): Promise<{ path: string; updatedAt: st
     ...under("/our-approach", data.phases),
     ...data.stories.map((row) => ({ path: storyHref(row.family, row.slug), updatedAt: row.updatedAt })),
   ].filter((entry) => FAMILY_ON_SHOW || !isFamilyHref(entry.path));
+}
+
+/* ---- llms.txt ---------------------------------------------------------------- */
+
+/** A page as /llms.txt lists it: where it is, its name, and a line on what it holds. */
+export interface AgentPage {
+  readonly path: string;
+  readonly title: string;
+  readonly description: string;
+}
+
+/** The site, for agents: see app/llms.txt/route.ts. */
+export interface AgentIndex {
+  readonly site: { readonly title: string; readonly description: string; readonly email: string };
+  /** The fixed pages, by document id: `aboutPage` and the rest of PAGE_PATHS. */
+  readonly pages: Readonly<Record<string, AgentPage>>;
+  /** The track pages, in the engagement models' order, each with what it costs. */
+  readonly tracks: readonly (AgentPage & { readonly terms: string })[];
+  readonly audiences: readonly AgentPage[];
+  readonly phases: readonly AgentPage[];
+  /** In /work's order. */
+  readonly projects: readonly AgentPage[];
+  /** Newest first. */
+  readonly insights: readonly (AgentPage & { readonly topic: string })[];
+  /** The Ghost family's pages, while it is on show (see FAMILY_ON_SHOW). */
+  readonly family: readonly AgentPage[];
+  readonly legal: readonly AgentPage[];
+}
+
+/**
+ * Every page worth an agent's reading, each with its name and summary: the
+ * description from its SEO fields, or the words its card shows. In the
+ * order the Studio gives them, as the site lists them.
+ */
+export async function getAgentIndex(): Promise<AgentIndex> {
+  type Row = { slug: string; title: string | null; description: string | null };
+  const data = (await sanityFetch({
+    query: `{
+      "site": *[_id == "siteSettings"][0]{title, description, email},
+      "pages": *[_id in $ids]{_id, title, description},
+      "trackOrder": coalesce(*[_id == "engagement"][0].models[].slug, []),
+      "tracks": *[_type == "trackPage" && defined(slug)]{
+        slug, title, description,
+        "terms": array::join(array::compact([terms.price, terms.minimum]), " · ")
+      },
+      "audiences": coalesce(*[_id == "whoWeServePage"][0].audiences.items[defined(@->slug.current) && defined(@->challenge.heading)]->{
+        "slug": slug.current, "title": array::join(name, " "),
+        "description": coalesce(description, pt::text(summary), pt::text(body))
+      }, []),
+      "phases": coalesce(*[_id == "approachPage"][0].phases.items[defined(@->slug.current) && defined(@->purpose.heading)]->{
+        "slug": slug.current, title, "description": coalesce(description, question)
+      }, []),
+      "projects": coalesce(*[_id == "workPage"][0]{"list": ${workOrder(
+        `{"slug": slug.current, "title": name, "description": coalesce(description, tagline)}`,
+      )}}.list, []),
+      "insights": *[_type == "article" && defined(slug.current)] | order(publishedAt desc){
+        "slug": slug.current, "title": array::join(title, " "),
+        "description": coalesce(seo.metaDescription, pt::text(excerpt)), "topic": ${TOPIC}
+      },
+      "family": *[_type == "familyPage" && defined(slug)]{slug, title, description},
+      "legal": *[_type == "legalPage" && defined(slug)]{slug, title, description}
+    }`,
+    params: { ids: Object.keys(PAGE_PATHS).filter((id) => id !== "homePage") },
+    tags: [
+      ...Object.keys(PAGE_PATHS),
+      "siteSettings",
+      "engagement",
+      "trackPage",
+      "audience",
+      "phase",
+      "project",
+      "article",
+      "insightTopic",
+      "familyPage",
+      "legalPage",
+    ],
+  })) as {
+    site: AgentIndex["site"];
+    pages: (Omit<Row, "slug"> & { _id: string })[];
+    trackOrder: string[];
+    tracks: (Row & { terms: string })[];
+    audiences: Row[];
+    phases: Row[];
+    projects: Row[];
+    insights: (Row & { topic: string })[];
+    family: Row[];
+    legal: Row[];
+  };
+
+  const page = (path: string, row: Omit<Row, "slug">): AgentPage => ({
+    path,
+    title: row.title ?? "",
+    description: row.description ?? "",
+  });
+  const under = (base: string) => (row: Row) => page(`${base}/${row.slug}`, row);
+  /* Compared clean: in draft mode each document's copy carries its own edit marks. */
+  const order = data.trackOrder.map(stegaClean);
+  const rank = (slug: string) => {
+    const at = order.indexOf(stegaClean(slug));
+    return at < 0 ? order.length : at;
+  };
+
+  return {
+    site: data.site,
+    pages: Object.fromEntries(data.pages.map((row) => [row._id, page(PAGE_PATHS[row._id], row)])),
+    tracks: [...data.tracks]
+      .sort((a, b) => rank(a.slug) - rank(b.slug))
+      .map((row) => ({ ...under("")(row), terms: row.terms })),
+    audiences: data.audiences.map(under("/who-we-serve")),
+    phases: data.phases.map(under("/our-approach")),
+    projects: data.projects.map(under("/work")),
+    insights: data.insights.map((row) => ({ ...under("/insights")(row), topic: row.topic })),
+    family: FAMILY_ON_SHOW ? data.family.map(under("")) : [],
+    legal: data.legal.map(under("")),
+  };
 }

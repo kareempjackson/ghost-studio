@@ -8,6 +8,9 @@ export const projectHref = (slug: string) => `/work/${slug}`;
 /** An insight's own page. The journal band on the home page links here too. */
 export const insightHref = (slug: string) => `/insights/${slug}`;
 
+/** A page's Markdown copy, for agents: an insight's or a project's, at its address plus .md. See lib/markdown.ts. */
+export const markdownHref = (href: string) => `${href}.md`;
+
 /**
  * Whether a link in the navigation is for where the reader is, as
  * aria-current takes it: "page" on the page itself, "true" in the section it

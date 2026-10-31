@@ -1,7 +1,9 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/site";
 import { getManagedServicesPage } from "@/sanity/content";
+import { toPlain } from "@/sanity/lib/rich";
 import { Questions } from "../../build/_components/Questions";
 import { ChatLauncher } from "../../_components/ChatLauncher";
 import { ContactBand } from "../../_components/ContactBand";
@@ -10,6 +12,7 @@ import { Rich } from "../../_components/Rich";
 import { BAND_STYLE, MONO } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
+import { StructuredData, faqPage, studio } from "../../_components/StructuredData";
 import { WordmarkPlate } from "../../_components/WordmarkPlate";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -50,12 +53,42 @@ const pad = (n: number) => String(n).padStart(2, "0");
  * priced; and the questions left over. The contact band closes it.
  */
 export default async function ManagedServices() {
-  const data = await getManagedServicesPage();
+  const [data, provider] = await Promise.all([getManagedServicesPage(), studio()]);
   const { who, included, setup, pricing, questions } = data;
+
+  /* The service, what it covers and how it is priced, and the questions
+     under it as an FAQ: what an agent quotes back. */
+  const structured = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Service",
+        name: data.title,
+        description: data.description,
+        url: absoluteUrl("/integrate/managed-services"),
+        provider,
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          name: included.heading.join(" "),
+          itemListElement: included.services.map((service) => ({
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: service.title.join(" "),
+              description: toPlain(service.body),
+            },
+          })),
+        },
+        offers: { "@type": "Offer", description: toPlain(pricing.body) },
+      },
+      ...(questions.items.length > 0 ? [faqPage(questions.items)] : []),
+    ],
+  };
 
   return (
     <>
       <SiteHeader />
+      <StructuredData data={structured} />
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">
         <PageCover
           id="managed-heading"

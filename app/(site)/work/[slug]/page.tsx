@@ -1,6 +1,9 @@
 import { projectHref } from "@/lib/links";
 import { pageMetadata } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/site";
+import { toPlain } from "@/sanity/lib/rich";
 import type { Metadata } from "next";
+import { stegaClean } from "next-sanity";
 import { Picture } from "../../_components/Picture";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -12,6 +15,7 @@ import { MONO } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { ProjectCard } from "../../_components/ProjectCard";
 import { SiteHeader } from "../../_components/SiteHeader";
+import { StructuredData, studio } from "../../_components/StructuredData";
 import { ClientFeedback } from "../_components/ClientFeedback";
 import { InDepth } from "../_components/InDepth";
 import { Overview } from "../_components/Overview";
@@ -40,6 +44,7 @@ export async function generateMetadata({
     title: project.name,
     description: project.description ?? project.tagline,
     path: `/work/${slug}`,
+    markdown: true,
   });
 }
 
@@ -89,12 +94,38 @@ const MORE_STYLE: CSSProperties = {
 export default async function ProjectPage({
   params,
 }: PageProps<"/work/[slug]">) {
-  const [project, workPage] = await Promise.all([
-    getProject((await params).slug),
+  const { slug } = await params;
+  const [project, workPage, creator] = await Promise.all([
+    getProject(slug),
     getWorkPage(),
+    studio(),
   ]);
   if (!project) notFound();
   const labels = workPage.caseStudy;
+
+  /* What search engines and agents read as the work: the studio made it,
+     in these trades, and it may be one part of a larger project. */
+  const structured = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: project.name,
+    headline: toPlain(project.headline),
+    description: project.description ?? project.tagline,
+    url: absoluteUrl(projectHref(slug)),
+    ...(project.image ? { image: project.image } : {}),
+    /* Once each: a discipline is often a tag as well. */
+    keywords: [...new Set([...project.disciplines, ...project.tags].map(stegaClean))].join(", "),
+    creator,
+    ...(project.parent
+      ? {
+          isPartOf: {
+            "@type": "CreativeWork",
+            name: project.parent.name,
+            url: absoluteUrl(projectHref(stegaClean(project.parent.slug))),
+          },
+        }
+      : {}),
+  };
   /* The margin's first block sits well under the way back; the rest closer. */
   const first = "mt-12 lg:mt-20";
   const next = "mt-10 lg:mt-12";
@@ -102,6 +133,7 @@ export default async function ProjectPage({
   return (
     <>
       <SiteHeader />
+      <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">

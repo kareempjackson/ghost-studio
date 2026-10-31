@@ -28,6 +28,7 @@ import { Services } from "./_components/Services";
 import { SelectedWork } from "./_components/SelectedWork";
 import { SiteFooter } from "./_components/SiteFooter";
 import { SiteHeader } from "./_components/SiteHeader";
+import { ORGANIZATION_ID, StructuredData } from "./_components/StructuredData";
 import { Testimonials } from "./_components/Testimonials";
 
 /**
@@ -74,7 +75,7 @@ export default async function Home() {
     "@graph": [
       {
         "@type": "Organization",
-        "@id": `${SITE_URL}/#organization`,
+        "@id": ORGANIZATION_ID,
         name,
         url: absoluteUrl("/"),
         /* Files in public/, at addresses that never change: the app's
@@ -90,17 +91,14 @@ export default async function Home() {
         "@id": `${SITE_URL}/#website`,
         name,
         url: absoluteUrl("/"),
-        publisher: { "@id": `${SITE_URL}/#organization` },
+        publisher: { "@id": ORGANIZATION_ID },
       },
     ],
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }}
-      />
+      <StructuredData data={structured} />
       <SiteHeader />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}

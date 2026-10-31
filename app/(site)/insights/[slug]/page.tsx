@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
 import { stegaClean } from "next-sanity";
-import { insightHref } from "@/lib/links";
+import { insightHref, markdownHref } from "@/lib/links";
 import { absoluteUrl } from "@/lib/site";
 import { getArticle, getArticleSlugs, getMoreArticles, getSettings } from "@/sanity/content";
 import { toPlain } from "@/sanity/lib/rich";
@@ -14,6 +14,7 @@ import { RichText, outline } from "../../_components/RichText";
 import { MONO } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
+import { StructuredData } from "../../_components/StructuredData";
 import { LABEL } from "../../_components/StudioStrip";
 import { Visual } from "../../_components/Visual";
 import { Contents } from "../_components/Contents";
@@ -52,7 +53,11 @@ export async function generateMetadata({
     title: metaTitle ? { absolute: metaTitle } : name,
     description,
     ...(article.seo.keyword ? { keywords: [stegaClean(article.seo.keyword)] } : {}),
-    alternates: { canonical: insightHref(slug) },
+    alternates: {
+      canonical: insightHref(slug),
+      /* Its Markdown copy, for agents: lib/markdown.ts. */
+      types: { "text/markdown": markdownHref(insightHref(slug)) },
+    },
     openGraph: {
       type: "article",
       siteName: stegaClean(settings.title),
@@ -123,10 +128,7 @@ export default async function InsightPage({ params }: PageProps<"/insights/[slug
     <>
       <SiteHeader />
       <ReadingProgress target="insight-body" />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }}
-      />
+      <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">

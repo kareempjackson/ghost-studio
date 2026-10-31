@@ -1,6 +1,7 @@
 import { FAMILY_ON_SHOW, isFamilyHref } from "@/lib/links";
 import { coverPosition, type Focus } from "@/lib/sanity-image";
 import { pageMetadata } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/site";
 import type { Metadata } from "next";
 import { stegaClean } from "next-sanity";
 import type { CSSProperties } from "react";
@@ -12,6 +13,7 @@ import { Picture } from "../_components/Picture";
 import { MONO, SectionHead } from "../_components/SectionHead";
 import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
+import { StructuredData, studio } from "../_components/StructuredData";
 import { LABEL, StudioStrip } from "../_components/StudioStrip";
 import { UpRight } from "../_components/UpRight";
 import { Visual } from "../_components/Visual";
@@ -71,10 +73,28 @@ const portraitPosition = (member: { focus: Focus | null; aspect: number | null }
  * them: what you do, who does it, what it is like, and what else you are.
  */
 export default async function About() {
-  const [aboutPage, studioStrip] = await Promise.all([
+  const [aboutPage, studioStrip, organization] = await Promise.all([
     getAboutPage(),
     getStudioStrip(),
+    studio(),
   ]);
+
+  /* The page is about the studio, and names who it is. */
+  const structured = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: aboutPage.title,
+    description: aboutPage.description,
+    url: absoluteUrl("/about"),
+    mainEntity: {
+      ...organization,
+      employee: aboutPage.team.members.map((member) => ({
+        "@type": "Person",
+        name: member.name,
+        jobTitle: member.role,
+      })),
+    },
+  };
   const { who, team, partners, expect, family } = aboutPage;
   /* The Ghost family, while it is on show (see FAMILY_ON_SHOW); with none of
      it to link to, the band is left out. */
@@ -85,6 +105,7 @@ export default async function About() {
   return (
     <>
       <SiteHeader />
+      <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">

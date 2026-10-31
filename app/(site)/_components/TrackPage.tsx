@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { stegaClean } from "next-sanity";
 import { pageMetadata } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/site";
 import type { CSSProperties } from "react";
 import { getEngagement } from "@/sanity/content";
 import type { TrackPageData } from "@/sanity/types";
@@ -11,6 +12,7 @@ import { FeaturedProject } from "./ProjectCard";
 import { BAND_STYLE, MONO, SectionHead } from "./SectionHead";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
+import { StructuredData, faqPage, studio } from "./StructuredData";
 import { LABEL } from "./StudioStrip";
 import { Questions } from "../build/_components/Questions";
 import { WordmarkPlate } from "./WordmarkPlate";
@@ -71,12 +73,33 @@ export async function TrackPage({
   size?: "lg" | "md";
 }) {
   const { plate, terms, who, shape, process, questions, others } = data;
-  const { models } = await getEngagement();
+  const [{ models }, provider] = await Promise.all([getEngagement(), studio()]);
   const tracks = models.filter((model) => model.slug !== data.slug);
+
+  /* The track as a service the studio sells, on its terms, and the
+     questions under it as an FAQ: what an agent quotes back. */
+  const structured = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Service",
+        name: data.title,
+        description: data.description,
+        url: absoluteUrl(`/${stegaClean(data.slug)}`),
+        provider,
+        offers: {
+          "@type": "Offer",
+          description: [terms.price, terms.minimum].filter(Boolean).join(" · "),
+        },
+      },
+      ...(questions.items.length > 0 ? [faqPage(questions.items)] : []),
+    ],
+  };
 
   return (
     <>
       <SiteHeader />
+      <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">

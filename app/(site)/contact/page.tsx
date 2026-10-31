@@ -1,4 +1,5 @@
 import { pageMetadata } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/site";
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { getContactPage } from "@/sanity/content";
@@ -6,6 +7,7 @@ import { ChatLauncher } from "../_components/ChatLauncher";
 import { SheetTrails } from "../_components/SheetTrails";
 import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
+import { StructuredData, studio } from "../_components/StructuredData";
 import { ContactForm } from "./_components/ContactForm";
 import { CopyEmail } from "./_components/CopyEmail";
 import { Rich } from "../_components/Rich";
@@ -65,11 +67,31 @@ function UpRight({ className = "" }: { className?: string }) {
  * page, and a page that asks for itself is furniture.
  */
 export default async function Contact() {
-  const contact = await getContactPage();
+  const [contact, organization] = await Promise.all([getContactPage(), studio()]);
+
+  /* How to reach the studio, as search engines and agents read it. */
+  const structured = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    name: contact.title,
+    description: contact.description,
+    url: absoluteUrl("/contact"),
+    mainEntity: {
+      ...organization,
+      email: contact.start.email,
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "new business",
+        email: contact.start.email,
+        url: absoluteUrl("/contact"),
+      },
+    },
+  };
 
   return (
     <>
       <SiteHeader />
+      <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. With no
           orange close here, the page itself takes the rounded bottom edge

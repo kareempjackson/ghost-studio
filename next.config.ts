@@ -24,6 +24,19 @@ const nextConfig: NextConfig = {
     { source: "/journal", destination: "/insights", permanent: true },
     { source: "/journal/:slug", destination: "/insights/:slug", permanent: true },
   ],
+  /* An insight or a case study as Markdown, for agents (lib/markdown.ts):
+     at its address plus .md, or at the address itself for a request that
+     accepts text/markdown. Before the files, so the page cannot answer first. */
+  rewrites: async () => ({
+    beforeFiles: ["insights", "work"].flatMap((section) => [
+      { source: `/${section}/:slug\\.md`, destination: `/md/${section}/:slug` },
+      {
+        source: `/${section}/:slug`,
+        has: [{ type: "header" as const, key: "accept", value: ".*text/markdown.*" }],
+        destination: `/md/${section}/:slug`,
+      },
+    ]),
+  }),
 };
 
 export default nextConfig;
