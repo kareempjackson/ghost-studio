@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { GUIDE_ON } from "@/lib/guide/protocol";
 import { ChatPanel } from "./ChatPanel";
 import { useChrome } from "./ChromeProvider";
 import { guide, prepare } from "./guide/store";
@@ -39,13 +40,6 @@ function Bubble() {
     </svg>
   );
 }
-
-/**
- * Whether the pill is on show. Every page places it; turned off, it draws
- * nothing. Until `npm run migrate:guide` has run, the guide speaks with its
- * seeded words (sanity/content.ts), so it can go live before the Studio has them.
- */
-const CHAT_ON_SHOW = true;
 
 /** The band the pill must never sit on top of: the close and the footer. */
 const CLOSE_SELECTOR = '[aria-labelledby="contact-heading"]';
@@ -201,8 +195,12 @@ function Launcher({ path }: { path: string | null }) {
   );
 }
 
-/** The pill, while it is on show (see CHAT_ON_SHOW). */
+/**
+ * The pill, while the guide is on (see GUIDE_ON). Every page places it;
+ * turned off, it draws nothing. Until `npm run migrate:guide` has run, the
+ * guide speaks with its seeded words (sanity/content.ts).
+ */
 export function ChatLauncher() {
-  if (!CHAT_ON_SHOW) return null;
+  if (!GUIDE_ON) return null;
   return <WithPathname>{(path) => <Launcher path={path} />}</WithPathname>;
 }

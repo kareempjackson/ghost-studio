@@ -10,6 +10,7 @@ import type {
 import { getGrounding, type Grounding } from "@/lib/guide/corpus";
 import { GUIDE_PROMPT, MAX_PICKS } from "@/lib/guide/prompt";
 import {
+  GUIDE_ON,
   MAX_QUESTION,
   MAX_TURNS,
   type GuideBrief,
@@ -254,7 +255,7 @@ function reason(error: unknown): GuideError {
  * workspace are what actually cap the cost.
  */
 export async function POST(request: Request) {
-  if (!client) return refuse("off", 503);
+  if (!GUIDE_ON || !client) return refuse("off", 503);
   if (!fromTheSite(request)) return refuse("failed", 403);
   if (tooMany(request)) return refuse("busy", 429);
 

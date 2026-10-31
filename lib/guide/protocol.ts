@@ -14,6 +14,12 @@
 import type { GuideCard } from "@/sanity/types";
 import type { Profile } from "./shortlist";
 
+/**
+ * Whether the guide is on: in development only, for now. A production build
+ * draws no pill, and app/api/guide answers that it is off.
+ */
+export const GUIDE_ON = process.env.NODE_ENV !== "production";
+
 /** Questions one conversation can ask before the guide hands over to the team. */
 export const MAX_TURNS = 12;
 /** The longest question, in characters. */
