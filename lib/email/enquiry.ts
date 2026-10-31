@@ -19,6 +19,10 @@ export interface Enquiry {
   readonly brief: string;
   readonly budget: string;
   readonly timing: string;
+  /** Where it was sent from: the contact form, or the site guide as a brief. */
+  readonly source: "contact" | "guide";
+  /** The conversation with the guide that led to the brief; empty from the form. */
+  readonly transcript: string;
 }
 
 export interface Email {
@@ -130,18 +134,32 @@ export function acknowledgementEmail(copy: EnquiryCopy, enquiry: Enquiry): Email
   return { subject: ack.subject, html, text };
 }
 
-/** The alert, to the studio. Replying to it answers the sender. */
+/** The conversation with the site guide, for the studio's alert: what was asked and answered. */
+const TRANSCRIPT_LABEL = "The conversation with the site guide";
+
+/**
+ * The alert, to the studio. Replying to it answers the sender. A brief from
+ * the site guide says so, and carries the conversation that led to it.
+ */
 export function notificationEmail(copy: EnquiryCopy, enquiry: Enquiry, studioLink: string | null): Email {
   const rows = recap(copy, enquiry);
   const who = [enquiry.name, enquiry.company].filter(Boolean).join(", ");
-  const subject = `New enquiry: ${who}`;
+  const guide = enquiry.source === "guide";
+  const subject = `${guide ? "New brief from the site guide" : "New enquiry"}: ${who}`;
+  const how = guide ? "Sent from the site guide. " : "";
 
   const html = layout(
     copy.siteName,
     `
-      <p style="margin:0 0 6px;font:22px/1.25 ${FONT};color:${INK};">New enquiry from ${escape(who)}</p>
-      <p style="margin:0 0 28px;font:14px/1.5 ${FONT};color:${MUTED};">Reply to this email to answer ${escape(enquiry.name)} directly.</p>
+      <p style="margin:0 0 6px;font:22px/1.25 ${FONT};color:${INK};">New ${guide ? "brief" : "enquiry"} from ${escape(who)}</p>
+      <p style="margin:0 0 28px;font:14px/1.5 ${FONT};color:${MUTED};">${how}Reply to this email to answer ${escape(enquiry.name)} directly.</p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${recapHtml(rows)}</table>
+      ${
+        enquiry.transcript
+          ? `<p style="margin:36px 0 12px;font:600 11px/1 ${FONT};letter-spacing:0.08em;text-transform:uppercase;color:${MUTED};">${TRANSCRIPT_LABEL}</p>
+      <p style="margin:0;padding:16px 18px;border-radius:8px;background:#f3f2f0;font:14px/1.6 ${FONT};color:${INK};">${block(enquiry.transcript)}</p>`
+          : ""
+      }
       ${
         studioLink
           ? `<p style="margin:28px 0 0;"><a href="${escape(studioLink)}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:${INK};color:#ffffff;font:600 12px/1 ${FONT};letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;">Open in the Studio</a></p>`
@@ -151,9 +169,10 @@ export function notificationEmail(copy: EnquiryCopy, enquiry: Enquiry, studioLin
   );
 
   const text = [
-    `New enquiry from ${who}`,
-    `Reply to this email to answer ${enquiry.name} directly.`,
+    `New ${guide ? "brief" : "enquiry"} from ${who}`,
+    `${how}Reply to this email to answer ${enquiry.name} directly.`,
     recapText(rows),
+    enquiry.transcript ? `— ${TRANSCRIPT_LABEL.toUpperCase()}\n\n${enquiry.transcript}` : "",
     studioLink ? `Open in the Studio: ${studioLink}` : "",
   ]
     .filter(Boolean)

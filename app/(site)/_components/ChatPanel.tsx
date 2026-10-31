@@ -1,71 +1,78 @@
 "use client";
 
-import { stegaClean } from "next-sanity";
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef } from "react";
 import { useChrome } from "./ChromeProvider";
-import { Rich } from "./Rich";
-
-const FIELD =
-  "w-full rounded-[0.625rem] bg-ink-200/70 px-4 py-3 text-[0.9375rem] leading-[1.4] tracking-[-0.01em] text-ink-950 placeholder:text-ink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-950";
-const LABEL = "block text-[0.875rem] leading-none text-ink-950";
-
-/** The draft, as a letter the visitor can send themselves. */
-function mailtoHref(
-  email: string,
-  topic: string,
-  name: string,
-  message: string,
-) {
-  const subject = `${stegaClean(topic)}${name ? ` — ${name}` : ""}`;
-  return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
-}
+import { Brief } from "./guide/Brief";
+import { Picker } from "./guide/Picker";
+import { AskBar, Thread } from "./guide/Thread";
+import { guide, prepare, shortlistFor, useCatalogue, useGuide } from "./guide/store";
+import { KICKER } from "./guide/styles";
 
 /**
- * The chat window: a header, an opening line, and the three things the studio
- * needs to answer anyone — what it is about, who is asking, and what they
- * want.
+ * The site guide's panel: a header that says what it is, then the way in.
  *
- * Nothing is wired to a chat service or an inbox, so the form does not
- * pretend to send. It composes what was typed and hands it back as an email
- * the visitor sends themselves, and it says so in as many words. When a
- * service is connected, `onSubmit` is the one thing that changes.
+ * Two questions narrow the site to a shortlist of real work, the way of
+ * working that fits, and something to read (./guide/Picker.tsx). Then the
+ * guide answers, from the site's own content, in the studio's voice
+ * (./guide/Thread.tsx, app/api/guide). And when the visitor is ready, a brief
+ * goes to the team (./guide/Brief.tsx). Everything typed stays in the tab
+ * unless it is sent as a brief.
+ *
+ * It never opens itself, never asks for an address until the brief, and says
+ * plainly that its answers are written by AI.
  */
-export function ChatPanel({ onClose }: { onClose: () => void }) {
+export function ChatPanel({ onClose, path }: { onClose: () => void; path: string }) {
   const {
     settings: { email },
     chat,
   } = useChrome();
-  const [topic, setTopic] = useState<string>(chat.topics[0] ?? "");
-  const [name, setName] = useState("");
-  const [message, setMessage] = useState("");
-  const [sent, setSent] = useState(false);
-  const firstFieldRef = useRef<HTMLInputElement>(null);
+  const state = useGuide();
+  const loaded = useCatalogue();
+  const root = useRef<HTMLDivElement>(null);
+  const focused = useRef(false);
   const id = useId();
 
-  function onSubmit(event: FormEvent) {
-    event.preventDefault();
-    setSent(true);
-  }
+  useEffect(() => {
+    prepare();
+    guide.opened();
+    /* Closed, the panel opens next time on the guide, not a half-filled brief. */
+    return () => guide.show("guide");
+  }, []);
+
+  /* Once there is something to choose, focus goes to the first choice, or to
+     the question box when the choosing is done. */
+  useEffect(() => {
+    if (!loaded || focused.current) return;
+    focused.current = true;
+    root.current
+      ?.querySelector<HTMLElement>("[data-autofocus], [data-autofocus-ask]")
+      ?.focus({ preventScroll: true });
+  }, [loaded]);
+
+  const list = loaded ? shortlistFor(loaded.catalogue, state) : null;
+  const shown = [
+    ...(list?.paths ?? []),
+    ...state.thread.flatMap((said) => said.picks.map((pick) => pick.card.path)),
+  ];
+  const follow = () => onClose();
 
   return (
-    <div className="flex max-h-[min(46rem,calc(100svh-7.5rem))] w-[min(26rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[1.25rem] bg-[#f3f2f0] shadow-[0_30px_80px_-24px_rgb(14_13_11/0.45)]">
-      <header className="flex items-start gap-4 bg-[#111] px-5 pt-5 pb-6 text-white">
+    <div
+      ref={root}
+      className="flex max-h-[min(46rem,calc(100svh-7.5rem))] w-[min(26rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[1.25rem] bg-[#f3f2f0] shadow-[0_30px_80px_-24px_rgb(14_13_11/0.45)] max-sm:max-h-[88svh] max-sm:w-full max-sm:rounded-b-none"
+    >
+      <header className="flex items-start gap-4 bg-[#111] px-5 pt-5 pb-5 text-white">
         <span
           aria-hidden
           className="grid size-11 shrink-0 place-items-center rounded-full bg-white text-[1.25rem] font-bold text-ink-950"
         >
           G
         </span>
-        <div className="flex-1">
-          <h2
-            id={`${id}-title`}
-            className="text-[1.25rem] leading-[1.15] font-medium tracking-[-0.03em]"
-          >
+        <div className="min-w-0 flex-1">
+          <h2 id={`${id}-title`} className="text-[1.25rem] leading-[1.15] font-medium tracking-[-0.03em]">
             {chat.heading}
           </h2>
-          <p className="mt-3 font-label text-[0.625rem] leading-none tracking-[0.06em] text-ink-400 uppercase">
-            {chat.status}
-          </p>
+          <p className="mt-2 text-[0.8125rem] leading-[1.35] text-ink-400">{chat.disclosure}</p>
         </div>
         <button
           type="button"
@@ -87,156 +94,56 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
         </button>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-5 py-5">
-        <div className="rounded-[0.625rem] bg-ink-200/70 px-4 py-3.5 text-[0.9375rem] leading-[1.45] tracking-[-0.01em] text-ink-950">
-          <Rich value={chat.intro} />
-        </div>
+      <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5">
+        {!loaded ? (
+          <p className={`${KICKER} motion-safe:animate-pulse`}>{chat.ask.reading}</p>
+        ) : state.view === "brief" ? (
+          <Brief chat={chat} state={state} catalogue={loaded.catalogue} studioEmail={email} />
+        ) : (
+          <>
+            <Picker
+              chat={chat}
+              state={state}
+              catalogue={loaded.catalogue}
+              canAsk={loaded.canAsk}
+              onFollow={follow}
+            />
+            {(state.picked || state.thread.length > 0) && (
+              <div className={list ? "mt-8" : ""}>
+                <Thread
+                  chat={chat}
+                  state={state}
+                  path={path}
+                  canAsk={loaded.canAsk}
+                  shown={shown}
+                  onFollow={follow}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
-        {sent ? (
-          <div className="mt-6">
-            <p className="font-label text-[0.6875rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
-              {chat.ready.label}
-            </p>
-            <dl className="mt-4 space-y-3 text-[0.9375rem] leading-[1.45] text-ink-950">
-              <div>
-                <dt className="text-ink-500">{chat.ready.about}</dt>
-                <dd>{topic}</dd>
-              </div>
-              {name && (
-                <div>
-                  <dt className="text-ink-500">{chat.ready.from}</dt>
-                  <dd>{name}</dd>
-                </div>
-              )}
-              <div>
-                <dt className="text-ink-500">{chat.ready.message}</dt>
-                <dd className="whitespace-pre-line">
-                  {message || chat.ready.empty}
-                </dd>
-              </div>
-            </dl>
-            <a
-              href={mailtoHref(email, topic, name, message)}
-              className="mt-6 inline-flex h-12 items-center rounded-pill bg-ink-950 px-6 font-label text-[0.75rem] leading-none tracking-[0.08em] text-white uppercase transition-colors duration-200 hover:bg-ink-800"
-            >
-              {chat.ready.send}
-            </a>
+      {loaded && state.view === "guide" && (
+        <footer className="border-t border-ink-200 px-4 pt-3 pb-4 sm:px-5">
+          {loaded.canAsk && <AskBar chat={chat} state={state} path={path} shown={shown} />}
+          <div className={`flex items-center justify-between gap-4 ${loaded.canAsk ? "mt-3 px-1" : ""}`}>
             <button
               type="button"
-              onClick={() => setSent(false)}
-              className="mt-4 block text-[0.875rem] text-ink-600 underline underline-offset-4 hover:text-ink-950"
+              onClick={() => guide.show("brief")}
+              className="text-[0.875rem] text-ink-950 underline underline-offset-4 hover:text-ink-600"
             >
-              {chat.ready.edit}
+              {chat.brief.open}
             </button>
+            <a
+              href={`mailto:${email}`}
+              className="truncate text-[0.8125rem] text-ink-600 underline-offset-4 hover:text-ink-950 hover:underline"
+            >
+              {email}
+            </a>
           </div>
-        ) : (
-          <form onSubmit={onSubmit} className="mt-5">
-            <fieldset>
-              <legend className="sr-only">{chat.topicsLabel}</legend>
-              <div className="flex flex-wrap gap-2">
-                {chat.topics.map((option) => {
-                  const on = option === topic;
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setTopic(option)}
-                      aria-pressed={on}
-                      className={`rounded-pill border px-3.5 py-2 font-label text-[0.625rem] leading-none tracking-[0.06em] uppercase transition-colors duration-200 ${
-                        on
-                          ? "border-ink-950 bg-ink-950 text-white"
-                          : "border-ink-300 text-ink-950 hover:border-ink-950"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  );
-                })}
-              </div>
-            </fieldset>
-
-            <div className="mt-5 space-y-4">
-              <div className="space-y-2">
-                <label className={LABEL} htmlFor={`${id}-name`}>
-                  {chat.name.label}
-                </label>
-                <input
-                  ref={firstFieldRef}
-                  id={`${id}-name`}
-                  name="name"
-                  autoComplete="name"
-                  placeholder={chat.name.placeholder}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  className={FIELD}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className={LABEL} htmlFor={`${id}-email`}>
-                  {chat.email.label}
-                </label>
-                <input
-                  id={`${id}-email`}
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder={chat.email.placeholder}
-                  className={FIELD}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className={LABEL} htmlFor={`${id}-message`}>
-                  {chat.message.label}
-                </label>
-                <textarea
-                  id={`${id}-message`}
-                  name="message"
-                  rows={3}
-                  placeholder={chat.message.placeholder}
-                  value={message}
-                  onChange={(event) => setMessage(event.target.value)}
-                  className={`${FIELD} resize-none`}
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="group mt-6 inline-flex h-12 items-center gap-5 rounded-pill bg-ink-950 pr-1 pl-5 font-label text-[0.75rem] leading-none tracking-[0.08em] text-white uppercase transition-colors duration-200 hover:bg-ink-800"
-            >
-              {chat.preview}
-              <span
-                aria-hidden
-                className="grid size-10 shrink-0 place-items-center rounded-pill border border-white/40"
-              >
-                <svg
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.25"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-0.5"
-                >
-                  <path d="M3 8h10M9 4l4 4-4 4" />
-                </svg>
-              </span>
-            </button>
-          </form>
-        )}
-
-        <p className="mt-6 font-label text-[0.625rem] leading-[1.6] tracking-[0.04em] text-ink-600 uppercase">
-          {chat.note}
-        </p>
-        <a
-          href={`mailto:${email}`}
-          className="mt-2.5 inline-block text-[0.875rem] text-ink-950 underline underline-offset-4 hover:text-ink-600"
-        >
-          {chat.contact} {email}
-        </a>
-      </div>
+        </footer>
+      )}
     </div>
   );
 }

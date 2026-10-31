@@ -24,8 +24,8 @@ import { Disciplines } from "./_components/Disciplines";
 import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { title, description } = await getServicesPage();
-  return pageMetadata({ title, description, path: "/services" });
+  const { title, metaTitle, description, noindex } = await getServicesPage();
+  return pageMetadata({ title, metaTitle, description, noindex, path: "/services" });
 }
 
 /** 44px at 390 to 104px at 1440, held there. A model's name, in capitals. */

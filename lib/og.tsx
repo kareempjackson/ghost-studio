@@ -17,7 +17,9 @@
 
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { stegaClean } from "next-sanity";
 import { ImageResponse } from "next/og";
+import { getSettings } from "@/sanity/content";
 
 export const OG_SIZE = { width: 1200, height: 630 };
 
@@ -29,7 +31,14 @@ export interface ShareCard {
   readonly image?: string | null;
   /** The social image an editor set, which comes before the picture. */
   readonly custom?: string | null;
+  /** The page's name, for the alt text: the title, unless the card is titled by a heading. */
+  readonly name?: string;
+  /** The alt text the editor set with the social image. */
+  readonly alt?: string | null;
 }
+
+/** What the brand card says when no page's name is set in its band. */
+export const BRAND_CARD_ALT = "Ghost Savvy Studios — We build companies, not just products";
 
 const root = process.cwd();
 const assets = Promise.all([
@@ -75,6 +84,29 @@ async function picture(url: string): Promise<{ data: string; type: string } | nu
     data: Buffer.from(await res.arrayBuffer()).toString("base64"),
     type: res.headers.get("content-type") ?? "image/jpeg",
   };
+}
+
+/**
+ * A route's one share card, described for generateImageMetadata. Its alt
+ * text is what the editor wrote with the page's social image, when that is
+ * the picture sent; otherwise the page's name with the site's, as `describe`
+ * puts them; with no card, what the brand card says. And the type it is
+ * sent as: the picture's JPEG or the brand card's PNG.
+ */
+export async function shareImageMetadata(
+  card: ShareCard | null,
+  describe: (name: string, site: string) => string = (name, site) => `${name} — ${site}`,
+) {
+  const site = stegaClean((await getSettings()).title);
+  const named = card?.name || card?.title;
+  return [
+    {
+      id: "card",
+      alt: (card?.custom && card.alt) || (named ? describe(named, site) : BRAND_CARD_ALT),
+      size: OG_SIZE,
+      contentType: card?.custom || card?.image ? "image/jpeg" : "image/png",
+    },
+  ];
 }
 
 export async function shareImage(card: ShareCard | null): Promise<Response> {

@@ -1,4 +1,5 @@
 import { pageMetadata } from "@/lib/seo";
+import { getBrandPage } from "@/sanity/content";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -66,13 +67,19 @@ import {
   Type,
 } from "./_components/ui";
 
-export function generateMetadata(): Promise<Metadata> {
-  return pageMetadata({
-    title: "Brand system",
-    description:
-      "The Ghost Savvy Studios brand system: the mark, the palette, the type scale, and the rules that keep them honest.",
-    path: "/brand",
-  });
+/** Until the Studio has its document: what the page was always called. */
+const BRAND_SEO = {
+  title: "Brand system",
+  metaTitle: null,
+  description:
+    "The Ghost Savvy Studios brand system: the mark, the palette, the type scale, and the rules that keep them honest.",
+  noindex: false,
+};
+
+/** The brand system is written in code; its search title and description are the Studio's (Pages → Brand system). */
+export async function generateMetadata(): Promise<Metadata> {
+  const { title, metaTitle, description, noindex } = (await getBrandPage()) ?? BRAND_SEO;
+  return pageMetadata({ title, metaTitle, description, noindex, path: "/brand" });
 }
 
 const VERSION = "v1.0 — August 2026";

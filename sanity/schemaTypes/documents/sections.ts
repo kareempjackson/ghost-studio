@@ -9,11 +9,13 @@ import {
   colour,
   lines,
   list,
+  metaTitle,
   num,
   object,
   para,
   picture,
   plain,
+  socialImage,
   text,
 } from "../fields";
 
@@ -24,6 +26,19 @@ export const homePage = defineType({
   title: "Home page",
   type: "document",
   fields: [
+    metaTitle({
+      description:
+        "The home page's title in search results and the browser tab, exactly as written: the site's name is not added. The site's name alone if empty.",
+    }),
+    plain("description", {
+      required: false,
+      description:
+        "The line under the title in search results and on share cards, 120 to 160 characters. The site's description if empty.",
+    }),
+    socialImage({
+      description:
+        "Optional. The picture on share cards: LinkedIn, X, Slack, iMessage. Cropped to 1200 × 630 around the hotspot. Empty, the brand card is used.",
+    }),
     object("hero", [
       defineField({
         name: "video",

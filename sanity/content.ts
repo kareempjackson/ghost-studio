@@ -12,12 +12,15 @@ import "server-only";
 import { sanityFetch } from "./lib/live";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { stegaClean } from "next-sanity";
-import { FAMILY_ON_SHOW, families, isFamilyHref, storyHref } from "../lib/links";
+import { FAMILY_ON_SHOW, families, insightHref, isFamilyHref, projectHref, storyHref } from "../lib/links";
 import { dataset, projectId } from "./env";
+import { toBlocks } from "./lib/rich";
+import { guide as seededGuide, guideExclude, guideNeeds } from "./seed/content/guide";
 import type {
   AboutPage,
   ApproachPage,
   AudiencePage,
+  BrandPage,
   Chapter,
   EnquiryCopy,
   Media,
@@ -29,6 +32,8 @@ import type {
   Chrome,
   ContactPage,
   Engagement,
+  GuideCard,
+  GuideCatalogue,
   FamilyPageData,
   Footer,
   HomePage,
@@ -175,7 +180,7 @@ const STORY = `{
 const familyStories = (family: string) =>
   `*[_type == "familyStory" && family == ${family} && defined(slug.current)] | order(date desc, _createdAt desc) ${STORY}`;
 
-const SEO = `"title": coalesce(title, ""), "description": coalesce(description, "")`;
+const SEO = `"title": coalesce(title, ""), metaTitle, "description": coalesce(description, ""), "noindex": coalesce(noindex, false)`;
 const COVER = `eyebrow, heading, summary, action${link}`;
 const STEPS = `items[]{title, body}`;
 
@@ -206,7 +211,7 @@ const shown = <T extends { href: string }>(links: readonly T[]): T[] =>
 export const getSettings = () =>
   single<SiteSettings>(
     "siteSettings",
-    `{title, description, email, social[]{id, label, href}, headerAction${link}}`,
+    `{title, description, googleSiteVerification, email, social[]{id, label, href}, headerAction${link}}`,
     [],
   );
 
@@ -284,7 +289,39 @@ export const getNewsletterCopy = () =>
     ["siteSettings"],
   );
 
-export const getChat = () => single<Chat>("chat", `{...}`, []);
+/**
+ * The site guide's words until the Studio has them: the seed's, its rich
+ * fields made rich. Cached, so the keys `toBlocks` draws hold still from
+ * render to render.
+ */
+async function seededChat(): Promise<Chat> {
+  "use cache";
+  return {
+    ...seededGuide,
+    intro: toBlocks(seededGuide.intro),
+    brief: { ...seededGuide.brief, lead: toBlocks(seededGuide.brief.lead) },
+  } as unknown as Chat;
+}
+
+/**
+ * The site guide's words. What it recommends is read by getGuideCatalogue,
+ * when the panel opens. Not through `single`: until `npm run migrate:guide`
+ * has given the document the guide's fields, it speaks with the words it was
+ * seeded with rather than the chat window's.
+ */
+export async function getChat(): Promise<Chat> {
+  const data = (await sanityFetch({
+    query: `*[_id == $id && defined(picker)][0]{
+      launcher, heading, disclosure, intro, closeLabel,
+      picker{audienceLabel, other, needLabel, unsure, skip, resultLabel, kinds, audienceLink, restart},
+      "starters": coalesce(starters[]{where, prompts}, []),
+      ask, brief
+    }`,
+    params: { id: "chat" },
+    tags: ["chat"],
+  })) as Chat | null;
+  return data ?? seededChat();
+}
 
 export async function getChrome(): Promise<Chrome> {
   const [settings, navigation, footer, chat] = await Promise.all([
@@ -302,6 +339,7 @@ export const getHomePage = () =>
   single<HomePage>(
     "homePage",
     `{
+      metaTitle, description,
       hero{"video": ${film("video")}, "poster": ${url("poster")}, showreelLabel, showreelMark},
       claim{cover, motto},
       methodology{heading, difference},
@@ -578,7 +616,9 @@ export async function getPhasePage(slug: string): Promise<PhasePage | null> {
       "page": *[_type == "phase" && slug.current == $slug && defined(purpose.heading)][0]{
         "slug": slug.current,
         "title": title,
+        metaTitle,
         "description": coalesce(description, question),
+        "noindex": coalesce(noindex, false),
         "heading": coalesce(heading, [title]),
         question,
         "action": select(defined(action.href) => action${link}),
@@ -623,7 +663,9 @@ export async function getAudiencePage(slug: string): Promise<AudiencePage | null
     query: `*[_type == "audience" && slug.current == $slug && defined(challenge.heading)][0]{
       "slug": slug.current,
       "title": array::join(name, " "),
+      metaTitle,
       "description": coalesce(description, pt::text(summary), pt::text(body)),
+      "noindex": coalesce(noindex, false),
       "eyebrow": *[_id == "whoWeServePage"][0].eyebrow,
       name,
       "heading": coalesce(heading, name),
@@ -796,7 +838,9 @@ export async function getStoryPage(family: string, slug: string): Promise<StoryP
       },
       "story": *[_type == "familyStory" && family == $family && slug.current == $slug][0]{
         ...@${STORY},
+        metaTitle,
         description,
+        "noindex": coalesce(noindex, false),
         "hero": select(defined(hero) => hero${MEDIA}),
         "notes": coalesce(notes[]{text, ground}, []),
         "headline": coalesce(headline, summary),
@@ -894,7 +938,9 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
     query: `{
       "project": *[_type == "project" && slug.current == $slug][0]{
         ...@${PROJECT},
+        metaTitle,
         description,
+        "noindex": coalesce(noindex, false),
         "hero": select(defined(hero) => hero${MEDIA}),
         "logo": ${pic("logo")},
         "headline": coalesce(headline, ${asRich("tagline")}),
@@ -1034,7 +1080,8 @@ export async function getArticle(slug: string): Promise<ArticleDetail | null> {
       "seo": {
         "title": seo.metaTitle,
         "description": seo.metaDescription,
-        "keyword": seo.keyword
+        "keyword": seo.keyword,
+        "noindex": coalesce(seo.noindex, false)
       }
     }`,
     params: { slug },
@@ -1058,16 +1105,30 @@ export async function getMoreArticles(slug: string): Promise<ArticleCard[]> {
   }) as Promise<ArticleCard[]>;
 }
 
+/* ---- Brand system ------------------------------------------------------------ */
+
+/** /brand's search title, description and share card; null until the Studio has its document. */
+export async function getBrandPage(): Promise<BrandPage | null> {
+  return sanityFetch({
+    query: `*[_id == "brandPage"][0]{${SEO}}`,
+    tags: ["brandPage"],
+  }) as Promise<BrandPage | null>;
+}
+
 /* ---- Share cards ------------------------------------------------------------ */
 
 /** What a page's share card carries: see lib/og.tsx. */
 export interface ShareCardData {
   readonly label: string;
   readonly title: string;
+  /** The page's name, for the card's alt text: a card is often titled by the page's heading instead. */
+  readonly name: string;
   /** The page's picture, 1200 × 630, as JPEG: sent on as the share image. */
   readonly image: string | null;
   /** The social image an editor set in the page's SEO fields. */
   readonly custom: string | null;
+  /** The alt text the editor set with it. */
+  readonly alt: string | null;
 }
 
 const shareUrl = (image: SanityImage | null | undefined) =>
@@ -1080,20 +1141,54 @@ const IMAGE = `{asset, crop, hotspot}`;
 type ShareRow = {
   label?: string | null;
   title?: string | readonly string[] | null;
+  name?: string | readonly string[] | null;
   image?: SanityImage | null;
   custom?: SanityImage | null;
+  alt?: string | null;
 };
+
+/** One line, from a string or the lines a heading is set in. */
+const oneLine = (value: string | readonly string[] | null | undefined) =>
+  typeof value === "string" ? value : value?.join(" ");
 
 /** A row from Sanity as a card: clean of edit marks, its lines as one title. */
 function shareCard(row: ShareRow | null, label: string): ShareCardData | null {
   if (!row) return null;
-  const title = typeof row.title === "string" ? row.title : row.title?.join(" ");
+  const title = oneLine(row.title);
   if (!title) return null;
+  const custom = shareUrl(row.custom);
   return {
     label: stegaClean(row.label || label),
     title: stegaClean(title),
+    name: stegaClean(oneLine(row.name) || title),
     image: shareUrl(row.image),
-    custom: shareUrl(row.custom),
+    custom,
+    alt: custom && row.alt ? stegaClean(row.alt) : null,
+  };
+}
+
+/**
+ * The home page's card: the social image an editor set, named by the site;
+ * or null for the brand card as it is, with no name in its band.
+ */
+export async function getHomeShare(): Promise<ShareCardData | null> {
+  const row = (await sanityFetch({
+    query: `*[_id == "homePage"][0]{
+      "custom": ogImage${IMAGE},
+      "alt": ogImage.alt,
+      "name": *[_id == "siteSettings"][0].title
+    }`,
+    tags: ["homePage", "siteSettings"],
+  })) as (Pick<ShareRow, "custom" | "alt"> & { name: string | null }) | null;
+  const custom = shareUrl(row?.custom);
+  if (!custom) return null;
+  return {
+    label: "",
+    title: "",
+    name: stegaClean(row?.name ?? ""),
+    image: null,
+    custom,
+    alt: row?.alt ? stegaClean(row.alt) : null,
   };
 }
 
@@ -1107,8 +1202,10 @@ export async function getPageShare(id: string, type = id): Promise<ShareCardData
     query: `*[_id == $id][0]{
       "label": select(defined(coalesce(heading, cover.heading)) => title, null),
       "title": coalesce(heading, cover.heading, title),
+      "name": title,
       "image": select(defined(plate.image.asset) => plate.image, defined(cover.card.asset) => cover.card)${IMAGE},
-      "custom": ogImage${IMAGE}
+      "custom": ogImage${IMAGE},
+      "alt": ogImage.alt
     }`,
     params: { id },
     tags: [type],
@@ -1122,7 +1219,8 @@ export async function getInsightShare(slug: string): Promise<ShareCardData | nul
       "label": "Insights / " + ${TOPIC},
       title,
       "image": cover.image${IMAGE},
-      "custom": seo.ogImage${IMAGE}
+      "custom": seo.ogImage${IMAGE},
+      "alt": seo.ogImage.alt
     }`,
     params: { slug },
     tags: ["article", "insightTopic"],
@@ -1143,6 +1241,7 @@ export async function getProjectShare(slug: string): Promise<ShareCardData | nul
       "label": "Work / " + coalesce(sector, scope, ""),
       "title": name,
       "custom": ogImage${IMAGE},
+      "alt": ogImage.alt,
       "image": select(
         defined(feature.image.asset) => feature.image,
         defined(image.asset) => image,
@@ -1157,8 +1256,9 @@ export async function getProjectShare(slug: string): Promise<ShareCardData | nul
 }
 
 /**
- * A story's card is its featured image, as a project's is, then the first
- * picture it has; with none, the brand card with its name under its family's.
+ * A story's card is the social image an editor set; without one its
+ * featured image, as a project's is, then the first picture it has; with
+ * none, the brand card with its name under its family's.
  */
 export async function getStoryShare(family: string, slug: string): Promise<ShareCardData | null> {
   const label = families.find((f) => f.slug === family)?.title ?? "Ghost Savvy Studios";
@@ -1166,7 +1266,9 @@ export async function getStoryShare(family: string, slug: string): Promise<Share
     query: `*[_type == "familyStory" && family == $family && slug.current == $slug][0]{
       "label": coalesce(*[_id == "familyPage-" + $family][0].title, $label),
       title,
-      "custom": select(
+      "custom": ogImage${IMAGE},
+      "alt": ogImage.alt,
+      "image": select(
         defined(feature.image.asset) => feature.image,
         defined(image.asset) => image,
         defined(hero.image.asset) => hero.image,
@@ -1184,7 +1286,10 @@ export async function getAudienceShare(slug: string): Promise<ShareCardData | nu
     query: `*[_type == "audience" && slug.current == $slug][0]{
       "label": "Who we serve",
       "title": coalesce(heading, name),
-      "image": plate.image${IMAGE}
+      name,
+      "image": plate.image${IMAGE},
+      "custom": ogImage${IMAGE},
+      "alt": ogImage.alt
     }`,
     params: { slug },
     tags: ["audience"],
@@ -1197,7 +1302,10 @@ export async function getPhaseShare(slug: string): Promise<ShareCardData | null>
     query: `*[_type == "phase" && slug.current == $slug][0]{
       "label": "Our approach",
       "title": coalesce(heading, [title]),
-      "image": select(defined(plate.image.asset) => plate.image, defined(image.asset) => image)${IMAGE}
+      "name": title,
+      "image": select(defined(plate.image.asset) => plate.image, defined(image.asset) => image)${IMAGE},
+      "custom": ogImage${IMAGE},
+      "alt": ogImage.alt
     }`,
     params: { slug },
     tags: ["phase"],
@@ -1223,18 +1331,19 @@ const PAGE_PATHS: Record<string, string> = {
 /**
  * Every published page with the time it last changed, for the sitemap: the
  * pages, every insight, project and family story, and the audiences and
- * phases that have a page of their own. The Ghost family's pages and stories
+ * phases that have a page of their own. Not a page hidden from search
+ * engines in its SEO fields. The Ghost family's pages and stories
  * only while it is on show (see FAMILY_ON_SHOW).
  */
 export async function getSitemapEntries(): Promise<{ path: string; updatedAt: string }[]> {
   const data = (await sanityFetch({
     query: `{
-      "pages": *[_id in $ids || _type in ["trackPage", "familyPage", "legalPage"]]{_id, _type, slug, "updatedAt": _updatedAt},
-      "insights": *[_type == "article" && defined(slug.current)]{"slug": slug.current, "updatedAt": _updatedAt},
-      "projects": *[_type == "project" && defined(slug.current)]{"slug": slug.current, "updatedAt": _updatedAt},
-      "audiences": *[_type == "audience" && defined(slug.current) && defined(challenge.heading)]{"slug": slug.current, "updatedAt": _updatedAt},
-      "phases": *[_type == "phase" && defined(slug.current) && defined(purpose.heading)]{"slug": slug.current, "updatedAt": _updatedAt},
-      "stories": *[_type == "familyStory" && defined(slug.current) && defined(family)]{family, "slug": slug.current, "updatedAt": _updatedAt}
+      "pages": *[(_id in $ids || _type in ["trackPage", "familyPage", "legalPage"]) && noindex != true]{_id, _type, slug, "updatedAt": _updatedAt},
+      "insights": *[_type == "article" && defined(slug.current) && seo.noindex != true]{"slug": slug.current, "updatedAt": _updatedAt},
+      "projects": *[_type == "project" && defined(slug.current) && noindex != true]{"slug": slug.current, "updatedAt": _updatedAt},
+      "audiences": *[_type == "audience" && defined(slug.current) && defined(challenge.heading) && noindex != true]{"slug": slug.current, "updatedAt": _updatedAt},
+      "phases": *[_type == "phase" && defined(slug.current) && defined(purpose.heading) && noindex != true]{"slug": slug.current, "updatedAt": _updatedAt},
+      "stories": *[_type == "familyStory" && defined(slug.current) && defined(family) && noindex != true]{family, "slug": slug.current, "updatedAt": _updatedAt}
     }`,
     params: { ids: Object.keys(PAGE_PATHS) },
     tags: [
@@ -1385,5 +1494,141 @@ export async function getAgentIndex(): Promise<AgentIndex> {
     insights: data.insights.map((row) => ({ ...under("/insights")(row), topic: row.topic })),
     family: FAMILY_ON_SHOW ? data.family.map(under("")) : [],
     legal: data.legal.map(under("")),
+  };
+}
+
+/* ---- Site guide ------------------------------------------------------------ */
+
+/** A document's id as published: in draft mode a read can carry the drafts. prefix. */
+const ownId = (id: string) => id.replace(/^drafts\./, "");
+
+/** A page's summary cut to a card's line, at a word. */
+const cardLine = (text: string, max = 110) => {
+  const flat = text.replace(/\s+/g, " ").trim();
+  if (flat.length <= max) return flat;
+  return `${flat.slice(0, flat.lastIndexOf(" ", max)).replace(/[,;:.]$/, "")}…`;
+};
+
+/**
+ * What the site guide draws on: the audiences and needs its two questions
+ * ask about, the work in /work's order and the insights newest first, and a
+ * card for every page in /llms.txt it may point to, without the legal pages.
+ * The work on the guide's Never recommend list is left out of all of it, so
+ * nothing downstream can reach it. Clean of edit marks: the guide's paths are
+ * compared, and its words are read by a model, not edited in Presentation.
+ */
+export async function getGuideCatalogue(): Promise<GuideCatalogue> {
+  type Row = { slug: string; ground: string | null; image: string | null };
+  const [index, data] = await Promise.all([
+    getAgentIndex(),
+    sanityFetch({
+      query: `{
+        "migrated": defined(*[_id == "chat"][0].picker),
+        "exclude": coalesce(*[_id == "chat"][0].exclude[]._ref, []),
+        "needs": coalesce(*[_id == "chat"][0].picker.needs[]{
+          "key": _key, label, "track": track->slug, "discipline": discipline->title, "topic": topic->title
+        }, []),
+        "audiences": coalesce(*[_id == "whoWeServePage"][0].audiences.items[defined(@->slug.current)]->{
+          "slug": slug.current, "name": array::join(name, " "), "hasPage": defined(challenge.heading),
+          "featured": coalesce(featured->slug.current, *[_id == "whoWeServePage"][0].featured->slug.current)
+        }, []),
+        "tracks": *[_type == "trackPage" && defined(slug)]{
+          slug, "featured": featured->slug.current, "ground": plate.ground, "image": ${url("plate.image")}
+        },
+        "projects": coalesce(*[_id == "workPage"][0]{"list": ${workOrder(
+          `{"id": _id, "slug": slug.current, scope, sector, "disciplines": ${DISCIPLINES}, ground, "image": ${url("image")}}`,
+        )}}.list, []),
+        "insights": *[_type == "article" && defined(slug.current)] | order(publishedAt desc){
+          "slug": slug.current, "topic": ${TOPIC}, "ground": coalesce(cover.ground, "#e7e6e1"), "image": ${url("cover.image")}
+        },
+        "start": *[_id == "approachPage"][0].phases.items[defined(@->purpose.heading)][0]->slug.current
+      }`,
+      tags: [
+        "chat",
+        "whoWeServePage",
+        "audience",
+        "trackPage",
+        "workPage",
+        "project",
+        "discipline",
+        "article",
+        "insightTopic",
+        "approachPage",
+        "phase",
+      ],
+    }),
+  ]);
+  const clean = stegaClean(data) as {
+    migrated: boolean;
+    exclude: string[];
+    needs: { key: string; label: string; track: string | null; discipline: string | null; topic: string | null }[];
+    audiences: { slug: string; name: string; hasPage: boolean; featured: string | null }[];
+    tracks: (Row & { featured: string | null })[];
+    projects: (Row & { id: string; scope: string | null; sector: string | null; disciplines: string[] })[];
+    insights: (Row & { topic: string })[];
+    start: string | null;
+  };
+  const { pages, tracks, audiences, phases, projects, insights } = stegaClean(index);
+
+  /* Until `npm run migrate:guide` has run, the needs and the work left out are the seed's. */
+  if (!clean.migrated) {
+    clean.exclude = guideExclude.map((slug) => `project-${slug}`);
+    clean.needs = guideNeeds.map((need, i) => ({
+      key: `seed${i}`,
+      label: need.label,
+      track: need.track,
+      discipline: need.discipline ?? null,
+      topic: need.topic ?? null,
+    }));
+  }
+  const out = new Set(clean.exclude.map(ownId));
+  /* The seed's list names the demo work by slug too, in case a project was made in the Studio under another id. */
+  const outSlugs = new Set<string>(clean.migrated ? [] : guideExclude);
+  const work = clean.projects.filter((project) => !out.has(ownId(project.id)) && !outSlugs.has(project.slug));
+  const listed = new Set(work.map((project) => project.slug));
+  /** A project's path, if the guide may point to it. */
+  const workPath = (slug: string | null) => (slug && listed.has(slug) ? projectHref(slug) : null);
+
+  const cards: Record<string, GuideCard> = {};
+  const add = (card: GuideCard) => {
+    cards[card.path] = card;
+  };
+  const art = <T extends Row>(rows: readonly T[], slug: string) => rows.find((row) => row.slug === slug);
+
+  for (const page of Object.values(pages)) {
+    add({ path: page.path, kind: "page", title: page.title, line: cardLine(page.description), ground: null, image: null });
+  }
+  for (const track of tracks) {
+    const row = art(clean.tracks, track.path.slice(1));
+    add({ path: track.path, kind: "track", title: track.title, line: track.terms, ground: row?.ground ?? null, image: row?.image ?? null });
+  }
+  for (const page of [...audiences, ...phases]) {
+    add({ path: page.path, kind: "page", title: page.title, line: cardLine(page.description), ground: null, image: null });
+  }
+  for (const project of projects) {
+    const row = work.find((one) => projectHref(one.slug) === project.path);
+    if (!row) continue;
+    add({
+      path: project.path,
+      kind: "work",
+      title: project.title,
+      line: [row.scope, row.sector].filter(Boolean).join(" · "),
+      ground: row.ground,
+      image: row.image,
+    });
+  }
+  for (const insight of insights) {
+    const row = art(clean.insights, insight.path.split("/").pop() ?? "");
+    add({ path: insight.path, kind: "insight", title: insight.title, line: insight.topic, ground: row?.ground ?? null, image: row?.image ?? null });
+  }
+
+  return {
+    audiences: clean.audiences.map((audience) => ({ ...audience, featured: workPath(audience.featured) })),
+    needs: clean.needs.map((need) => ({ ...need, track: need.track ? `/${need.track}` : null })),
+    tracks: clean.tracks.map((track) => ({ path: `/${track.slug}`, featured: workPath(track.featured) })),
+    projects: work.map((project) => ({ path: projectHref(project.slug), disciplines: project.disciplines })),
+    insights: clean.insights.map((insight) => ({ path: insightHref(insight.slug), topic: insight.topic })),
+    start: clean.start ? `/our-approach/${clean.start}` : null,
+    cards,
   };
 }

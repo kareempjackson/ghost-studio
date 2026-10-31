@@ -12,6 +12,8 @@ import {
   href,
   lines,
   list,
+  metaTitle,
+  noindex,
   object,
   para,
   paras,
@@ -19,6 +21,7 @@ import {
   phrase,
   plain,
   seo,
+  socialImage,
   text,
 } from "../fields";
 
@@ -145,6 +148,15 @@ export const aboutPage = defineType({
   preview: single("About"),
 });
 
+/** /brand: the brand system is written in code (lib/brand); what search engines and share cards say about it is here. */
+export const brandPage = defineType({
+  name: "brandPage",
+  title: "Brand system",
+  type: "document",
+  fields: [...seo()],
+  preview: single("Brand system"),
+});
+
 export const servicesPage = defineType({
   name: "servicesPage",
   title: "Services page",
@@ -211,7 +223,10 @@ export const audience = defineType({
       validation: (r) => r.required(),
     }),
     para("body", { description: "The line on the card." }),
-    plain("description", { required: false, description: "For search results. The summary is used if empty." }),
+    plain("description", { required: false, description: "For search results and share cards. The summary is used if empty." }),
+    metaTitle(),
+    socialImage(),
+    noindex(),
     lines("heading", { required: false, description: "The page's cover, one entry per line." }),
     para("summary", { required: false, description: "Under the audience's name, beside the cover." }),
     action("action", { required: false, description: "The way on from the cover." }),
@@ -655,7 +670,10 @@ export const phase = defineType({
     }),
     text("question", { description: "The question the phase exists to answer." }),
     picture("image", { description: "The card's picture on /our-approach." }),
-    plain("description", { required: false, description: "For search results. The question is used if empty." }),
+    plain("description", { required: false, description: "For search results and share cards. The question is used if empty." }),
+    metaTitle(),
+    socialImage(),
+    noindex(),
     lines("heading", {
       required: false,
       description: "The page's cover, one entry per line. The title is used if empty.",

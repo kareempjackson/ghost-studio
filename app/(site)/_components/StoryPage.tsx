@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
-import { storyHref } from "@/lib/links";
+import { FAMILY_ON_SHOW, storyHref } from "@/lib/links";
 import { pageMetadata } from "@/lib/seo";
 import { getStoryPage, getStorySlugs } from "@/sanity/content";
 import { toPlain } from "@/sanity/lib/rich";
@@ -26,15 +26,17 @@ export async function storyParams(family: string) {
   return slugs.length ? slugs.map((slug) => ({ slug })) : [{ slug: "_" }];
 }
 
-/** Metadata for a story: its name, under its family's. */
+/** Metadata for a story: its name, under its family's. Out of search results while the family is not on show. */
 export async function storyMetadata(family: string, slug: string): Promise<Metadata> {
   const page = await getStoryPage(family, slug);
   if (!page) return {};
   const { story } = page;
   return pageMetadata({
     title: `${story.title} · ${page.family.title}`,
+    metaTitle: story.metaTitle,
     description: story.description || toPlain(story.summary),
     path: storyHref(family, slug),
+    noindex: story.noindex || !FAMILY_ON_SHOW,
   });
 }
 

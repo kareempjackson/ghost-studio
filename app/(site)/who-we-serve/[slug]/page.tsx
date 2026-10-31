@@ -2,7 +2,7 @@ import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
-import { getAudiencePage, getAudienceSlugs } from "@/sanity/content";
+import { getAudiencePage, getAudienceSlugs, getWhoWeServePage } from "@/sanity/content";
 import { ChatLauncher } from "../../_components/ChatLauncher";
 import { ContactBand } from "../../_components/ContactBand";
 import { PageCover } from "../../_components/PageCover";
@@ -11,6 +11,7 @@ import { Practice } from "../../_components/Practice";
 import { MONO, SectionHead } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
+import { StructuredData, breadcrumbs, webPage } from "../../_components/StructuredData";
 import { Visual } from "../../_components/Visual";
 
 /** Cache Components needs one param to prerender against; `_` is never an audience. */
@@ -25,7 +26,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const page = await getAudiencePage(slug);
   return page
-    ? pageMetadata({ title: page.title, description: page.description, path: `/who-we-serve/${slug}` })
+    ? pageMetadata({
+        title: page.title,
+        metaTitle: page.metaTitle,
+        description: page.description,
+        noindex: page.noindex,
+        path: `/who-we-serve/${slug}`,
+      })
     : {};
 }
 
@@ -58,13 +65,27 @@ const PAPER = "#edebe7";
 export default async function AudienceRoute({
   params,
 }: PageProps<"/who-we-serve/[slug]">) {
-  const page = await getAudiencePage((await params).slug);
+  const [page, whoWeServe] = await Promise.all([getAudiencePage((await params).slug), getWhoWeServePage()]);
   if (!page) notFound();
   const { plate, challenge, practice, outputs } = page;
+
+  /* The audience, as search engines read it, under Who we serve. */
+  const path = `/who-we-serve/${page.slug}`;
+  const structured = {
+    "@context": "https://schema.org",
+    "@graph": [
+      webPage({ name: page.title, description: page.description, path }),
+      breadcrumbs([
+        { name: whoWeServe.title, path: "/who-we-serve" },
+        { name: page.title, path },
+      ]),
+    ],
+  };
 
   return (
     <>
       <SiteHeader />
+      <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">

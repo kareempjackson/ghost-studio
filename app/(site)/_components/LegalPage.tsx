@@ -24,7 +24,13 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Metadata for a legal route, from its document in Sanity. */
 export function legalMetadata(doc: LegalDocument): Promise<Metadata> {
-  return pageMetadata({ title: doc.title, description: doc.description, path: `/${stegaClean(doc.slug)}` });
+  return pageMetadata({
+    title: doc.title,
+    metaTitle: doc.metaTitle,
+    description: doc.description,
+    noindex: doc.noindex,
+    path: `/${stegaClean(doc.slug)}`,
+  });
 }
 
 /**

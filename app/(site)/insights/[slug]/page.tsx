@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 import { stegaClean } from "next-sanity";
 import { insightHref, markdownHref } from "@/lib/links";
 import { absoluteUrl } from "@/lib/site";
-import { getArticle, getArticleSlugs, getMoreArticles, getSettings } from "@/sanity/content";
+import { getArticle, getArticleSlugs, getInsightsPage, getMoreArticles, getSettings } from "@/sanity/content";
 import { toPlain } from "@/sanity/lib/rich";
 import { ChatLauncher } from "../../_components/ChatLauncher";
 import { ContactBand } from "../../_components/ContactBand";
@@ -14,7 +14,7 @@ import { RichText, outline } from "../../_components/RichText";
 import { MONO } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
-import { StructuredData } from "../../_components/StructuredData";
+import { StructuredData, breadcrumbs, studio } from "../../_components/StructuredData";
 import { LABEL } from "../../_components/StudioStrip";
 import { Visual } from "../../_components/Visual";
 import { Contents } from "../_components/Contents";
@@ -52,6 +52,7 @@ export async function generateMetadata({
   return {
     title: metaTitle ? { absolute: metaTitle } : name,
     description,
+    ...(article.seo.noindex ? { robots: { index: false, follow: true } } : {}),
     ...(article.seo.keyword ? { keywords: [stegaClean(article.seo.keyword)] } : {}),
     alternates: {
       canonical: insightHref(slug),
@@ -99,7 +100,7 @@ const DATE = new Intl.DateTimeFormat("en-GB", {
  */
 export default async function InsightPage({ params }: PageProps<"/insights/[slug]">) {
   const { slug } = await params;
-  const [article, settings] = await Promise.all([getArticle(slug), getSettings()]);
+  const [article, insightsPage, author] = await Promise.all([getArticle(slug), getInsightsPage(), studio()]);
   if (!article) notFound();
   const more = await getMoreArticles(slug);
 
@@ -109,19 +110,29 @@ export default async function InsightPage({ params }: PageProps<"/insights/[slug
   const published = article.publishedAt ? new Date(article.publishedAt) : null;
 
   /* What search engines read as the article: the same fields the share
-     cards carry. */
+     cards carry, its cover, the studio that wrote it, and where it sits. */
   const structured = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: stegaClean(article.seo.title ?? name),
-    description: stegaClean(article.seo.description ?? toPlain(article.excerpt)),
-    ...(article.publishedAt ? { datePublished: article.publishedAt } : {}),
-    dateModified: article.updatedAt,
-    ...(article.seo.keyword ? { keywords: stegaClean(article.seo.keyword) } : {}),
-    articleSection: stegaClean(article.topic),
-    mainEntityOfPage: absoluteUrl(insightHref(slug)),
-    author: { "@type": "Organization", name: stegaClean(settings.title) },
-    publisher: { "@type": "Organization", name: stegaClean(settings.title) },
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        headline: stegaClean(article.seo.title ?? name),
+        description: stegaClean(article.seo.description ?? toPlain(article.excerpt)),
+        url: absoluteUrl(insightHref(slug)),
+        ...(article.cover.src ? { image: article.cover.src } : {}),
+        ...(article.publishedAt ? { datePublished: article.publishedAt } : {}),
+        dateModified: article.updatedAt,
+        ...(article.seo.keyword ? { keywords: stegaClean(article.seo.keyword) } : {}),
+        articleSection: stegaClean(article.topic),
+        mainEntityOfPage: absoluteUrl(insightHref(slug)),
+        author,
+        publisher: author,
+      },
+      breadcrumbs([
+        { name: insightsPage.title, path: "/insights" },
+        { name, path: insightHref(slug) },
+      ]),
+    ],
   };
 
   return (

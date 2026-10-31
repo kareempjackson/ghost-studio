@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site";
-import { getManagedServicesPage } from "@/sanity/content";
+import { getManagedServicesPage, getTrackPage } from "@/sanity/content";
 import { toPlain } from "@/sanity/lib/rich";
 import { Questions } from "../../build/_components/Questions";
 import { ChatLauncher } from "../../_components/ChatLauncher";
@@ -12,12 +12,12 @@ import { Rich } from "../../_components/Rich";
 import { BAND_STYLE, MONO } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
-import { StructuredData, faqPage, studio } from "../../_components/StructuredData";
+import { StructuredData, breadcrumbs, faqPage, studio } from "../../_components/StructuredData";
 import { WordmarkPlate } from "../../_components/WordmarkPlate";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { title, description } = await getManagedServicesPage();
-  return pageMetadata({ title, description, path: "/integrate/managed-services" });
+  const { title, metaTitle, description, noindex } = await getManagedServicesPage();
+  return pageMetadata({ title, metaTitle, description, noindex, path: "/integrate/managed-services" });
 }
 
 /** The band headings, at the site's band size, in the cover's regular weight, as the comp sets them. */
@@ -53,11 +53,16 @@ const pad = (n: number) => String(n).padStart(2, "0");
  * priced; and the questions left over. The contact band closes it.
  */
 export default async function ManagedServices() {
-  const [data, provider] = await Promise.all([getManagedServicesPage(), studio()]);
+  const [data, provider, integrate] = await Promise.all([
+    getManagedServicesPage(),
+    studio(),
+    getTrackPage("integrate"),
+  ]);
   const { who, included, setup, pricing, questions } = data;
 
   /* The service, what it covers and how it is priced, and the questions
-     under it as an FAQ: what an agent quotes back. */
+     under it as an FAQ: what an agent quotes back. And where it sits:
+     under Integrate. */
   const structured = {
     "@context": "https://schema.org",
     "@graph": [
@@ -82,6 +87,10 @@ export default async function ManagedServices() {
         offers: { "@type": "Offer", description: toPlain(pricing.body) },
       },
       ...(questions.items.length > 0 ? [faqPage(questions.items)] : []),
+      breadcrumbs([
+        { name: integrate.title, path: "/integrate" },
+        { name: data.title, path: "/integrate/managed-services" },
+      ]),
     ],
   };
 

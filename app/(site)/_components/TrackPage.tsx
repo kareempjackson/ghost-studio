@@ -20,7 +20,13 @@ import { Rich } from "./Rich";
 
 /** Metadata for a track page, from its document in Sanity. */
 export function trackMetadata(data: TrackPageData): Promise<Metadata> {
-  return pageMetadata({ title: data.title, description: data.description, path: `/${stegaClean(data.slug)}` });
+  return pageMetadata({
+    title: data.title,
+    metaTitle: data.metaTitle,
+    description: data.description,
+    noindex: data.noindex,
+    path: `/${stegaClean(data.slug)}`,
+  });
 }
 
 /** 30px at 390 to 44px at 1440, held there. What comes with the team. */

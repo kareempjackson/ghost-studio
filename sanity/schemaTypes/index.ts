@@ -6,6 +6,7 @@ import {
   aboutPage,
   approachPage,
   audience,
+  brandPage,
   phase,
   contactPage,
   familyPage,
@@ -58,6 +59,7 @@ export const schemaTypes = [
   approachPage,
   phase,
   audience,
+  brandPage,
   project,
   article,
   insightTopic,
@@ -70,7 +72,7 @@ export const singletons = [
   { type: "siteSettings", title: "Site settings" },
   { type: "navigation", title: "Navigation" },
   { type: "footer", title: "Footer" },
-  { type: "chat", title: "Chat" },
+  { type: "chat", title: "Site guide" },
   { type: "homePage", title: "Home page" },
   { type: "pointOfView", title: "Point of view" },
   { type: "process", title: "Process" },
@@ -87,6 +89,7 @@ export const singletons = [
   { type: "insightsPage", title: "Insights page" },
   { type: "contactPage", title: "Contact page" },
   { type: "approachPage", title: "Our approach" },
+  { type: "brandPage", title: "Brand system" },
 ] as const;
 
 /** Types with one document per fixed route; ids are `${type}-${slug}`. */

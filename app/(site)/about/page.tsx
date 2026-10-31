@@ -20,8 +20,8 @@ import { Visual } from "../_components/Visual";
 import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { title, description } = await getAboutPage();
-  return pageMetadata({ title, description, path: "/about" });
+  const { title, metaTitle, description, noindex } = await getAboutPage();
+  return pageMetadata({ title, metaTitle, description, noindex, path: "/about" });
 }
 
 /** 26px at 390 to 36px at 1440, held there. One expectation, as a claim. */

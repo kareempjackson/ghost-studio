@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { CSSProperties } from "react";
-import { getPhasePage, getPhaseSlugs } from "@/sanity/content";
+import { getApproachPage, getPhasePage, getPhaseSlugs } from "@/sanity/content";
 import type { PhasePage } from "@/sanity/types";
 import { ChatLauncher } from "../../_components/ChatLauncher";
 import { ContactBand } from "../../_components/ContactBand";
@@ -13,6 +13,7 @@ import { Practice } from "../../_components/Practice";
 import { SectionHead } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
+import { StructuredData, breadcrumbs, webPage } from "../../_components/StructuredData";
 import { Visual } from "../../_components/Visual";
 
 /** Cache Components needs one param to prerender against; `_` is never a phase. */
@@ -27,7 +28,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const page = await getPhasePage(slug);
   return page
-    ? pageMetadata({ title: page.title, description: page.description, path: `/our-approach/${slug}` })
+    ? pageMetadata({
+        title: page.title,
+        metaTitle: page.metaTitle,
+        description: page.description,
+        noindex: page.noindex,
+        path: `/our-approach/${slug}`,
+      })
     : {};
 }
 
@@ -56,13 +63,27 @@ const pad = (n: number) => String(n).padStart(2, "0");
 export default async function PhaseRoute({
   params,
 }: PageProps<"/our-approach/[slug]">) {
-  const page = await getPhasePage((await params).slug);
+  const [page, approach] = await Promise.all([getPhasePage((await params).slug), getApproachPage()]);
   if (!page) notFound();
   const { plate, purpose, practice, outputs } = page;
+
+  /* The phase, as search engines read it, under Our approach. */
+  const path = `/our-approach/${page.slug}`;
+  const structured = {
+    "@context": "https://schema.org",
+    "@graph": [
+      webPage({ name: page.title, description: page.description, path }),
+      breadcrumbs([
+        { name: approach.title, path: "/our-approach" },
+        { name: page.title, path },
+      ]),
+    ],
+  };
 
   return (
     <>
       <SiteHeader />
+      <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">

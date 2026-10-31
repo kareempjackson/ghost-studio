@@ -1,3 +1,4 @@
+import { projectHref } from "@/lib/links";
 import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
@@ -7,11 +8,12 @@ import { ChatLauncher } from "../_components/ChatLauncher";
 import { ContactBand } from "../_components/ContactBand";
 import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
+import { StructuredData, breadcrumbs, collectionPage } from "../_components/StructuredData";
 import { WorkGallery } from "./_components/WorkGallery";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { title, description } = await getWorkPage();
-  return pageMetadata({ title, description, path: "/work" });
+  const { title, metaTitle, description, noindex } = await getWorkPage();
+  return pageMetadata({ title, metaTitle, description, noindex, path: "/work" });
 }
 
 /** 44px at 390 to 88px at 1440, held there. The cover of the page. */
@@ -42,9 +44,25 @@ const CLOSE_STYLE: CSSProperties = {
 export default async function Work() {
   const workPage = await getWorkPage();
 
+  /* The index, as search engines read it: the page, every project on it,
+     and where it sits. */
+  const structured = {
+    "@context": "https://schema.org",
+    "@graph": [
+      collectionPage({
+        name: workPage.title,
+        description: workPage.description,
+        path: "/work",
+        items: workPage.projects.map((p) => ({ name: p.name, path: projectHref(p.slug) })),
+      }),
+      breadcrumbs([{ name: workPage.title, path: "/work" }]),
+    ],
+  };
+
   return (
     <>
       <SiteHeader />
+      <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">

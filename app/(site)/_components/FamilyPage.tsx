@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { stegaClean } from "next-sanity";
+import { FAMILY_ON_SHOW } from "@/lib/links";
 import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import type { CSSProperties } from "react";
@@ -16,9 +17,15 @@ import { STORY_TITLE_STYLE, StoryCard } from "./StoryCard";
 import { Visual } from "./Visual";
 import { Rich } from "./Rich";
 
-/** Metadata for a family page, from its document in Sanity. */
+/** Metadata for a family page, from its document in Sanity. Out of search results while the family is not on show. */
 export function familyMetadata(data: FamilyPageData): Promise<Metadata> {
-  return pageMetadata({ title: data.title, description: data.description, path: stegaClean(data.href) });
+  return pageMetadata({
+    title: data.title,
+    metaTitle: data.metaTitle,
+    description: data.description,
+    path: stegaClean(data.href),
+    noindex: data.noindex || !FAMILY_ON_SHOW,
+  });
 }
 
 /** 56px at 390 to 136px at 1440, held there. The claim, set solid. */

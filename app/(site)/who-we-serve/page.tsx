@@ -10,11 +10,12 @@ import { FeaturedProject } from "../_components/ProjectCard";
 import { MONO, SectionHead } from "../_components/SectionHead";
 import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
+import { StructuredData, breadcrumbs, collectionPage } from "../_components/StructuredData";
 import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { title, description } = await getWhoWeServePage();
-  return pageMetadata({ title, description, path: "/who-we-serve" });
+  const { title, metaTitle, description, noindex } = await getWhoWeServePage();
+  return pageMetadata({ title, metaTitle, description, noindex, path: "/who-we-serve" });
 }
 
 /** 28px at 390 to 38px at 1440, held there. Who the client is. */
@@ -38,9 +39,27 @@ export default async function WhoWeServe() {
   const whoWeServePage = await getWhoWeServePage();
   const { audiences } = whoWeServePage;
 
+  /* The index, as search engines read it: the page, the audiences with a
+     page of their own, and where it sits. */
+  const structured = {
+    "@context": "https://schema.org",
+    "@graph": [
+      collectionPage({
+        name: whoWeServePage.title,
+        description: whoWeServePage.description,
+        path: "/who-we-serve",
+        items: audiences.items
+          .filter((a) => a.hasPage)
+          .map((a) => ({ name: a.name.join(" "), path: `/who-we-serve/${a.slug}` })),
+      }),
+      breadcrumbs([{ name: whoWeServePage.title, path: "/who-we-serve" }]),
+    ],
+  };
+
   return (
     <>
       <SiteHeader />
+      <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">

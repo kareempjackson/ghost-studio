@@ -25,6 +25,7 @@ import {
   caseStudy,
   disciplineDoc,
   disciplineRefs,
+  guideFields,
   keyed,
   story,
   storyId,
@@ -169,32 +170,8 @@ async function documents() {
     newsletter: { ...footer.newsletter, inputLabel: "Email address" },
   });
 
-  /* Lifted out of ChatPanel and ChatLauncher, where it was set inline. */
-  add("chat", "chat", {
-    launcher: { open: "Let’s talk", close: "Close", label: "Chat with Ghost Savvy" },
-    heading: "A good conversation starts here",
-    status: "Chat preview · Connected",
-    intro:
-      "Tell us what you’re thinking. A new idea, a tricky problem, or a question about working together.",
-    topics: ["A project", "Your services", "Something else"],
-    topicsLabel: "What is it about?",
-    name: { label: "Your name", placeholder: "Name" },
-    email: { label: "Email", placeholder: "you@company.com" },
-    message: { label: "Your message", placeholder: "What’s on your mind" },
-    preview: "Preview message",
-    ready: {
-      label: "Your message, ready to send",
-      about: "About",
-      from: "From",
-      message: "Message",
-      empty: "(nothing yet)",
-      send: "Send it as an email",
-      edit: "Edit the message",
-    },
-    note: "Demo only. This form doesn’t send or store your details.",
-    contact: "Contact",
-    closeLabel: "Close chat",
-  });
+  /* The site guide: its words in sanity/seed/content/guide.ts. */
+  add("chat", "chat", guideFields());
 
   /* Projects and articles */
   /* Every discipline the work names, as a document the projects refer to. */

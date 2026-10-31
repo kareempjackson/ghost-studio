@@ -8,8 +8,10 @@
  * which stores an enquiry in Sanity and emails through Resend
  * (app/(site)/contact/actions.ts); and the newsletter sign-up, which adds
  * the address to a list kept by Resend and sends a welcome
- * (app/(site)/_components/subscribe.ts). The chat opens the visitor's own
- * mail app.
+ * (app/(site)/_components/subscribe.ts); and the site guide, whose answers
+ * are written by Anthropic's API from what the visitor types, and whose
+ * conversation is kept in session storage and sent to the studio only as a
+ * brief (app/api/guide, app/(site)/_components/guide/).
  *
  * When any of that changes — an analytics tool, a new form, a new provider —
  * these documents change with it, and their date moves.
@@ -63,8 +65,8 @@ export const legalDocuments = {
     title: "Privacy policy",
     description:
       "What personal information Ghost Savvy Studios collects when you visit our website or get in touch, how we use it, and the choices you have.",
-    /* Moved when the newsletter sign-up started keeping addresses. */
-    updated: "13 October 2026",
+    /* Moved when the site guide arrived. */
+    updated: "31 October 2026",
     intro: `This policy explains what personal information ${ENTITY}, doing business as ${TRADING} (“Ghost Savvy Studios”, “we”, “us”), collects when you visit our website or contact us, how we use it, and the choices you have. We collect very little: no advertising trackers, no analytics cookies, and we never sell your information.`,
     sections: [
       {
@@ -91,7 +93,8 @@ export const legalDocuments = {
         ],
         list: [
           "**The contact form:** your name and email address and, if you add them, your company, the services you’re interested in, your message, your budget and your timing.",
-          "**Email:** anything you include when you write to us. The chat window opens a message in your own email app, so what you send that way reaches us as an email.",
+          "**Email:** anything you include when you write to us.",
+          "**The site guide:** the questions you type into the guide on our pages, and which of our pages you’ve opened in that tab, so it can answer them. We keep none of it unless you send the conversation to us as a brief, when it is stored with your enquiry.",
           "**The newsletter:** your email address, if you sign up for it.",
           "**Working together:** business contact details and project information you share during an engagement.",
         ],
@@ -107,6 +110,7 @@ export const legalDocuments = {
           "**Fonts:** our typefaces are served by Adobe Fonts, which receives your IP address and the address of the page you’re viewing, to deliver the fonts and count page views for licensing.",
           "**Pictures, video and page updates:** these are delivered from Sanity’s and Cloudflare’s networks, which receive your IP address to send them to you.",
           "**Browser storage:** one item in your browser’s session storage remembers that you’ve seen the opening animation. It holds no personal information and is deleted when you close the tab. Our [cookie policy](/cookies) has the details.",
+          "**The site guide’s conversation:** if you use the site guide, your browser’s session storage keeps the conversation as you move between pages. It is deleted when you close the tab.",
         ],
       },
       {
@@ -117,6 +121,7 @@ export const legalDocuments = {
         ],
         list: [
           "**To answer your enquiry**, and to email you a confirmation that it arrived: to take the steps you’ve asked for before any contract, and our legitimate interest in replying to people who contact us.",
+          "**To answer your questions in the site guide**: our legitimate interest in helping visitors find what they’re looking for.",
           "**To deliver our services** and manage our relationship with clients: to perform our contract.",
           "**To send our newsletter**, if you’ve asked for it: your consent, which you can withdraw at any time.",
           "**To run and secure the website**, and to keep spam and abuse out of the contact form: our legitimate interests.",
@@ -135,6 +140,7 @@ export const legalDocuments = {
           "**Vercel**, which hosts the website.",
           "**Sanity**, which stores the website’s content and the messages sent through the contact form.",
           "**Resend**, which delivers the emails sent when you use the contact form, and keeps our newsletter’s list of subscribers and sends each issue.",
+          "**Anthropic**, which writes the site guide’s answers from what you type into it.",
           "**Cloudflare**, which stores and delivers the website’s video.",
           "**Adobe**, which serves the website’s fonts.",
           "**Our email and business software providers**, which hold our correspondence and records.",
@@ -155,6 +161,7 @@ export const legalDocuments = {
           "**Enquiries that don’t lead to work:** up to two years after our last contact, then deleted.",
           "**Client records:** for the length of the engagement, and up to seven years after it ends, to meet tax, accounting and legal obligations.",
           "**Newsletter:** until you unsubscribe.",
+          "**Site guide conversations:** not kept, unless you send one to us as a brief, when it is kept as an enquiry is.",
           "**Server logs:** for a short period set by our hosting provider, typically a few days.",
         ],
       },
@@ -205,9 +212,10 @@ export const legalDocuments = {
     title: "Cookie policy",
     description:
       "The cookies and browser storage the Ghost Savvy Studios website uses, the services that load with its pages, and how to control them.",
-    updated: UPDATED,
+    /* Moved when the site guide arrived. */
+    updated: "31 October 2026",
     intro:
-      "In short: our website doesn’t use advertising, analytics or tracking cookies. This policy explains the one small piece of browser storage we do use, the services that load with our pages, and how to control them.",
+      "In short: our website doesn’t use advertising, analytics or tracking cookies. This policy explains the little we keep in your browser, the services that load with our pages, and how to control them.",
     sections: [
       {
         id: "what-cookies-are",
@@ -222,10 +230,11 @@ export const legalDocuments = {
         title: "What we use",
         paragraphs: [
           "We don’t use cookies to track you, measure visits or show you advertising.",
-          "The only thing we store in your browser is one item of session storage, which the site needs to work as designed:",
+          "The only things we keep in your browser are a few small items the site needs to work as designed:",
         ],
         list: [
           "**gs-intro-played** (session storage): remembers that the opening animation has played in this tab, so it doesn’t play again as you move around the site. It holds no personal information and is deleted when you close the tab.",
+          "**gs-guide** (session storage): keeps your conversation with the site guide, if you use it, as you move between pages. It holds only what you typed into the guide and is deleted when you close the tab.",
         ],
       },
       {

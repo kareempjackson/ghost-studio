@@ -1,6 +1,6 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { R2VideoInput } from "../components/R2VideoInput";
-import { colour, href, picture, text } from "./fields";
+import { colour, href, noindex, picture, text } from "./fields";
 
 const linkAnnotation = defineArrayMember({
   name: "link",
@@ -127,9 +127,15 @@ export const seoType = defineType({
         "The picture on share cards: LinkedIn, X, Slack, iMessage. Cropped to 1200 × 630 around the hotspot. The cover if empty.",
       options: { hotspot: true },
       fields: [
-        defineField({ name: "alt", type: "string", title: "Alt text" }),
+        defineField({
+          name: "alt",
+          type: "string",
+          title: "Alt text",
+          description: "What the picture shows, for people who can't see it. Empty, the insight's title is used.",
+        }),
       ],
     }),
+    noindex(),
   ],
   options: { collapsible: false },
 });

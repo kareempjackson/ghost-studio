@@ -177,16 +177,66 @@ export const list = (
     ...o,
   });
 
-/** Title and description for search engines and the browser tab. */
-export const seo = () => [
-  text("title", { description: "The browser tab and search title." }),
-  plain("description", { description: "One or two sentences for search results." }),
+/*
+ * What search engines and share cards say about a page. Every page-like
+ * document carries the same four: a search title, a description, a social
+ * image and a way out of search results.
+ */
+
+type SeoOpts = { group?: string; description?: string };
+
+/** The whole title in search results and the browser tab, exactly as written. */
+export const metaTitle = (o: SeoOpts = {}) =>
+  defineField({
+    name: "metaTitle",
+    type: "string",
+    title: "Search title",
+    description:
+      "Optional. The title in search results and the browser tab, exactly as written: the site's name is not added, so end with it if you want it there. Empty, the page's name and the site's are used, e.g. “About us — Ghost Savvy Studios”.",
+    validation: (r) => r.max(60).warning("Search results cut titles at around 60 characters."),
+    ...o,
+  });
+
+/** The picture on share cards, and what it shows for those who can't see it. */
+export const socialImage = (o: SeoOpts = {}) =>
   defineField({
     name: "ogImage",
     type: "image",
     title: "Social image",
     description:
-      "Optional. The picture on share cards: LinkedIn, X, Slack, iMessage. Cropped to 1200 × 630 around the hotspot. Empty, the page's own picture or the brand card with its heading is used.",
+      "Optional. The picture on share cards: LinkedIn, X, Slack, iMessage. Cropped to 1200 × 630 around the hotspot. Empty, the page's own picture or the brand card with its name is used.",
     options: { hotspot: true },
+    fields: [
+      defineField({
+        name: "alt",
+        type: "string",
+        title: "Alt text",
+        description: "What the picture shows, for people who can't see it. Empty, the page's name is used.",
+      }),
+    ],
+    ...o,
+  });
+
+/** Out of search results and the sitemap, still live at its address. */
+export const noindex = (o: SeoOpts = {}) =>
+  defineField({
+    name: "noindex",
+    type: "boolean",
+    title: "Hide from search engines",
+    description:
+      "Keeps the page out of Google and other search results, and out of the sitemap. It stays live for anyone with the link.",
+    initialValue: false,
+    ...o,
+  });
+
+/** A page's name, then everything search engines and share cards read. */
+export const seo = () => [
+  text("title", {
+    description:
+      "The page's name: its share card's label, and what search engines and agents read it as. With the site's name after it, the search title too, unless one is set below.",
   }),
+  metaTitle(),
+  plain("description", { description: "One or two sentences for search results and share cards: 120 to 160 characters." }),
+  socialImage(),
+  noindex(),
 ];

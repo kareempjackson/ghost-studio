@@ -17,9 +17,12 @@
     "migrate:topics": "tsx --env-file=.env.local sanity/migrate/insight-topics.ts",
     "migrate:disciplines": "tsx --env-file=.env.local sanity/migrate/disciplines.ts",
     "migrate:newsletter": "tsx --env-file=.env.local sanity/migrate/newsletter.ts",
-    "migrate:family": "tsx --env-file=.env.local sanity/migrate/family-archives.ts"
+    "migrate:family": "tsx --env-file=.env.local sanity/migrate/family-archives.ts",
+    "migrate:guide": "tsx --env-file=.env.local sanity/migrate/guide.ts",
+    "migrate:seo": "tsx --env-file=.env.local sanity/migrate/seo.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
     "@sanity/icons": "^5.2.3",
     "@sanity/image-url": "^2.1.1",
     "@sanity/ui": "^4.3.1",

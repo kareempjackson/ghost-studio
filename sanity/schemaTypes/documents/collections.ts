@@ -6,7 +6,22 @@
 
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { families } from "../../../lib/links";
-import { action, colour, lines, num, object, para, paras, phrase, picture, plain, text } from "../fields";
+import {
+  action,
+  colour,
+  lines,
+  metaTitle,
+  noindex,
+  num,
+  object,
+  para,
+  paras,
+  phrase,
+  picture,
+  plain,
+  socialImage,
+  text,
+} from "../fields";
 
 const slug = (source: string | ((doc: Record<string, unknown>) => string)) =>
   defineField({
@@ -122,6 +137,7 @@ export const project = defineType({
   groups: [
     { name: "card", title: "Card", default: true },
     { name: "story", title: "Case study" },
+    { name: "seo", title: "SEO" },
   ],
   fields: [
     text("name", { description: "The client, as they write it themselves.", group: "card" }),
@@ -188,7 +204,12 @@ export const project = defineType({
       },
       initialValue: "cover",
     }),
-    plain("description", { required: false, description: "For search results.", group: "card" }),
+    metaTitle({ group: "seo" }),
+    plain("description", {
+      required: false,
+      description: "For search results and share cards, 120 to 160 characters. The tagline is used if empty.",
+      group: "seo",
+    }),
 
     /* The case study, at /work/[slug]. Every part is optional: what is
        empty is left out, so a project reads as far as it is written. */
@@ -197,11 +218,18 @@ export const project = defineType({
       name: "ogImage",
       type: "image",
       title: "Social image",
-      group: "story",
+      group: "seo",
       description:
         "The picture on share cards: LinkedIn, X, Slack, iMessage. Cropped to 1200 × 630 around the hotspot. A film can't be a share image, so set one when the header is a film; otherwise the first picture in the case study is used.",
       options: { hotspot: true },
-      fields: [defineField({ name: "alt", type: "string", title: "Alt text" })],
+      fields: [
+        defineField({
+          name: "alt",
+          type: "string",
+          title: "Alt text",
+          description: "What the picture shows, for people who can't see it. Empty, the project's name is used.",
+        }),
+      ],
       validation: (r) =>
         r
           .custom((value: { asset?: unknown } | undefined, context) => {
@@ -212,6 +240,7 @@ export const project = defineType({
           })
           .warning(),
     }),
+    noindex({ group: "seo" }),
     picture("logo", { description: "The client's mark, set small over the headline.", group: "story", video: false }),
     phrase("headline", { required: false, description: "The page's heading. The tagline is used if empty.", group: "story" }),
     defineField({
@@ -333,6 +362,7 @@ export const familyStory = defineType({
   groups: [
     { name: "card", title: "Card", default: true },
     { name: "story", title: "Story" },
+    { name: "seo", title: "SEO" },
   ],
   fields: [
     defineField({
@@ -359,7 +389,18 @@ export const familyStory = defineType({
     para("summary", { description: "One or two sentences: the line under its name in the archive.", group: "card" }),
     colour("ground", { description: "The card's colour in the archive, and behind its picture.", group: "card" }),
     picture("image", { description: "The card's picture or film. Its colour if empty.", group: "card" }),
-    plain("description", { required: false, description: "For search results. The summary is used if empty.", group: "card" }),
+    metaTitle({ group: "seo" }),
+    plain("description", {
+      required: false,
+      description: "For search results and share cards, 120 to 160 characters. The summary is used if empty.",
+      group: "seo",
+    }),
+    socialImage({
+      group: "seo",
+      description:
+        "Optional. The picture on share cards: LinkedIn, X, Slack, iMessage. Cropped to 1200 × 630 around the hotspot. Empty, the story's featured image, then the first picture it has, is used.",
+    }),
+    noindex({ group: "seo" }),
 
     /* The story, at /[family]/[slug]. */
     plate("hero", { group: "story", description: "The plate at the top of the page." }),

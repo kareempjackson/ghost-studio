@@ -4,6 +4,7 @@
  */
 
 import type { StorySeed } from "./content/family-stories";
+import { guide, guideExclude, guideNeeds } from "./content/guide";
 import type { CaseStudySeed, PlateSeed } from "./content/work";
 
 type Json = string | number | boolean | null | undefined | Json[] | { [key: string]: Json };
@@ -85,3 +86,40 @@ export function disciplineDoc(title: string) {
 /** A project's disciplines, as its document stores them: references to them. */
 export const disciplineRefs = (names: readonly string[]) =>
   names.map((name) => ({ _type: "reference", _ref: disciplineId(name), _key: disciplineId(name) }));
+
+/** A discipline's or topic's document id, by its name: the seed's own ids unless told otherwise. */
+type IdOf = (type: "discipline" | "insightTopic", title: string) => string | null;
+
+const seededId: IdOf = (type, title) => (type === "discipline" ? disciplineId(title) : topicId(title));
+
+/**
+ * The site guide's document: its words, its needs as references to a track,
+ * a discipline and a topic, and the work it never recommends, by weak
+ * reference so the demo projects can still be deleted. `idOf` finds a
+ * discipline or topic in a dataset where it was made under another id; one it
+ * cannot find is left off the need.
+ */
+export function guideFields(idOf: IdOf = seededId) {
+  const weak = (_ref: string) => ({ _type: "reference", _ref, _weak: true });
+  const named = (type: "discipline" | "insightTopic", title?: string) => {
+    const id = title ? idOf(type, title) : null;
+    return id ? weak(id) : undefined;
+  };
+  return {
+    ...guide,
+    picker: {
+      ...guide.picker,
+      needs: guideNeeds.map((need) => {
+        const discipline = named("discipline", need.discipline);
+        const topic = named("insightTopic", need.topic);
+        return {
+          label: need.label,
+          track: { _type: "reference", _ref: `trackPage-${need.track}` },
+          ...(discipline ? { discipline } : {}),
+          ...(topic ? { topic } : {}),
+        };
+      }),
+    },
+    exclude: guideExclude.map((slug) => ({ ...weak(`project-${slug}`), _key: slug })),
+  };
+}

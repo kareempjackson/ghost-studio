@@ -15,7 +15,7 @@ import { MONO } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { ProjectCard } from "../../_components/ProjectCard";
 import { SiteHeader } from "../../_components/SiteHeader";
-import { StructuredData, studio } from "../../_components/StructuredData";
+import { StructuredData, breadcrumbs, studio } from "../../_components/StructuredData";
 import { ClientFeedback } from "../_components/ClientFeedback";
 import { InDepth } from "../_components/InDepth";
 import { Overview } from "../_components/Overview";
@@ -42,7 +42,9 @@ export async function generateMetadata({
   if (!project) return {};
   return pageMetadata({
     title: project.name,
+    metaTitle: project.metaTitle,
     description: project.description ?? project.tagline,
+    noindex: project.noindex,
     path: `/work/${slug}`,
     markdown: true,
   });
@@ -104,9 +106,9 @@ export default async function ProjectPage({
   const labels = workPage.caseStudy;
 
   /* What search engines and agents read as the work: the studio made it,
-     in these trades, and it may be one part of a larger project. */
-  const structured = {
-    "@context": "https://schema.org",
+     in these trades, and it may be one part of a larger project. And where
+     it sits: under the work, and under the larger project it is part of. */
+  const work = {
     "@type": "CreativeWork",
     name: project.name,
     headline: toPlain(project.headline),
@@ -125,6 +127,19 @@ export default async function ProjectPage({
           },
         }
       : {}),
+  };
+  const structured = {
+    "@context": "https://schema.org",
+    "@graph": [
+      work,
+      breadcrumbs([
+        { name: workPage.title, path: "/work" },
+        ...(project.parent
+          ? [{ name: project.parent.name, path: projectHref(stegaClean(project.parent.slug)) }]
+          : []),
+        { name: project.name, path: projectHref(slug) },
+      ]),
+    ],
   };
   /* The margin's first block sits well under the way back; the rest closer. */
   const first = "mt-12 lg:mt-20";

@@ -4,6 +4,9 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { ChatPanel } from "./ChatPanel";
 import { useChrome } from "./ChromeProvider";
+import { guide, prepare } from "./guide/store";
+import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+import { WithPathname } from "./WithPathname";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -38,27 +41,31 @@ function Bubble() {
 }
 
 /**
- * Whether the pill is on show. Off for launch: every page still places it,
- * but it draws nothing until this is turned back on.
+ * Whether the pill is on show. Every page places it; turned off, it draws
+ * nothing. Until `npm run migrate:guide` has run, the guide speaks with its
+ * seeded words (sanity/content.ts), so it can go live before the Studio has them.
  */
-const CHAT_ON_SHOW = false;
+const CHAT_ON_SHOW = true;
 
 /** The band the pill must never sit on top of: the close and the footer. */
 const CLOSE_SELECTOR = '[aria-labelledby="contact-heading"]';
 
 /**
- * Show the pill only where it covers nothing that has to be read: past the
- * cover, and gone again once the close has arrived. A corner widget is always
- * over something, so it is only ever over the middle of the page.
+ * Show the pill only where it covers nothing that has to be read, and gone
+ * again once the close has arrived. On the home page that means past the
+ * cover, whose motto sits in this corner; every other page's cover leaves the
+ * corner empty, so there it is there from the start. Before the address is
+ * known, it is treated as the home page.
  */
-function useOutOfTheWay() {
+function useOutOfTheWay(path: string | null) {
   const [shown, setShown] = useState(false);
+  const home = !path || path === "/";
 
   useEffect(() => {
     let closeIsUp = false;
 
     const sync = () => {
-      const pastCover = window.scrollY > window.innerHeight * 1.1;
+      const pastCover = !home || window.scrollY > window.innerHeight * 1.1;
       setShown(pastCover && !closeIsUp);
     };
 
@@ -82,35 +89,45 @@ function useOutOfTheWay() {
       window.removeEventListener("scroll", sync);
       window.removeEventListener("resize", sync);
     };
-  }, []);
+  }, [home]);
 
   return shown;
 }
 
 /**
- * The way in, kept on screen.
+ * The way in, kept on screen: the site guide.
  *
- * A pill in the corner that opens a short panel: the two ways to start a
- * conversation, and nothing else. It is deliberately not a chat window —
- * there is no one at the other end of one yet — so it answers the question a
- * chat bubble raises rather than pretending to be one. When a chat service is
- * wired up, the panel is the one piece that changes.
+ * A pill in the corner that opens the guide's panel (ChatPanel.tsx). It never
+ * opens by itself and never asks for attention: no badge, no sound, no
+ * greeting that pops up. Escape closes it, a click outside closes it, and
+ * focus returns to the pill so the keyboard never loses its place. On a
+ * phone the panel rises as a sheet from the foot of the screen.
  *
- * Escape closes it, a click outside closes it, and focus returns to the pill
- * so the keyboard never loses its place.
- *
- * It shows only over the middle of the page: not over the cover, whose own
- * sign-off sits in this corner, and not over the close or the footer.
+ * It stays out of the way: not over the home page's cover, whose own sign-off
+ * sits in this corner, and not over the close or the footer. The
+ * first time it shows, it reads what the guide's shortlist is made from, so
+ * the panel has it the moment it opens. Each page it sits on is noted for the
+ * guide, for this tab only.
  */
-function Launcher() {
+function Launcher({ path }: { path: string | null }) {
   const { launcher } = useChrome().chat;
   const [open, setOpen] = useState(false);
-  const shown = useOutOfTheWay();
+  const shown = useOutOfTheWay(path);
+  const still = usePrefersReducedMotion();
   const rootRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLButtonElement>(null);
 
   /* Out of the way is out of reach: the panel is only open with its pill. */
   const panelOpen = open && shown;
+  const motionFor = (duration: number) => ({ duration: still ? 0 : duration, ease: EASE });
+
+  useEffect(() => {
+    if (path) guide.visit(path);
+  }, [path]);
+
+  useEffect(() => {
+    if (shown) prepare();
+  }, [shown]);
 
   useEffect(() => {
     if (!panelOpen) return;
@@ -143,12 +160,19 @@ function Launcher() {
             initial={{ opacity: 0, y: 12, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            transition={{ duration: 0.24, ease: EASE }}
+            transition={motionFor(0.24)}
             style={{ transformOrigin: "100% 100%" }}
             role="dialog"
             aria-label={launcher.label}
+            className="max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0"
           >
-            <ChatPanel onClose={() => setOpen(false)} />
+            <ChatPanel
+              path={path ?? "/"}
+              onClose={() => {
+                setOpen(false);
+                pillRef.current?.focus({ preventScroll: true });
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -161,12 +185,12 @@ function Launcher() {
             ? { opacity: 1, y: 0, pointerEvents: "auto" }
             : { opacity: 0, y: 16, pointerEvents: "none" }
         }
-        transition={{ duration: 0.3, ease: EASE }}
+        transition={motionFor(0.3)}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={panelOpen}
         aria-controls="chat-panel"
-        className="group flex h-12 items-center gap-3 rounded-pill bg-[#111] pr-6 pl-2.5 text-white shadow-[0_12px_30px_-12px_rgb(14_13_11/0.6)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.03] lg:h-14 lg:pr-7 lg:pl-3"
+        className={`${panelOpen ? "max-sm:hidden" : ""} group flex h-12 items-center gap-3 rounded-pill bg-[#111] pr-6 pl-2.5 text-white shadow-[0_12px_30px_-12px_rgb(14_13_11/0.6)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.03] motion-reduce:hover:scale-100 lg:h-14 lg:pr-7 lg:pl-3`}
       >
         <Bubble />
         <span className="font-label text-[0.75rem] leading-none tracking-[0.12em]">
@@ -179,5 +203,6 @@ function Launcher() {
 
 /** The pill, while it is on show (see CHAT_ON_SHOW). */
 export function ChatLauncher() {
-  return CHAT_ON_SHOW ? <Launcher /> : null;
+  if (!CHAT_ON_SHOW) return null;
+  return <WithPathname>{(path) => <Launcher path={path} />}</WithPathname>;
 }

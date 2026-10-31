@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { stegaClean } from "next-sanity";
 import { preload } from "react-dom";
 import { sanityImage } from "@/lib/sanity-image";
-import { SITE_URL, absoluteUrl } from "@/lib/site";
+import { pageMetadata } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/site";
 import {
   getEngagement,
   getHomePage,
@@ -28,14 +29,23 @@ import { Services } from "./_components/Services";
 import { SelectedWork } from "./_components/SelectedWork";
 import { SiteFooter } from "./_components/SiteFooter";
 import { SiteHeader } from "./_components/SiteHeader";
-import { ORGANIZATION_ID, StructuredData } from "./_components/StructuredData";
+import { ORGANIZATION_ID, StructuredData, WEBSITE_ID } from "./_components/StructuredData";
 import { Testimonials } from "./_components/Testimonials";
 
 /**
- * The home page carries the site's own title and description, from the
- * layout; its share image is ./opengraph-image.png, the brand card.
+ * The home page's search title and description, as written in the Studio:
+ * the title stands alone, without the site's name after it. The site's own
+ * name and description without them. Its share image is ./opengraph-image.
  */
-export const metadata: Metadata = { alternates: { canonical: "/" } };
+export async function generateMetadata(): Promise<Metadata> {
+  const [settings, home] = await Promise.all([getSettings(), getHomePage()]);
+  return pageMetadata({
+    title: settings.title,
+    metaTitle: home.metaTitle || settings.title,
+    description: home.description || settings.description,
+    path: "/",
+  });
+}
 
 export default async function Home() {
   const [
@@ -88,7 +98,7 @@ export default async function Home() {
       },
       {
         "@type": "WebSite",
-        "@id": `${SITE_URL}/#website`,
+        "@id": WEBSITE_ID,
         name,
         url: absoluteUrl("/"),
         publisher: { "@id": ORGANIZATION_ID },

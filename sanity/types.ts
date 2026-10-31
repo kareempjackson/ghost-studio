@@ -46,6 +46,8 @@ export interface Picture {
 export interface SiteSettings {
   readonly title: string;
   readonly description: string;
+  /** The content of Google Search Console's verification tag, when the site is verified that way. */
+  readonly googleSiteVerification: string | null;
   readonly email: string;
   readonly social: readonly { readonly id: string; readonly label: string; readonly href: string }[];
   readonly headerAction: Link;
@@ -98,29 +100,100 @@ export interface NewsletterCopy {
   readonly welcome: { readonly subject: string; readonly body: string; readonly signoff: Lines } | null;
 }
 
+/** The kinds of page the guide offers its own questions on (STARTER_PLACES in the schema). */
+export type StarterPlace = "any" | "home" | "work" | "insights" | "services" | "audiences" | "approach";
+
+/** The site guide's words: the pill, the panel, the shortlist, the questions and the brief. */
 export interface Chat {
   readonly launcher: { readonly open: string; readonly close: string; readonly label: string };
   readonly heading: string;
-  readonly status: string;
+  /** What the guide is, in a line: that its answers are written by AI. */
+  readonly disclosure: string;
   readonly intro: Rich;
-  readonly topics: Lines;
-  readonly topicsLabel: string;
-  readonly name: { readonly label: string; readonly placeholder: string };
-  readonly email: { readonly label: string; readonly placeholder: string };
-  readonly message: { readonly label: string; readonly placeholder: string };
-  readonly preview: string;
-  readonly ready: {
-    readonly label: string;
-    readonly about: string;
-    readonly from: string;
-    readonly message: string;
-    readonly empty: string;
-    readonly send: string;
-    readonly edit: string;
-  };
-  readonly note: string;
-  readonly contact: string;
   readonly closeLabel: string;
+  readonly picker: {
+    readonly audienceLabel: string;
+    readonly other: string;
+    readonly needLabel: string;
+    readonly unsure: string;
+    readonly skip: string;
+    readonly resultLabel: string;
+    readonly kinds: { readonly work: string; readonly track: string; readonly insight: string; readonly page: string };
+    /** {audience}: the audience's name. */
+    readonly audienceLink: string;
+    readonly restart: string;
+  };
+  readonly starters: readonly { readonly where: StarterPlace; readonly prompts: Lines }[];
+  readonly ask: {
+    readonly placeholder: string;
+    readonly send: string;
+    readonly reading: string;
+    readonly you: string;
+    readonly guide: string;
+    readonly error: string;
+    readonly busy: string;
+    readonly limit: string;
+  };
+  readonly brief: {
+    readonly open: string;
+    readonly review: string;
+    readonly heading: string;
+    readonly lead: Rich;
+    readonly name: { readonly label: string; readonly placeholder: string };
+    readonly email: { readonly label: string; readonly placeholder: string };
+    readonly company: { readonly label: string; readonly placeholder: string };
+    readonly summary: { readonly label: string; readonly placeholder: string };
+    readonly optional: string;
+    readonly send: string;
+    readonly sending: string;
+    /** {email}: the sender's address. */
+    readonly sent: string;
+    /** {email}: the studio's address. */
+    readonly failed: string;
+    readonly note: string;
+    readonly back: string;
+  };
+}
+
+/** One page the guide can point to, as its card shows it. */
+export interface GuideCard {
+  readonly path: string;
+  readonly kind: "work" | "track" | "insight" | "page";
+  readonly title: string;
+  /** Under the title: a project's scope and sector, a track's terms, an insight's topic. */
+  readonly line: string;
+  readonly ground: string | null;
+  readonly image: string | null;
+}
+
+/**
+ * What the shortlist is made from, all of it as the site has it: who the
+ * studio serves, the needs the guide asks about, the work in /work's order
+ * and the insights newest first, and a card for every page the guide may
+ * point to. Work the guide must never recommend is already left out.
+ */
+export interface GuideCatalogue {
+  readonly audiences: readonly {
+    readonly slug: string;
+    readonly name: string;
+    readonly hasPage: boolean;
+    /** The path of the project its page closes on. */
+    readonly featured: string | null;
+  }[];
+  readonly needs: readonly {
+    readonly key: string;
+    readonly label: string;
+    /** The track's path, e.g. /build. */
+    readonly track: string | null;
+    readonly discipline: string | null;
+    readonly topic: string | null;
+  }[];
+  readonly tracks: readonly { readonly path: string; readonly featured: string | null }[];
+  readonly projects: readonly { readonly path: string; readonly disciplines: readonly Discipline[] }[];
+  readonly insights: readonly { readonly path: string; readonly topic: Topic }[];
+  /** The first phase of Our approach: where someone who doesn't know yet starts. */
+  readonly start: string | null;
+  readonly cards: Readonly<Record<string, GuideCard>>;
 }
 
 /** Everything the header, menu, footer and chat need, fetched once in the layout. */
@@ -195,7 +268,9 @@ export interface Chapter {
 
 /** A project's own page: the card's record, and the case study if written. */
 export interface ProjectDetail extends Project {
+  readonly metaTitle: string | null;
   readonly description: string | null;
+  readonly noindex: boolean;
   readonly hero: Media | null;
   readonly logo: Picture;
   readonly headline: Rich;
@@ -219,6 +294,7 @@ export interface SearchMeta {
   readonly title: string | null;
   readonly description: string | null;
   readonly keyword: string | null;
+  readonly noindex: boolean;
 }
 
 export interface ArticleDetail extends ArticleCard {
@@ -254,6 +330,9 @@ export interface JournalSection {
 }
 
 export interface HomePage {
+  /** The search title and description an editor set; the site's are used without them. */
+  readonly metaTitle: string | null;
+  readonly description: string | null;
   readonly hero: {
     readonly video: string | null;
     readonly poster: string | null;
@@ -381,9 +460,17 @@ export interface StudioStrip {
 /* ---- Pages ----------------------------------------------------------------- */
 
 interface Seo {
+  /** The page's name: with the site's after it, the title in search results unless it has a search title. */
   readonly title: string;
+  /** The whole title in search results and the tab, as the editor wrote it. */
+  readonly metaTitle: string | null;
   readonly description: string;
+  /** Kept out of search results and the sitemap. */
+  readonly noindex: boolean;
 }
+
+/** /brand: written in code, but its search title, description and share card are the Studio's. */
+export type BrandPage = Seo;
 
 interface Cover {
   readonly eyebrow: string;
@@ -707,7 +794,9 @@ export interface StoryLabels {
 
 /** A story's own page: the record, the claim, the parts, and how it ended. */
 export interface StoryDetail extends StoryCard {
+  readonly metaTitle: string | null;
   readonly description: string | null;
+  readonly noindex: boolean;
   readonly hero: Media | null;
   readonly notes: readonly Note[];
   readonly headline: Rich;

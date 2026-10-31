@@ -3,7 +3,7 @@
  * band and the footer, and the chat window. One document each.
  */
 
-import { defineField, defineType } from "sanity";
+import { defineArrayMember, defineField, defineType } from "sanity";
 import {
   action,
   colour,
@@ -23,8 +23,18 @@ export const siteSettings = defineType({
   title: "Site settings",
   type: "document",
   fields: [
-    text("title", { description: "The site's name, after every page title." }),
-    plain("description", { description: "The default description for search results." }),
+    text("title", {
+      description:
+        "The site's name: after the page's name in the title of every page without a search title of its own, and on share cards.",
+    }),
+    plain("description", { description: "The default description for search results, for a page without one." }),
+    defineField({
+      name: "googleSiteVerification",
+      type: "string",
+      title: "Google Search Console code",
+      description:
+        "Optional. Proves the site is yours to Google Search Console: add the site as a URL-prefix property, choose the HTML tag method, and paste the tag's content value here. Not needed when the site is verified by DNS or through the Google tag.",
+    }),
     defineField({
       name: "email",
       type: "string",
@@ -160,37 +170,163 @@ export const footer = defineType({
   preview: { prepare: () => ({ title: "Footer" }) },
 });
 
+const field = (name: string) => object(name, [text("label"), text("placeholder")]);
+
+/** The kinds of page the panel can open on, for the questions it offers there. */
+export const STARTER_PLACES = [
+  { title: "Any page", value: "any" },
+  { title: "Home", value: "home" },
+  { title: "A case study", value: "work" },
+  { title: "An insight", value: "insights" },
+  { title: "Services and the tracks", value: "services" },
+  { title: "Who we serve", value: "audiences" },
+  { title: "Our approach", value: "approach" },
+];
+
+/**
+ * The site guide: the pill in the corner and the panel it opens. Two
+ * questions narrow the work to a shortlist, the guide answers in its own
+ * words from what the site says (app/api/guide), and a brief goes to the
+ * studio as an enquiry, as the contact form's do.
+ *
+ * Stored as `chat`, the type's name since it was a chat window: a document's
+ * type cannot be renamed in place.
+ */
 export const chat = defineType({
   name: "chat",
-  title: "Chat",
+  title: "Site guide",
   type: "document",
-  fields: [
-    object("launcher", [
-      text("open"),
-      text("close"),
-      text("label", { description: "For screen readers." }),
-    ]),
-    text("heading"),
-    text("status"),
-    para("intro"),
-    lines("topics", { description: "The chips at the top. The first is chosen to begin with." }),
-    text("topicsLabel", { description: "For screen readers." }),
-    object("name", [text("label"), text("placeholder")]),
-    object("email", [text("label"), text("placeholder")]),
-    object("message", [text("label"), text("placeholder")]),
-    text("preview", { description: "The submit button." }),
-    object("ready", [
-      text("label"),
-      text("about"),
-      text("from"),
-      text("message"),
-      text("empty"),
-      text("send"),
-      text("edit"),
-    ]),
-    text("note"),
-    text("contact", { description: "Set before the email address at the foot." }),
-    text("closeLabel", { description: "For screen readers." }),
+  groups: [
+    { name: "panel", title: "Panel", default: true },
+    { name: "shortlist", title: "Shortlist" },
+    { name: "ask", title: "Questions" },
+    { name: "brief", title: "Brief" },
   ],
-  preview: { prepare: () => ({ title: "Chat" }) },
+  fields: [
+    object(
+      "launcher",
+      [text("open"), text("close"), text("label", { description: "For screen readers." })],
+      { group: "panel" },
+    ),
+    text("heading", { group: "panel" }),
+    text("disclosure", {
+      group: "panel",
+      description: "Under the heading: what the guide is, in a line. Say that its answers are written by AI.",
+    }),
+    para("intro", { group: "panel", description: "Over the two questions." }),
+    text("closeLabel", { group: "panel", description: "For screen readers." }),
+    object(
+      "picker",
+      [
+        text("audienceLabel", { description: "Over the audiences, which are the ones on Who we serve." }),
+        text("other", { description: "The chip after the audiences, for anyone else." }),
+        text("needLabel"),
+        list(
+          "needs",
+          [
+            text("label"),
+            defineField({
+              name: "track",
+              type: "reference",
+              to: [{ type: "trackPage" }],
+              description: "The way of working this points to: its terms are shortlisted.",
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "discipline",
+              type: "reference",
+              weak: true,
+              to: [{ type: "discipline" }],
+              description: "Optional. Work of this kind is shortlisted first.",
+            }),
+            defineField({
+              name: "topic",
+              type: "reference",
+              weak: true,
+              to: [{ type: "insightTopic" }],
+              description: "Optional. An insight on this topic is shortlisted; the newest one if empty.",
+            }),
+          ],
+          { preview: { select: { title: "label", subtitle: "track.title" } } },
+        ),
+        text("unsure", {
+          description: "The last need, for someone who doesn't know yet. It shortlists the first phase of Our approach.",
+        }),
+        text("skip", { description: "The way past the two questions, straight to asking." }),
+        text("resultLabel", { description: "Over the shortlist." }),
+        object("kinds", [text("work"), text("track"), text("insight"), text("page")], {
+          description: "The label on each kind of card.",
+        }),
+        text("audienceLink", {
+          description: "{audience}: the audience's name. The link to its page under the shortlist.",
+        }),
+        text("restart"),
+      ],
+      { group: "shortlist" },
+    ),
+    defineField({
+      name: "exclude",
+      title: "Never recommend",
+      type: "array",
+      group: "shortlist",
+      description:
+        "Work the guide never shortlists or points to: demo projects, or anything not ready to be shown off.",
+      /* Weak, so a project on the list can still be deleted: the demo work is meant to be. */
+      of: [defineArrayMember({ type: "reference", weak: true, to: [{ type: "project" }] })],
+    }),
+    list(
+      "starters",
+      [
+        defineField({
+          name: "where",
+          type: "string",
+          options: { list: STARTER_PLACES },
+          validation: (r) => r.required(),
+        }),
+        lines("prompts", { description: "One question per line, as the visitor would ask it." }),
+      ],
+      {
+        group: "ask",
+        description:
+          "Questions offered as chips, by the kind of page the panel is opened on. Any page is used where nothing else matches.",
+        preview: { select: { title: "where", subtitle: "prompts.0" } },
+      },
+    ),
+    object(
+      "ask",
+      [
+        text("placeholder"),
+        text("send", { description: "For screen readers: the arrow." }),
+        text("reading", { description: "While an answer is being written." }),
+        text("you", { description: "For screen readers: before each of the visitor's messages." }),
+        text("guide", { description: "For screen readers: before each answer." }),
+        text("error", { description: "When an answer could not be written." }),
+        text("busy", { description: "When too many questions arrive at once." }),
+        text("limit", { description: "When a conversation has run as long as it can." }),
+      ],
+      { group: "ask" },
+    ),
+    object(
+      "brief",
+      [
+        text("open", { description: "The link at the foot of the panel." }),
+        text("review", { description: "Under an answer that drafted a brief: the way to it." }),
+        text("heading"),
+        para("lead"),
+        field("name"),
+        field("email"),
+        field("company"),
+        field("summary"),
+        text("optional", { description: "After an optional field's label." }),
+        text("send"),
+        text("sending"),
+        text("sent", { description: "{email}: the sender's address." }),
+        text("failed", { description: "{email}: the studio's address." }),
+        text("note", { description: "Under the button: what happens to the conversation." }),
+        text("back"),
+      ],
+      { group: "brief" },
+    ),
+  ],
+  preview: { prepare: () => ({ title: "Site guide" }) },
 });

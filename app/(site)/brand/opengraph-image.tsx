@@ -1,10 +1,15 @@
-import { shareImage } from "@/lib/og";
+import { shareImage, shareImageMetadata } from "@/lib/og";
+import { getPageShare } from "@/sanity/content";
 
-export const alt = "Brand system — Ghost Savvy Studios";
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+/** Until the Studio has the page's document: its name, as it always was. */
+const FALLBACK = { label: "Brand", title: "Brand system" };
 
-/** The brand system's share card. Its words are in code, as the page's are. */
-export default function Image() {
-  return shareImage({ label: "Brand", title: "Brand system" });
+/** The card, described: its alt text from the page's SEO fields or its name. See lib/og.tsx. */
+export async function generateImageMetadata() {
+  return shareImageMetadata((await getPageShare("brandPage")) ?? FALLBACK);
+}
+
+/** The brand system's share card: its social image from the Studio, or the brand card with its name. */
+export default async function Image() {
+  return shareImage((await getPageShare("brandPage")) ?? FALLBACK);
 }

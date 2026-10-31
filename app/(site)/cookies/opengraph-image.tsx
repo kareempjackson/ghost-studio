@@ -1,9 +1,10 @@
-import { shareImage } from "@/lib/og";
+import { shareImage, shareImageMetadata } from "@/lib/og";
 import { getPageShare } from "@/sanity/content";
 
-export const alt = "Cookie policy — Ghost Savvy Studios";
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+/** The card, described: its alt text from the page's SEO fields or its name. See lib/og.tsx. */
+export async function generateImageMetadata() {
+  return shareImageMetadata(await getPageShare("legalPage-cookies", "legalPage"));
+}
 
 /** The page's share card, from its heading or its own social image: see lib/og.tsx. */
 export default async function Image() {

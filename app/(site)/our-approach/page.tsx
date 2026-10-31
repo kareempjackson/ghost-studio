@@ -12,10 +12,11 @@ import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
 import { Visual } from "../_components/Visual";
 import { Rich } from "../_components/Rich";
+import { StructuredData, breadcrumbs, collectionPage } from "../_components/StructuredData";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { title, description } = await getApproachPage();
-  return pageMetadata({ title, description, path: "/our-approach" });
+  const { title, metaTitle, description, noindex } = await getApproachPage();
+  return pageMetadata({ title, metaTitle, description, noindex, path: "/our-approach" });
 }
 
 /** 28px at 390 to 40px at 1440, held there. A phase's name. */
@@ -47,9 +48,27 @@ export default async function OurApproach() {
   const page = await getApproachPage();
   const { plate, start, phases } = page;
 
+  /* The index, as search engines read it: the page, the phases with a page
+     of their own, in order, and where it sits. */
+  const structured = {
+    "@context": "https://schema.org",
+    "@graph": [
+      collectionPage({
+        name: page.title,
+        description: page.description,
+        path: "/our-approach",
+        items: phases.items
+          .filter((p) => p.hasPage)
+          .map((p) => ({ name: p.title, path: `/our-approach/${p.slug}` })),
+      }),
+      breadcrumbs([{ name: page.title, path: "/our-approach" }]),
+    ],
+  };
+
   return (
     <>
       <SiteHeader />
+      <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">

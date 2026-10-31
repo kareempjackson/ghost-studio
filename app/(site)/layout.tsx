@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { stegaClean } from "next-sanity";
 import { arial, dmSans } from "@/app/fonts";
 import { typekit } from "@/lib/brand";
 import { gtagScript, gtagSrc, loadsAnalytics } from "@/lib/analytics";
@@ -20,12 +21,25 @@ import "./globals.css";
  */
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { title, description } = await getSettings();
+  const { title, description, googleSiteVerification } = await getSettings();
   return {
     /* Where canonical and share-card addresses point: lib/site.ts. */
     metadataBase: new URL(SITE_URL),
     title: { default: title, template: `%s — ${title}` },
     description,
+    /* Every page may be indexed, with its pictures shown large and its
+       snippets and films previewed in full. A page can still opt out. */
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+    },
+    /* Proves the site is the studio's to Google Search Console, where the
+       sitemap is submitted and the site's search performance is read. The
+       code is set in Site settings. */
+    ...(googleSiteVerification
+      ? { verification: { google: stegaClean(googleSiteVerification) } }
+      : {}),
     /* A page without its own share fields still carries the site's. */
     openGraph: { type: "website", siteName: title, title, description },
     twitter: { card: "summary_large_image", title, description },

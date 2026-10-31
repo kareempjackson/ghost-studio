@@ -1,5 +1,6 @@
 /**
- * A message sent from the form on /contact.
+ * A message sent from the form on /contact, or as a brief from the site
+ * guide, which carries the conversation that led to it.
  *
  * The site writes these, never an editor: what the sender typed is read-only
  * here, and the studio's part is the status and the notes. They are stored
@@ -65,6 +66,26 @@ export const enquiry = defineType({
     defineField({ name: "brief", title: "Message", type: "text", rows: 8, readOnly: true }),
     defineField({ name: "budget", type: "string", readOnly: true }),
     defineField({ name: "timing", type: "string", readOnly: true }),
+    defineField({
+      name: "source",
+      title: "Sent from",
+      type: "string",
+      readOnly: true,
+      options: {
+        list: [
+          { title: "The contact form", value: "contact" },
+          { title: "The site guide", value: "guide" },
+        ],
+      },
+    }),
+    defineField({
+      name: "transcript",
+      title: "Conversation with the guide",
+      type: "text",
+      rows: 10,
+      readOnly: true,
+      description: "What the sender asked the site guide and what it answered, before they sent the brief.",
+    }),
     defineField({
       name: "delivery",
       type: "object",

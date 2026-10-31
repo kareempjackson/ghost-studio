@@ -17,6 +17,7 @@ export const resolve: PresentationPluginOptions["resolve"] = {
   mainDocuments: defineDocuments([
     { route: "/", filter: `_id == "homePage"` },
     { route: "/about", filter: `_id == "aboutPage"` },
+    { route: "/brand", filter: `_id == "brandPage"` },
     { route: "/services", filter: `_id == "servicesPage"` },
     { route: "/integrate/managed-services", filter: `_id == "managedServicesPage"` },
     { route: "/who-we-serve", filter: `_id == "whoWeServePage"` },
@@ -59,6 +60,7 @@ export const resolve: PresentationPluginOptions["resolve"] = {
       ],
     }),
     aboutPage: defineLocations(at("About", "/about")),
+    brandPage: defineLocations(at("Brand system", "/brand")),
     managedServicesPage: defineLocations(at("Managed services", "/integrate/managed-services")),
     servicesPage: defineLocations({
       locations: [

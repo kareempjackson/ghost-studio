@@ -21,6 +21,10 @@ export interface EnquiryInput {
   readonly website: string;
   /** When the form was first shown, in ms: a person takes longer than a bot. */
   readonly startedAt: number;
+  /** Set by the site guide, whose brief comes through here too. */
+  readonly source?: "guide";
+  /** The guide's conversation, as the panel showed it: kept with the brief. */
+  readonly transcript?: string;
 }
 
 export type EnquiryResult = { readonly ok: true } | { readonly ok: false };
@@ -42,8 +46,10 @@ const prose = (value: unknown, max: number) =>
   typeof value === "string" ? value.replace(/\r\n?/g, "\n").trim().slice(0, max) : "";
 
 /**
- * The form on /contact. The message is stored in Sanity as an enquiry, the
- * sender is sent a confirmation, and the studio an alert it can reply to.
+ * The form on /contact, and the brief the site guide sends. The message is
+ * stored in Sanity as an enquiry, the sender is sent a confirmation, and the
+ * studio an alert it can reply to. A brief carries the conversation with the
+ * guide that led to it, and nothing else of the conversation is ever kept.
  *
  * It counts as received if it was stored or the studio was told: either way
  * someone will see it. Emails go through Resend (RESEND_API_KEY), from
@@ -72,6 +78,8 @@ export async function sendEnquiry(input: EnquiryInput): Promise<EnquiryResult> {
     brief: prose(input.brief, 5000),
     budget: budgets.has(budget) ? budget : "",
     timing: line(input.timing, 120),
+    source: input.source === "guide" ? "guide" : "contact",
+    transcript: input.source === "guide" ? prose(input.transcript, 8000) : "",
   };
   if (!enquiry.name || !EMAIL.test(enquiry.email)) return { ok: false };
 

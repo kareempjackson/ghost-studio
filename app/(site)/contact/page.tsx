@@ -13,8 +13,8 @@ import { CopyEmail } from "./_components/CopyEmail";
 import { Rich } from "../_components/Rich";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { title, description } = await getContactPage();
-  return pageMetadata({ title, description, path: "/contact" });
+  const { title, metaTitle, description, noindex } = await getContactPage();
+  return pageMetadata({ title, metaTitle, description, noindex, path: "/contact" });
 }
 
 /** 48px at 390 to 96px at 1440, held there. The question, asked once. */

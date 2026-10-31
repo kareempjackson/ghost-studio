@@ -12,6 +12,7 @@ const PAGES = [
   "workPage",
   "contactPage",
   "approachPage",
+  "brandPage",
 ];
 
 /** Pages with pages of their own under them, at /[page]/[slug]. */
