@@ -207,7 +207,8 @@ export const project = defineType({
     metaTitle({ group: "seo" }),
     plain("description", {
       required: false,
-      description: "For search results and share cards, 120 to 160 characters. The tagline is used if empty.",
+      title: "Meta description",
+      description: "The line under the title in search results and on share cards, 120 to 160 characters. The tagline is used if empty.",
       group: "seo",
     }),
 
@@ -392,7 +393,8 @@ export const familyStory = defineType({
     metaTitle({ group: "seo" }),
     plain("description", {
       required: false,
-      description: "For search results and share cards, 120 to 160 characters. The summary is used if empty.",
+      title: "Meta description",
+      description: "The line under the title in search results and on share cards, 120 to 160 characters. The summary is used if empty.",
       group: "seo",
     }),
     socialImage({

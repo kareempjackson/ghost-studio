@@ -32,6 +32,7 @@ export const homePage = defineType({
     }),
     plain("description", {
       required: false,
+      title: "Meta description",
       description:
         "The line under the title in search results and on share cards, 120 to 160 characters. The site's description if empty.",
     }),

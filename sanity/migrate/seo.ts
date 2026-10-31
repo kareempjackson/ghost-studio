@@ -6,7 +6,7 @@
  *   npm run migrate:seo -- --dry   # list what would change
  *   npm run migrate:seo
  *
- * Search titles go in the Search title fields, whole, as search results
+ * Search titles go in the Meta title fields, whole, as search results
  * show them, so a page's name, its share card and its heading stay as they
  * are. Descriptions fill the pages' description fields, 120 to 160
  * characters, where search results cut them. Phases, audiences and

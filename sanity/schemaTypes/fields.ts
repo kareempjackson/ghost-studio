@@ -179,7 +179,7 @@ export const list = (
 
 /*
  * What search engines and share cards say about a page. Every page-like
- * document carries the same four: a search title, a description, a social
+ * document carries the same four: a meta title, a meta description, a social
  * image and a way out of search results.
  */
 
@@ -190,7 +190,7 @@ export const metaTitle = (o: SeoOpts = {}) =>
   defineField({
     name: "metaTitle",
     type: "string",
-    title: "Search title",
+    title: "Meta title",
     description:
       "Optional. The title in search results and the browser tab, exactly as written: the site's name is not added, so end with it if you want it there. Empty, the page's name and the site's are used, e.g. “About us — Ghost Savvy Studios”.",
     validation: (r) => r.max(60).warning("Search results cut titles at around 60 characters."),
@@ -233,10 +233,13 @@ export const noindex = (o: SeoOpts = {}) =>
 export const seo = () => [
   text("title", {
     description:
-      "The page's name: its share card's label, and what search engines and agents read it as. With the site's name after it, the search title too, unless one is set below.",
+      "The page's name: its share card's label, and what search engines and agents read it as. With the site's name after it, the meta title too, unless one is set below.",
   }),
   metaTitle(),
-  plain("description", { description: "One or two sentences for search results and share cards: 120 to 160 characters." }),
+  plain("description", {
+    title: "Meta description",
+    description: "The line under the title in search results and on share cards: one or two sentences, 120 to 160 characters.",
+  }),
   socialImage(),
   noindex(),
 ];

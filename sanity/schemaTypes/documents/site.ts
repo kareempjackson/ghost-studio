@@ -25,9 +25,12 @@ export const siteSettings = defineType({
   fields: [
     text("title", {
       description:
-        "The site's name: after the page's name in the title of every page without a search title of its own, and on share cards.",
+        "The site's name: after the page's name in the title of every page without a meta title of its own, and on share cards.",
     }),
-    plain("description", { description: "The default description for search results, for a page without one." }),
+    plain("description", {
+      title: "Default meta description",
+      description: "The line under the title in search results and on share cards, for a page without a meta description of its own.",
+    }),
     defineField({
       name: "googleSiteVerification",
       type: "string",

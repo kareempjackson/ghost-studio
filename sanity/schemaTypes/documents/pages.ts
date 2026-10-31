@@ -223,8 +223,12 @@ export const audience = defineType({
       validation: (r) => r.required(),
     }),
     para("body", { description: "The line on the card." }),
-    plain("description", { required: false, description: "For search results and share cards. The summary is used if empty." }),
     metaTitle(),
+    plain("description", {
+      required: false,
+      title: "Meta description",
+      description: "The line under the title in search results and on share cards. The summary is used if empty.",
+    }),
     socialImage(),
     noindex(),
     lines("heading", { required: false, description: "The page's cover, one entry per line." }),
@@ -670,8 +674,12 @@ export const phase = defineType({
     }),
     text("question", { description: "The question the phase exists to answer." }),
     picture("image", { description: "The card's picture on /our-approach." }),
-    plain("description", { required: false, description: "For search results and share cards. The question is used if empty." }),
     metaTitle(),
+    plain("description", {
+      required: false,
+      title: "Meta description",
+      description: "The line under the title in search results and on share cards. The question is used if empty.",
+    }),
     socialImage(),
     noindex(),
     lines("heading", {
