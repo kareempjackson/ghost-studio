@@ -7,7 +7,7 @@ import type { Chat, GuideCatalogue } from "@/sanity/types";
 import { Rich } from "../Rich";
 import { GuideCards } from "./Cards";
 import { guide, shortlistFor, type GuideState } from "./store";
-import { CHOICE, CHOICE_ON, KICKER, QUIET } from "./styles";
+import { CHOICE, KICKER, QUIET } from "./styles";
 
 /** One question's answers, as pills; the chosen one stays dark. */
 function Choices({
@@ -39,7 +39,7 @@ function Choices({
               aria-pressed={on}
               data-autofocus={autoFocus && i === 0 ? "" : undefined}
               onClick={() => onChoose(option.value)}
-              className={`${CHOICE} ${on ? CHOICE_ON : ""}`}
+              className={CHOICE}
             >
               {option.label}
             </button>

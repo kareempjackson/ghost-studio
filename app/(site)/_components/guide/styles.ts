@@ -6,10 +6,13 @@
 /** A label over a group: the questions, the shortlist. */
 export const KICKER = "font-label text-[0.625rem] leading-none tracking-[0.06em] text-ink-500 uppercase";
 
-/** A choice. Sentence case, as the visitor would say it: these are answers, not buttons. */
+/**
+ * A choice. Sentence case, as the visitor would say it: these are answers, not buttons.
+ * The chosen one goes dark through aria-pressed: a variant, so it outranks the light
+ * fill and ink in the stylesheet rather than fighting them for the same rule.
+ */
 export const CHOICE =
-  "rounded-pill border border-ink-300 bg-white/60 px-3.5 py-2.5 text-left text-[0.875rem] leading-[1.15] tracking-[-0.01em] text-ink-950 transition-colors duration-200 hover:border-ink-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-950";
-export const CHOICE_ON = "border-ink-950 bg-ink-950 text-white hover:border-ink-950";
+  "rounded-pill border border-ink-300 bg-white/60 px-3.5 py-2.5 text-left text-[0.875rem] leading-[1.15] tracking-[-0.01em] text-ink-950 transition-colors duration-200 hover:border-ink-950 aria-pressed:border-ink-950 aria-pressed:bg-ink-950 aria-pressed:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-950";
 
 /** A quiet way on, set as a link: skip, start again, back. */
 export const QUIET =
