@@ -20,7 +20,8 @@
     "migrate:family": "tsx --env-file=.env.local sanity/migrate/family-archives.ts",
     "migrate:guide": "tsx --env-file=.env.local sanity/migrate/guide.ts",
     "migrate:seo": "tsx --env-file=.env.local sanity/migrate/seo.ts",
-    "migrate:tracking": "tsx --env-file=.env.local sanity/migrate/tracking.ts"
+    "migrate:tracking": "tsx --env-file=.env.local sanity/migrate/tracking.ts",
+    "migrate:moments": "tsx --env-file=.env.local sanity/migrate/moments.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

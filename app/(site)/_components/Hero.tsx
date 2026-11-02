@@ -15,7 +15,7 @@ import {
   wordmarkSplitCss,
 } from "@/lib/brand";
 import { sanityImage } from "@/lib/sanity-image";
-import type { HomePage } from "@/sanity/types";
+import type { HomePage, Moments } from "@/sanity/types";
 import { CursorPlay } from "./CursorPlay";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 import { Claim } from "./Claim";
@@ -145,9 +145,12 @@ function stages(m: Metrics): { start: Rect; full: Rect; plate: Rect } {
 export function Hero({
   hero,
   claim,
+  moments,
 }: {
   hero: HomePage["hero"];
   claim: HomePage["claim"];
+  /** What may take the motto's place for this visitor (Motto.tsx). */
+  moments: Moments;
 }) {
   const trackRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -379,7 +382,7 @@ export function Hero({
           className="px-5 pb-[6svh] sm:px-8 lg:px-12"
         >
           <div className="gs-hero-claim">
-            <Claim claim={claim} headingId="hero-heading" />
+            <Claim claim={claim} moments={moments} headingId="hero-heading" />
           </div>
         </motion.div>
       </div>

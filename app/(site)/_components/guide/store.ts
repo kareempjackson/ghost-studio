@@ -2,16 +2,20 @@
 
 import { useSyncExternalStore } from "react";
 import {
+  MAX_EARLIER_READS,
   MAX_TURNS,
   type GuideBrief,
   type GuideContext,
   type GuideError,
   type GuideEvent,
   type GuidePick,
+  type Returning,
   type SealedTurn,
 } from "@/lib/guide/protocol";
 import { OTHER, UNSURE, shortlist, type Profile, type Shortlist } from "@/lib/guide/shortlist";
+import { insightHref, projectHref } from "@/lib/links";
 import { track } from "@/lib/track";
+import { readVisitor, type Read } from "@/lib/visitor";
 import type { GuideCatalogue } from "@/sanity/types";
 import { loadGuide } from "./actions";
 
@@ -161,6 +165,23 @@ export function shortlistFor(catalogue: GuideCatalogue, current: GuideState): Sh
 
 const id = () => Math.random().toString(36).slice(2, 10);
 
+/**
+ * For someone who has been before, what the guide is told of it: how often,
+ * when last, and the case studies and insights read on earlier visits
+ * (lib/visitor.ts). Nothing on a first visit.
+ */
+function returning(): Returning | undefined {
+  const visitor = readVisitor();
+  if (!visitor || visitor.visits < 2) return undefined;
+  const before = (reads: readonly Read[], href: (slug: string) => string) =>
+    reads.filter((one) => one.at < visitor.current).map((one) => ({ path: href(one.slug), at: one.at }));
+  const read = [...before(visitor.read.work, projectHref), ...before(visitor.read.insights, insightHref)]
+    .sort((a, b) => b.at.localeCompare(a.at))
+    .slice(0, MAX_EARLIER_READS)
+    .map((one) => one.path);
+  return { visits: visitor.visits, since: visitor.previous, read };
+}
+
 export const guide = {
   opened() {
     set((current) => (current.openedAt ? {} : { openedAt: Date.now() }));
@@ -203,7 +224,7 @@ export const guide = {
     if (!text || state.thread.some((said) => said.writing) || state.turns.length >= MAX_TURNS) return;
 
     const answer = id();
-    const context: GuideContext = { path, visited: state.visited, profile: state.profile, shown };
+    const context: GuideContext = { path, visited: state.visited, profile: state.profile, shown, returning: returning() };
     const turns = state.turns;
     /* A question typed before the two are answered passes over them. */
     set((current) => ({

@@ -6,6 +6,7 @@
 
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { families } from "../../../lib/links";
+import { REGIONS } from "../../../lib/region";
 import {
   action,
   colour,
@@ -175,6 +176,26 @@ export const project = defineType({
     text("scope", { description: "What the studio did, in three words or fewer.", group: "card" }),
     text("tagline", { description: "The job in one line.", group: "card" }),
     text("location", { group: "card" }),
+    defineField({
+      name: "region",
+      type: "string",
+      group: "card",
+      options: { list: REGIONS.map(({ title, value }) => ({ title, value })) },
+      description: "The part of the world the work was for. The home page puts it first for visitors from there.",
+    }),
+    defineField({
+      name: "countries",
+      type: "array",
+      group: "card",
+      of: [defineArrayMember({ type: "string" })],
+      options: { layout: "tags" },
+      description:
+        "Optional. The countries it was for, as two-letter codes: JM, TT, US. Visitors from exactly there see it before the rest of the region.",
+      validation: (r) =>
+        r.custom((codes?: string[]) =>
+          (codes ?? []).every((code) => /^[A-Z]{2}$/.test(code)) ? true : "Two capital letters each, e.g. JM.",
+        ),
+    }),
     text("sector", { group: "card" }),
     defineField({
       name: "disciplines",

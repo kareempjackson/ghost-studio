@@ -25,6 +25,13 @@ const NOT_COPY = new Set([
   "image",
   "portrait",
   "email",
+  /* The home page's moments: their conditions, and the dates and kinds of
+     what is new, are read, not shown. Their lines are copy. */
+  "when",
+  "publishedAt",
+  "studioTimeZone",
+  "region",
+  "countries",
 ]);
 
 export const client = createClient({

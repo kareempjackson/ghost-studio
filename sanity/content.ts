@@ -98,7 +98,8 @@ const DISCIPLINES = `array::compact([
    (`[defined(@->slug.current)]`), so a page never renders a null. */
 const PROJECT = `{
   "slug": slug.current,
-  name, scope, tagline, location, sector,
+  name, scope, tagline, location, sector, region, countries,
+  "addedAt": _createdAt,
   "disciplines": ${DISCIPLINES},
   ground,
   "image": ${url("image")},
@@ -215,7 +216,7 @@ export const getSettings = () =>
       title, description, googleSiteVerification, bingSiteVerification,
       gaMeasurementId, posthogKey, posthogRegion, sessionReplays,
       linkedinPartnerId, linkedinConversions{enquiry, newsletter, booking, deck}, metaPixelId, consentScope,
-      email, social[]{id, label, href}, headerAction${link},
+      email, studioTimeZone, social[]{id, label, href}, headerAction${link},
       bookingUrl, "deck": credentialsDeck.asset->{url, originalFilename},
       "cookieBanner": select(defined(cookieBanner) => cookieBanner{message, link${link}, accept, decline, settings})
     }`,
@@ -270,7 +271,10 @@ export async function getFooter(): Promise<Footer> {
   const footer = await single<Footer>(
     "footer",
     `{
-      contactBand{eyebrow, heading, action${link}},
+      contactBand{
+        eyebrow, heading, action${link},
+        "returning": select(count(returning.heading) > 0 => returning{after, eyebrow, heading})
+      },
       explore{label, links[]${link}},
       newsletter{heading, placeholder, inputLabel, action, note{before, link${link}, after}, done, invalid, failed},
       legal[]${link},
@@ -355,7 +359,7 @@ export const getHomePage = () =>
         eyebrow, heading,
         "featured": featured{
           label, action,
-          ...article->{"slug": slug.current, "category": ${TOPIC}, title, "summary": excerpt},
+          ...article->{"slug": slug.current, "category": ${TOPIC}, title, "summary": excerpt, "at": publishedAt},
           "image": {
             "src": coalesce(${url("image")}, ${url("article->cover.image")}),
             "video": coalesce(${vid("image")}, ${vid("article->cover.image")}),
@@ -363,9 +367,22 @@ export const getHomePage = () =>
           }
         },
         "entries": entries[defined(@->slug.current)]->{
-          "slug": slug.current, "category": ${TOPIC}, title, excerpt,
+          "slug": slug.current, "category": ${TOPIC}, title, excerpt, "at": publishedAt,
           "cover": {"src": ${url("cover.image")}, "alt": coalesce(cover.image.alt, ""), "video": ${vid("cover.image")}, "ground": coalesce(cover.ground, "#e7e6e1")}
         }
+      },
+      "moments": {
+        "greetings": moments.greetings{morning, afternoon, evening, night},
+        "newLabel": moments.newLabel,
+        "items": coalesce(moments.items[count(lines) > 0]{
+          "key": _key, title, "when": coalesce(when, {}), lines,
+          "leadWith": coalesce(leadWith[defined(@->slug.current)]->${PROJECT}, [])
+        }, []),
+        "work": selectedWork.projects[defined(@->slug.current)]->{"slug": slug.current, region, countries},
+        "recent": *[_type in ["project", "article"] && defined(slug.current)]
+          | order(coalesce(publishedAt, _createdAt) desc)[0...20]{
+            "kind": _type, "slug": slug.current, "at": coalesce(publishedAt, _createdAt)
+          }
       }
     }`,
     ["project", "article", "insightTopic"],

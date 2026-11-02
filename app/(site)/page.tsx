@@ -77,6 +77,10 @@ export default async function Home() {
   };
   preload(reel.poster, { as: "image" });
 
+  /* What may take the motto's place for the visitor reading it, and the
+     studio's clock some of it is told by. See lib/moments.ts. */
+  const moments = { ...home.moments, studioTimeZone: settings.studioTimeZone };
+
   /* Who the site belongs to, for search engines: the studio, its address,
      its mark and where else it is. */
   const name = stegaClean(settings.title);
@@ -113,8 +117,8 @@ export default async function Home() {
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">
-        <Hero hero={home.hero} claim={home.claim} />
-        <SelectedWork selectedWork={home.selectedWork} claim={home.claim} />
+        <Hero hero={home.hero} claim={home.claim} moments={moments} />
+        <SelectedWork selectedWork={home.selectedWork} claim={home.claim} moments={moments} />
         <ExploreWork hero={home.hero} workAction={home.selectedWork.action} />
         <PointOfView pointOfView={pointOfView} />
         <Methodology
@@ -129,7 +133,7 @@ export default async function Home() {
           testimonials={testimonials}
           action={pointOfView.action}
         />
-        <Journal journal={home.journal} />
+        <Journal journal={home.journal} newLabel={home.moments.newLabel} />
       </main>
       {/* The close sits over the footer, not inside the page, so its rounded
           corners open onto the footer beneath it. */}

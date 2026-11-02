@@ -8,7 +8,9 @@
  * page opened, the credentials deck downloaded. And the site guide's own:
  * that the panel was opened, what its two questions were answered, which
  * pages it sent people to, that a question was asked and that a brief was
- * sent. Counts and pages only: nothing anyone types is ever sent.
+ * sent. And which of the home page's moments a visitor was shown, by its
+ * title (lib/moments.ts). Counts and pages only: nothing anyone types is
+ * ever sent.
  *
  * Quiet wherever no tool is loaded, which is everywhere but a production
  * build with their IDs set. An event from before PostHog or the pixels have
@@ -33,7 +35,8 @@ export type EventName =
   | "guide_card_click"
   | "guide_brief_sent"
   | "showreel_started"
-  | "insight_shared";
+  | "insight_shared"
+  | "moment_shown";
 
 /** Held until PostHog starts, if it is going to. */
 const held: [EventName, Params][] = [];

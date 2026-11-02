@@ -12,8 +12,11 @@
  * A cookie that only records the choice is strictly necessary, so it needs
  * no consent of its own. Google's tag reads it before it starts
  * (lib/analytics.ts); PostHog, the ad pixels, the attribution record and the
- * banner follow this store.
+ * banner follow this store, and so does the note of a visitor's visits
+ * (lib/visitor.ts).
  */
+
+import { whereFrom } from "./region";
 
 export type Choice = "granted" | "denied";
 
@@ -62,11 +65,8 @@ export const consent = {
       const choice = stored();
       if (choice) return set({ choice });
       if (askEveryone) return set({ required: true });
-      const required = await fetch("/api/region")
-        .then((response) => response.json() as Promise<{ consentRequired?: boolean }>)
-        .then((body) => body.consentRequired !== false)
-        .catch(() => true);
-      set({ required });
+      const { consentRequired } = await whereFrom();
+      set({ required: consentRequired });
     })();
     return resolving;
   },

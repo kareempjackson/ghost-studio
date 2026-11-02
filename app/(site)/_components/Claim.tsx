@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
-import type { HomePage } from "@/sanity/types";
+import type { HomePage, Moments } from "@/sanity/types";
+import { Motto } from "./Motto";
 import { Type } from "./Type";
 
 /**
@@ -23,14 +24,20 @@ const CLAIM_STYLE: CSSProperties = {
  * Set twice on the home page — under the reel, and again at the head of the
  * work that slides over it. Only the first is the page's heading; the repeat
  * is hidden from assistive tech so the line is not read out twice.
+ *
+ * The motto may give way to a line for the visitor reading it (Motto.tsx);
+ * both instances show the same one.
  */
 export function Claim({
   claim,
+  moments,
   headingId,
   repeat = false,
 }: {
   /** The sentence and its motto, from the home page. */
   claim: HomePage["claim"];
+  /** The home page's moments, which may take the motto's place. */
+  moments?: Moments;
   /** Set on the instance that is the page's h1. */
   headingId?: string;
   /** A visual repeat: rendered as plain text and hidden from assistive tech. */
@@ -56,11 +63,7 @@ export function Claim({
       </Type>
 
       <p className="shrink-0 font-label text-[0.8125rem] leading-[1.6] tracking-[0.04em] text-primary uppercase sm:text-[0.9375rem] lg:pb-[0.35em] lg:text-right">
-        {claim.motto.map((line) => (
-          <span key={line} className="block">
-            {line}
-          </span>
-        ))}
+        <Motto motto={claim.motto} moments={moments} repeat={repeat} />
       </p>
     </div>
   );

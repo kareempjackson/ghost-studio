@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { insightHref } from "@/lib/links";
 import type { JournalSection } from "@/sanity/types";
 import { ArrowPill } from "./ArrowPill";
+import { NewMark } from "./NewMark";
 import { Visual } from "./Visual";
 import { Rich } from "./Rich";
 
@@ -36,8 +37,18 @@ const ENTRY_STYLE: CSSProperties = {
  * process cards, so it reads as part of the same system. The two under it
  * are the same idea at a smaller size: a picture with the way in on its
  * corner, and the words beside it.
+ *
+ * A piece published since a returning visitor was last here, and not yet
+ * read, carries the New mark (NewMark.tsx).
  */
-export function Journal({ journal }: { journal: JournalSection }) {
+export function Journal({
+  journal,
+  newLabel = null,
+}: {
+  journal: JournalSection;
+  /** The words of the New mark; no mark without them. */
+  newLabel?: string | null;
+}) {
   const { featured } = journal;
 
   return (
@@ -79,6 +90,13 @@ export function Journal({ journal }: { journal: JournalSection }) {
             <span className="font-label text-[0.625rem] leading-none tracking-[0.04em] text-ink-500 uppercase">
               {featured.label}
             </span>
+            <NewMark
+              label={newLabel}
+              kind="article"
+              slug={featured.slug}
+              at={featured.at}
+              className="rounded-pill bg-signal-500 px-2.5 py-1.5 font-label text-[0.625rem] leading-none tracking-[0.04em] text-ink-950 uppercase"
+            />
           </div>
           <h3 className="mt-7 lg:mt-9" style={FEATURED_STYLE}>
             {featured.title.map((line) => (
@@ -149,8 +167,15 @@ export function Journal({ journal }: { journal: JournalSection }) {
                   square's foot, two or three; longer ones end in an ellipsis. */}
               <div className="relative self-stretch">
                 <div className="absolute inset-0 flex flex-col overflow-hidden pt-1">
-                  <p className="font-label text-[0.5625rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
+                  <p className="flex items-center gap-2 font-label text-[0.5625rem] leading-none tracking-[0.06em] text-ink-500 uppercase">
                     {entry.category}
+                    <NewMark
+                      label={newLabel}
+                      kind="article"
+                      slug={entry.slug}
+                      at={entry.at}
+                      className="rounded-pill bg-signal-500 px-1.5 py-1 text-ink-950"
+                    />
                   </p>
                   <h3
                     className="mt-3 line-clamp-2 text-ink-950 transition-colors duration-200 group-hover:text-accent lg:mt-4"

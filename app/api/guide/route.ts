@@ -14,6 +14,7 @@ import { getGrounding, type Grounding } from "@/lib/guide/corpus";
 import { canAsk, siteMay, visitorMay } from "@/lib/guide/limit";
 import { GUIDE_PROMPT, MAX_PICKS } from "@/lib/guide/prompt";
 import {
+  MAX_EARLIER_READS,
   MAX_QUESTION,
   MAX_TURNS,
   type GuideBrief,
@@ -91,12 +92,23 @@ function contextNote(context: GuideContext, grounding: Grounding) {
   const shown = paths(context?.shown, 24);
   const read = paths(context?.visited, 12);
 
+  /* Someone who has been before: how often, when last, and what they read then. */
+  const back = context?.returning;
+  const visits = typeof back?.visits === "number" && back.visits > 1 ? Math.min(Math.floor(back.visits), 999) : 0;
+  const since =
+    visits && typeof back?.since === "string" && !Number.isNaN(Date.parse(back.since))
+      ? new Date(back.since).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
+      : "";
+  const earlier = visits ? (Array.isArray(back?.read) ? back.read : []).filter(known).slice(0, MAX_EARLIER_READS).map(name).join(", ") : "";
+
   return [
     here,
     audience && `Who the work is for: ${audience}.`,
     need && `What they need: ${need}.`,
     shown && `Already shown to them: ${shown}.`,
     read && `Read in this tab: ${read}.`,
+    visits > 0 && `They have been to the site ${visits} times${since ? `, last before this visit on ${since}` : ""}.`,
+    earlier && `Read on earlier visits: ${earlier}.`,
   ]
     .filter(Boolean)
     .join("\n");

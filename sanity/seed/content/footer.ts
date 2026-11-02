@@ -24,10 +24,18 @@ export const social = [
   },
 ] as const;
 
+/** What the band says instead from a visitor's third visit (Footer › Contact band › For returning visitors). */
+export const returningBand = {
+  after: 3,
+  eyebrow: "Good to see you again",
+  heading: ["You know the work.", "Tell us about yours."],
+} as const;
+
 export const contactBand = {
   eyebrow: "Your next chapter starts here",
   heading: ["Have a good", "feeling about this?"],
   action: { label: "Let’s talk", href: "/contact" },
+  returning: returningBand,
 } as const;
 
 export const footer = {

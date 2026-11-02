@@ -38,6 +38,7 @@ import { approachPage, phases as approachPhases } from "./content/approach";
 import { buildPage } from "./content/build";
 import { contact } from "./content/contact";
 import { engagePage } from "./content/engage";
+import { greetings, moments, newLabel, studioTimeZone } from "./content/moments";
 import { engagement } from "./content/engagement";
 import { ghostUPage, givesPage, labsPage, type FamilyPageData } from "./content/family-pages";
 import { stories } from "./content/family-stories";
@@ -148,6 +149,7 @@ async function documents() {
     description:
       "We build public-facing digital systems for institutions that cannot afford to get them wrong.",
     email,
+    studioTimeZone,
     social,
     headerAction: { label: "Let’s talk", href: "/contact" },
   });
@@ -226,6 +228,7 @@ async function documents() {
       showreelMark: "Ghostsavvy / Showreel",
     },
     claim: { cover: positioning.cover, motto: positioning.motto },
+    moments: { greetings, newLabel, items: moments },
     methodology: { heading: "Methodology", difference: positioning.difference },
     selectedWork: {
       tag: selectedWork.tag,

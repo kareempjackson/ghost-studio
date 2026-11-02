@@ -18,8 +18,185 @@ import {
   socialImage,
   text,
 } from "../fields";
+import { isToken, LINE_MAX, tokensIn, TOKENS } from "../../../lib/moments";
+import { REGIONS } from "../../../lib/region";
 
 const single = (title: string) => ({ prepare: () => ({ title }) });
+
+/* ---- Moments: what the home page says to the visitor reading it ------------ */
+
+const TIMES = [
+  { title: "Morning, 5 am to noon", value: "morning" },
+  { title: "Afternoon, noon to 5 pm", value: "afternoon" },
+  { title: "Evening, 5 pm to 10 pm", value: "evening" },
+  { title: "Night, 10 pm to 5 am", value: "night" },
+];
+
+const words = (name: string, title: string, description: string) =>
+  defineField({
+    name,
+    title,
+    type: "array",
+    of: [defineArrayMember({ type: "string" })],
+    options: { layout: "tags" },
+    description,
+  });
+
+const choice = (name: string, title: string, list: { title: string; value: string }[], description: string) =>
+  defineField({
+    name,
+    title,
+    type: "string",
+    options: { list, layout: "radio", direction: "horizontal" },
+    description,
+  });
+
+/** The longest a greeting in the document runs, for measuring a line with {greeting} in it. */
+const longestGreeting = (document: unknown) =>
+  Object.values((document as { moments?: { greetings?: Record<string, unknown> } })?.moments?.greetings ?? {})
+    .filter((value): value is string => typeof value === "string")
+    .reduce((longest, value) => (value.length > longest.length ? value : longest), TOKENS.greeting as string);
+
+const momentLines = defineField({
+  name: "lines",
+  type: "array",
+  of: [defineArrayMember({ type: "string" })],
+  description:
+    "One or two lines, set where the motto is. Words in braces are filled in: {greeting} (Good evening, by their clock, as set above), {studioTime} (the studio's time, e.g. 9:40 pm), {lastVisit} (the day they were last here, e.g. 14 October), {new} (what has gone up since, e.g. two projects and one insight) and {region} (where they are, e.g. the Caribbean). A moment whose words can't all be filled in for a visitor is skipped.",
+  validation: (r) => [
+    r.required().min(1).max(2),
+    r.custom((lines?: string[]) => {
+      const unknown = [...new Set((lines ?? []).flatMap(tokensIn).filter((name) => !isToken(name)))];
+      return unknown.length ? `Not a word that can be filled in: ${unknown.map((name) => `{${name}}`).join(", ")}.` : true;
+    }),
+    r
+      .custom((lines: string[] | undefined, context) => {
+        const greeting = longestGreeting(context.document);
+        const long = (lines ?? []).find(
+          (line) =>
+            line.replace(/\{(\w+)\}/g, (whole, name: string) =>
+              name === "greeting" ? greeting : isToken(name) ? TOKENS[name] : whole,
+            ).length > LINE_MAX,
+        );
+        return long ? `“${long}” can run past ${LINE_MAX} characters once filled in: wider than the motto.` : true;
+      })
+      .warning(),
+  ],
+});
+
+const moments = object(
+  "moments",
+  [
+    object(
+      "greetings",
+      [
+        text("morning", { required: false, description: "5 am to noon." }),
+        text("afternoon", { required: false, description: "Noon to 5 pm." }),
+        text("evening", { required: false, description: "5 pm to 10 pm." }),
+        text("night", {
+          required: false,
+          description: "10 pm to 5 am. “Good evening” reads better than “Good night”, which is a goodbye.",
+        }),
+      ],
+      { description: "What {greeting} says, by the visitor's own clock." },
+    ),
+    text("newLabel", {
+      required: false,
+      title: "New mark",
+      description:
+        "The mark on a case study or an insight that has gone up since a returning visitor was last here, and they haven't read. No mark if empty.",
+    }),
+    list(
+      "items",
+      [
+        text("title", { description: "What the moment is for: for you, and for the analytics. Not shown on the site." }),
+        object(
+          "when",
+          [
+            defineField({
+              name: "times",
+              title: "Time of day",
+              type: "array",
+              of: [defineArrayMember({ type: "string" })],
+              options: { list: TIMES },
+              description: "By their own clock. None ticked: any time.",
+            }),
+            choice("days", "Days", [{ title: "Weekends", value: "weekend" }, { title: "Weekdays", value: "weekday" }], "Empty: any day."),
+            choice(
+              "visit",
+              "Visit",
+              [{ title: "First visit", value: "first" }, { title: "Returning", value: "returning" }],
+              "A new visit begins after half an hour away. Empty: either.",
+            ),
+            num("away", {
+              required: false,
+              title: "Away for at least (days)",
+              description: "Days since they were last here. Returning visitors only.",
+            }),
+            num("visits", { required: false, title: "Visits, at least", description: "This one included." }),
+            defineField({
+              name: "fresh",
+              title: "Something is new",
+              type: "boolean",
+              description: "Only when a case study or an insight has gone up since they were last here, and they haven't read it.",
+            }),
+            words(
+              "campaigns",
+              "Campaigns",
+              "The utm_campaign on the link they came in on, any of these: health, for a link ending ?utm_campaign=health. For a link you send a prospect.",
+            ),
+            words(
+              "sources",
+              "Came from",
+              "A word in the link's utm_source, or in the address of the site that sent them, any of these: linkedin.",
+            ),
+            defineField({
+              name: "regions",
+              title: "Where they are",
+              type: "array",
+              of: [defineArrayMember({ type: "string" })],
+              options: { list: REGIONS.map(({ title, value }) => ({ title, value })) },
+              description: "From the country their connection is in; never closer than that. None ticked: anywhere.",
+            }),
+            defineField({
+              name: "local",
+              title: "Work from where they are",
+              type: "boolean",
+              description:
+                "Only when Selected work has a project from their country or region (Project › Region), which it then shows first.",
+            }),
+            defineField({
+              name: "gap",
+              title: "Hours apart",
+              type: "boolean",
+              description: "Only when their clock is two hours or more from the studio's (Site settings › Studio time zone).",
+            }),
+          ],
+          { description: "Every condition that is set must hold. With none set, the moment always holds." },
+        ),
+        momentLines,
+        defineField({
+          name: "leadWith",
+          title: "Lead with",
+          type: "array",
+          of: [defineArrayMember({ type: "reference", to: [{ type: "project" }] })],
+          description:
+            "Optional. Projects Selected work shows first while this moment is said, in this order, taking the places of the last in the selection. For a link you send a prospect.",
+        }),
+      ],
+      {
+        title: "In order",
+        description: "Tried from the top: the first whose conditions all hold, and whose words can all be filled in, is said. Drag to reorder.",
+        preview: { select: { title: "title", subtitle: "lines.0" } },
+      },
+    ),
+  ],
+  {
+    description:
+      "What the home page says in the motto's place to a visitor it knows something about: their time of day, that they're back and what is new since, the link they came in on, where they are. Worked out in their browser; nothing about them is stored here. With nothing to say, the motto stays.",
+    collapsed: true,
+  },
+);
 
 export const homePage = defineType({
   name: "homePage",
@@ -85,6 +262,7 @@ export const homePage = defineType({
         of: [defineArrayMember({ type: "reference", to: [{ type: "article" }] })],
       }),
     ]),
+    moments,
   ],
   preview: single("Home page"),
 });

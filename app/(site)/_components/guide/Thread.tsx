@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { MAX_QUESTION, MAX_TURNS, type GuideError } from "@/lib/guide/protocol";
 import type { Chat, StarterPlace } from "@/sanity/types";
+import { useVisitor } from "../moment";
 import { GuideCards } from "./Cards";
 import { guide, type GuideState, type Said } from "./store";
 import { ARROW, CHOICE, KICKER } from "./styles";
@@ -18,10 +19,16 @@ function placeOf(path: string): StarterPlace {
   return "any";
 }
 
-/** The questions offered as chips: this kind of page's, or any page's. */
-export function startersFor(chat: Chat, path: string) {
+/**
+ * The questions offered as chips: this kind of page's, or any page's. On the
+ * home page, someone back who has read a case study or an insight before is
+ * offered the returning set, where there is one.
+ */
+export function startersFor(chat: Chat, path: string, returning = false) {
   const place = placeOf(path);
-  const own = chat.starters.find((set) => set.where === place);
+  const own =
+    (place === "home" && returning ? chat.starters.find((set) => set.where === "returning") : undefined) ??
+    chat.starters.find((set) => set.where === place);
   const any = chat.starters.find((set) => set.where === "any");
   return (own ?? any)?.prompts.slice(0, 3) ?? [];
 }
@@ -106,7 +113,13 @@ export function Thread({
     end.current?.scrollIntoView({ block: "nearest" });
   }, [state.thread.length, last?.text.length, last?.picks.length]);
 
-  const starters = canAsk && state.thread.length === 0 ? startersFor(chat, path) : [];
+  const visitor = useVisitor();
+  const readBefore = Boolean(
+    visitor &&
+      visitor.visits > 1 &&
+      [...visitor.read.work, ...visitor.read.insights].some((one) => one.at < visitor.current),
+  );
+  const starters = canAsk && state.thread.length === 0 ? startersFor(chat, path, readBefore) : [];
 
   return (
     <div>

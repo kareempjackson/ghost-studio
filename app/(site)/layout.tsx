@@ -13,6 +13,7 @@ import { SanityLive } from "@/sanity/lib/live";
 import { ChromeProvider } from "./_components/ChromeProvider";
 import { CookieBanner } from "./_components/CookieBanner";
 import { Tracking } from "./_components/Tracking";
+import { VisitorMemory } from "./_components/VisitorMemory";
 import { PageTransition } from "./_components/PageTransition";
 import "./globals.css";
 
@@ -90,6 +91,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               lib/consent.ts. */}
           <Tracking trackers={tracking.browser} />
           {tracking.on && <CookieBanner />}
+          {/* The visitor's visits, for what the home page says to them.
+              See lib/visitor.ts. */}
+          <VisitorMemory />
         </ChromeProvider>
         <PageTransition />
         <Suspense>

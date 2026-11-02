@@ -10,6 +10,7 @@ import {
   href,
   lines,
   list,
+  num,
   object,
   para,
   plain,
@@ -87,6 +88,25 @@ export const siteSettings = defineType({
       group: "site",
       description: "The studio's address: the contact page, the footer, the chat and the forms all use it.",
       validation: (r) => r.required().email(),
+    }),
+    defineField({
+      name: "studioTimeZone",
+      type: "string",
+      title: "Studio time zone",
+      group: "site",
+      description:
+        "Where the studio's clock is, as a time zone name such as America/New_York: the time {studioTime} gives in the home page's moments, and what “Hours apart” is measured from. America/New_York if empty, which keeps daylight saving.",
+      initialValue: "America/New_York",
+      validation: (r) =>
+        r.custom((zone?: string) => {
+          if (!zone) return true;
+          try {
+            new Intl.DateTimeFormat("en-GB", { timeZone: zone });
+            return true;
+          } catch {
+            return "Not a time zone. Use a name like America/New_York or America/Jamaica.";
+          }
+        }),
     }),
     list(
       "social",
@@ -332,10 +352,36 @@ export const footer = defineType({
   title: "Footer",
   type: "document",
   fields: [
-    object("contactBand", [text("eyebrow"), lines("heading"), action()], {
-      title: "Contact band",
-      description: "The orange band at the foot of most pages.",
-    }),
+    object(
+      "contactBand",
+      [
+        text("eyebrow"),
+        lines("heading"),
+        action(),
+        object(
+          "returning",
+          [
+            num("after", {
+              required: false,
+              title: "From visit",
+              description: "The visit it is shown from, this one counted: 3 is someone on their third visit. 3 if empty.",
+            }),
+            text("eyebrow", { required: false, description: "The eyebrow above is kept if empty." }),
+            lines("heading", { required: false, description: "One entry per line, as the design breaks it. Off if empty." }),
+          ],
+          {
+            title: "For returning visitors",
+            description:
+              "What the band says instead to someone who keeps coming back, counted in their browser (the home page's moments count the same visits). The action stays the same.",
+            collapsed: true,
+          },
+        ),
+      ],
+      {
+        title: "Contact band",
+        description: "The orange band at the foot of most pages.",
+      },
+    ),
     object("explore", [
       text("label"),
       list("links", link, { preview: { select: { title: "label", subtitle: "href" } } }),
@@ -378,6 +424,7 @@ const field = (name: string) => object(name, [text("label"), text("placeholder")
 export const STARTER_PLACES = [
   { title: "Any page", value: "any" },
   { title: "Home", value: "home" },
+  { title: "Home, for someone back who has read our work", value: "returning" },
   { title: "A case study", value: "work" },
   { title: "An insight", value: "insights" },
   { title: "Services and the tracks", value: "services" },

@@ -67,6 +67,8 @@ export interface SiteSettings {
   /** Who is asked before tracking cookies are set: the EEA, UK and Switzerland if unset. */
   readonly consentScope: "regions" | "everyone" | null;
   readonly email: string;
+  /** The studio's clock, as an IANA time zone, for {studioTime} on the home page; America/New_York if unset. */
+  readonly studioTimeZone: string | null;
   readonly social: readonly { readonly id: string; readonly label: string; readonly href: string }[];
   readonly headerAction: Link;
   /** Where /book sends people: the studio's booking page. */
@@ -115,7 +117,17 @@ export interface Navigation {
 }
 
 export interface Footer {
-  readonly contactBand: { readonly eyebrow: string; readonly heading: Lines; readonly action: Link };
+  readonly contactBand: {
+    readonly eyebrow: string;
+    readonly heading: Lines;
+    readonly action: Link;
+    /** What it says instead from a visitor's nth visit; null when there is nothing else to say. */
+    readonly returning?: {
+      readonly after: number | null;
+      readonly eyebrow: string | null;
+      readonly heading: Lines;
+    } | null;
+  };
   readonly explore: { readonly label: string; readonly links: readonly Link[] };
   readonly newsletter: {
     readonly heading: string;
@@ -141,7 +153,7 @@ export interface NewsletterCopy {
 }
 
 /** The kinds of page the guide offers its own questions on (STARTER_PLACES in the schema). */
-export type StarterPlace = "any" | "home" | "work" | "insights" | "services" | "audiences" | "approach";
+export type StarterPlace = "any" | "home" | "returning" | "work" | "insights" | "services" | "audiences" | "approach";
 
 /** The site guide's words: the pill, the panel, the shortlist, the questions and the brief. */
 export interface Chat {
@@ -256,6 +268,11 @@ export interface Project {
   readonly tagline: string;
   readonly location: string;
   readonly sector: string;
+  /** The part of the world the work was for (lib/region.ts), and its countries as ISO codes. */
+  readonly region?: string | null;
+  readonly countries?: readonly string[] | null;
+  /** When it went up on the site: for what is new since a visit. */
+  readonly addedAt?: string;
   readonly disciplines: readonly Discipline[];
   readonly ground: string;
   /** Null until the picture is uploaded: a draft can exist without one. */
@@ -358,6 +375,8 @@ export interface JournalSection {
     readonly title: Lines;
     readonly summary: Rich;
     readonly action: string;
+    /** When it was published: for what is new since a visit. */
+    readonly at?: string | null;
     readonly image: { readonly src: string | null; readonly alt: string; readonly video: Film };
   };
   readonly entries: readonly {
@@ -366,6 +385,7 @@ export interface JournalSection {
     readonly title: Lines;
     readonly excerpt: Rich;
     readonly cover: { readonly src: string | null; readonly alt: string; readonly video: Film; readonly ground: string };
+    readonly at?: string | null;
   }[];
 }
 
@@ -387,6 +407,75 @@ export interface HomePage {
     readonly action: Link;
   };
   readonly journal: JournalSection;
+  readonly moments: HomeMoments;
+}
+
+/** A part of the day, by the visitor's own clock. */
+export type TimeOfDay = "morning" | "afternoon" | "evening" | "night";
+
+/** When a moment is said: every condition that is set must hold. */
+export interface MomentWhen {
+  readonly times?: readonly TimeOfDay[] | null;
+  readonly days?: "weekend" | "weekday" | null;
+  readonly visit?: "first" | "returning" | null;
+  /** At least this many days since they were last here. */
+  readonly away?: number | null;
+  /** At least this many visits, this one included. */
+  readonly visits?: number | null;
+  /** Only when something has been published since they were last here. */
+  readonly fresh?: boolean | null;
+  /** utm_campaign values, any of which will do. */
+  readonly campaigns?: readonly string[] | null;
+  /** Words in utm_source or the referring site's address, any of which will do. */
+  readonly sources?: readonly string[] | null;
+  /** The parts of the world they may be in (lib/region.ts). */
+  readonly regions?: readonly string[] | null;
+  /** Only when Selected work has a project from their country or region. */
+  readonly local?: boolean | null;
+  /** Only when their clock is two hours or more from the studio's. */
+  readonly gap?: boolean | null;
+}
+
+/** One thing the home page may say in the motto's place, and when. */
+export interface Moment {
+  readonly key: string;
+  readonly title: string;
+  readonly when: MomentWhen;
+  readonly lines: Lines;
+  /** Projects Selected work shows first while it is said. */
+  readonly leadWith: readonly Project[];
+}
+
+/** Where a project was for. */
+export interface Place {
+  readonly slug: string;
+  readonly region: string | null;
+  readonly countries: readonly string[] | null;
+}
+
+/** A case study or an insight, and when it went up: for what is new since a visit. */
+export interface Published {
+  readonly kind: "project" | "article";
+  readonly slug: string;
+  readonly at: string;
+}
+
+/** The home page's moments, in the order they are tried, and what they draw on. */
+export interface HomeMoments {
+  /** What {greeting} says at each part of the day. */
+  readonly greetings: Partial<Record<TimeOfDay, string | null>> | null;
+  /** The mark on what is new since a returning visitor was last here; none if null. */
+  readonly newLabel: string | null;
+  readonly items: readonly Moment[];
+  /** Where Selected work's projects were for, for "work from where they are". */
+  readonly work: readonly Place[];
+  /** The latest case studies and insights, newest first. */
+  readonly recent: readonly Published[];
+}
+
+/** The moments as the hero reads them: with the studio's clock, from Site settings. */
+export interface Moments extends HomeMoments {
+  readonly studioTimeZone: string | null;
 }
 
 export interface ViewCard {

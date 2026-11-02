@@ -68,6 +68,10 @@ export const guide = {
       ],
     },
     {
+      where: "returning",
+      prompts: ["What should I read next?", "Show me more like what I read last time", "Where should we start?"],
+    },
+    {
       where: "home",
       prompts: ["Where should we start?", "Who do you usually work with?", "How do you price the work?"],
     },

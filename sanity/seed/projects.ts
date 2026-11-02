@@ -18,6 +18,7 @@
  */
 
 import { createClient } from "next-sanity";
+import { placeOf } from "../lib/places";
 import { richify } from "../lib/rich";
 import { schemaTypes } from "../schemaTypes";
 import { caseStudies, projects } from "./content/work";
@@ -64,7 +65,7 @@ async function main() {
   for (const project of chosen) {
     /* The card, without the seed's poster: the picture is uploaded in the Studio. */
     const { slug, name, scope, tagline, location, sector, disciplines, ground } = project;
-    const card = { name, scope, tagline, location, sector, disciplines: disciplineRefs(disciplines), ground };
+    const card = { name, scope, tagline, location, ...placeOf(location), sector, disciplines: disciplineRefs(disciplines), ground };
     /* The disciplines it names, as documents, for any not made yet. */
     for (const title of disciplines) tx.createIfNotExists(disciplineDoc(title));
     const _id = `project-${slug}`;

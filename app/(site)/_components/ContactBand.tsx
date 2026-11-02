@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { useChrome } from "./ChromeProvider";
+import { useVisitor } from "./moment";
 import { SheetTrails } from "./SheetTrails";
 
 /** 44px at 390 to 80px at 1440, held there. */
@@ -19,12 +20,21 @@ const HEADING_STYLE: CSSProperties = {
  * rounded bottom corners open onto the footer rather than onto the page. It
  * is the sheet that slides up off the footer, and while it moves, colour
  * trails out from under its bottom edge.
+ *
+ * Someone who keeps coming back (lib/visitor.ts) may be told something else
+ * (Footer › Contact band › For returning visitors). It is decided once the
+ * page is up, long before the band at its foot is reached.
  */
 export function ContactBand() {
   const {
     settings: { email },
     footer: { contactBand },
   } = useChrome();
+  const visitor = useVisitor();
+  const { returning } = contactBand;
+  const back = Boolean(returning && visitor && visitor.visits >= (returning.after ?? 3));
+  const eyebrow = (back && returning?.eyebrow) || contactBand.eyebrow;
+  const heading = back && returning ? returning.heading : contactBand.heading;
 
   return (
     <div className="relative z-[1] isolate">
@@ -34,13 +44,13 @@ export function ContactBand() {
         className="relative rounded-b-[32px] bg-[#eb5b32] px-5 pt-14 pb-14 text-ink-950 sm:px-8 lg:px-12 lg:pt-16 lg:pb-16"
       >
         <p className="font-label text-[0.75rem] leading-none tracking-[0.06em] uppercase">
-          {contactBand.eyebrow}
+          {eyebrow}
         </p>
 
         <div className="mt-8 flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 id="contact-heading" style={HEADING_STYLE}>
-              {contactBand.heading.map((line) => (
+              {heading.map((line) => (
                 <span key={line} className="block">
                   {line}
                 </span>

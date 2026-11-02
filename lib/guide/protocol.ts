@@ -34,7 +34,22 @@ export interface GuideContext {
   readonly profile: Profile;
   /** The pages the shortlist and earlier answers have shown. */
   readonly shown: readonly string[];
+  /** For someone who has been before (lib/visitor.ts): how often, when last, and what they read then. */
+  readonly returning?: Returning;
 }
+
+/** A returning visitor, as the panel tells the guide. */
+export interface Returning {
+  /** Visits, this one counted. */
+  readonly visits: number;
+  /** When they were last here before this visit, as an ISO date. */
+  readonly since?: string;
+  /** The case studies and insights read on earlier visits, latest first, as paths. */
+  readonly read: readonly string[];
+}
+
+/** Pages read on earlier visits that the guide is told of, at most. */
+export const MAX_EARLIER_READS = 10;
 
 /** One question and its answer, as the API had them: JSON, and the server's seal over it. */
 export interface SealedTurn {
