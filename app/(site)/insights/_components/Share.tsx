@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { track } from "@/lib/track";
 import { SocialIcon } from "../../_components/SocialIcon";
 
 /** The same family as SocialIcon: outline, 2px, a rounded square around each. */
@@ -62,6 +63,7 @@ export function Share({ title, label = "Share" }: { title: string; label?: strin
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(url || window.location.href);
+      track("insight_shared", { method: "copy_link" });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -79,6 +81,7 @@ export function Share({ title, label = "Share" }: { title: string; label?: strin
         href={`https://www.linkedin.com/sharing/share-offsite/?url=${to}`}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => track("insight_shared", { method: "linkedin" })}
         className={BUTTON}
       >
         <SocialIcon id="linkedin" />
@@ -88,12 +91,17 @@ export function Share({ title, label = "Share" }: { title: string; label?: strin
         href={`https://x.com/intent/post?url=${to}&text=${text}`}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => track("insight_shared", { method: "x" })}
         className={BUTTON}
       >
         {X_MARK}
         <span className="sr-only">Share on X</span>
       </a>
-      <a href={`mailto:?subject=${text}&body=${to}`} className={BUTTON}>
+      <a
+        href={`mailto:?subject=${text}&body=${to}`}
+        onClick={() => track("insight_shared", { method: "email" })}
+        className={BUTTON}
+      >
         {MAIL}
         <span className="sr-only">Share by email</span>
       </a>

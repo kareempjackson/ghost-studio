@@ -31,7 +31,9 @@ export type EventName =
   | "guide_pick"
   | "guide_ask"
   | "guide_card_click"
-  | "guide_brief_sent";
+  | "guide_brief_sent"
+  | "showreel_started"
+  | "insight_shared";
 
 /** Held until PostHog starts, if it is going to. */
 const held: [EventName, Params][] = [];

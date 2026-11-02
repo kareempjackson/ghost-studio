@@ -1,5 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
+import { SeverityNumber } from "@opentelemetry/api-logs";
+import { after } from "next/server";
 import type {
   BetaContentBlock,
   BetaContentBlockParam,
@@ -7,6 +9,7 @@ import type {
   BetaTool,
   BetaToolUseBlock,
 } from "@anthropic-ai/sdk/resources/beta/messages";
+import { posthogLog, posthogLogProvider } from "@/instrumentation";
 import { getGrounding, type Grounding } from "@/lib/guide/corpus";
 import { GUIDE_PROMPT, MAX_PICKS } from "@/lib/guide/prompt";
 import {
@@ -240,6 +243,15 @@ function reason(error: unknown): GuideError {
   return "failed";
 }
 
+/** Emits only non-user guide-request outcomes to the dedicated PostHog logger. */
+function logGuideOutcome(
+  body: string,
+  severityNumber: SeverityNumber,
+  attributes: Record<string, string | number | boolean>,
+) {
+  posthogLog.emit({ body, severityNumber, attributes });
+}
+
 /**
  * The site guide's answers (app/(site)/_components/ChatPanel.tsx).
  *
@@ -274,8 +286,15 @@ export async function POST(request: Request) {
   if (turns.length >= MAX_TURNS) return refuse("limit", 400);
   if (!turns.every(sealed)) return refuse("failed", 400);
 
+  const startedAt = Date.now();
   const history: BetaMessageParam[] = turns.flatMap((turn) => JSON.parse(turn.raw) as BetaMessageParam[]);
   const grounding = await getGrounding();
+  logGuideOutcome("guide request accepted", SeverityNumber.INFO, {
+    event: "guide_request_accepted",
+    endpoint: "/api/guide",
+    method: "POST",
+    prior_turn_count: turns.length,
+  });
 
   /* A tool call is answered before the next question: the panel acted on it. */
   const last = history.at(-1);
@@ -325,6 +344,12 @@ export async function POST(request: Request) {
           console.info("[guide]", message.stop_reason, message.usage, message.input_transformations ?? []);
         }
         if (message.stop_reason === "refusal") {
+          logGuideOutcome("guide response declined", SeverityNumber.WARN, {
+            event: "guide_response_completed",
+            endpoint: "/api/guide",
+            outcome: "declined",
+            duration_ms: Date.now() - startedAt,
+          });
           send({ t: "error", v: "declined" });
           return;
         }
@@ -340,11 +365,27 @@ export async function POST(request: Request) {
         if (brief) send({ t: "brief", v: brief });
 
         const raw = JSON.stringify([...asked, { role: "assistant", content }]);
+        logGuideOutcome("guide response completed", SeverityNumber.INFO, {
+          event: "guide_response_completed",
+          endpoint: "/api/guide",
+          outcome: "completed",
+          duration_ms: Date.now() - startedAt,
+          tool_call_count: calls.length,
+          picks_shown: picks.length,
+          brief_offered: Boolean(brief),
+        });
         send({ t: "turn", v: { raw, seal: seal(raw) } });
         send({ t: "done" });
       } catch (error) {
+        const outcome = reason(error);
+        logGuideOutcome("guide response failed", SeverityNumber.ERROR, {
+          event: "guide_response_completed",
+          endpoint: "/api/guide",
+          outcome,
+          duration_ms: Date.now() - startedAt,
+        });
         console.error("[guide] the answer failed", error);
-        send({ t: "error", v: reason(error) });
+        send({ t: "error", v: outcome });
       } finally {
         controller.close();
       }
@@ -352,6 +393,10 @@ export async function POST(request: Request) {
     cancel() {
       stream.abort();
     },
+  });
+
+  after(async () => {
+    await posthogLogProvider.forceFlush();
   });
 
   return new Response(answer, {

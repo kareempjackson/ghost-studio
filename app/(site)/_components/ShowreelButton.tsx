@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { sanityImage } from "@/lib/sanity-image";
+import { track } from "@/lib/track";
 import { useNearScreen } from "./useNearScreen";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
@@ -76,7 +77,12 @@ export function ShowreelButton({
     } catch {
       /* Fullscreen refused: the controls and sound still stand on their own. */
     }
-    await el.play().catch(() => {});
+    try {
+      await el.play();
+      track("showreel_started");
+    } catch {
+      /* Playback was refused; the visitor can still use the video controls. */
+    }
   }
 
   return (

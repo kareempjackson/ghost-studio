@@ -2,10 +2,10 @@
  * Ghost Savvy Studios — tracking: Google Analytics, PostHog, and the
  * LinkedIn and Meta pixels.
  *
- * All of it is set in the Studio, under Site settings › Tracking: each tool
- * is on once its ID is given, and who is asked about cookies is chosen
- * there too. Only production builds carry them, so `next dev` stays out of
- * the reports.
+ * The public PostHog configuration can be supplied by environment variables;
+ * other tools are set in the Studio under Site settings › Tracking. Who is
+ * asked about cookies is chosen there too. Only production builds carry
+ * analytics, so `next dev` stays out of the reports.
  *
  * The Google tag (gtag.js) is set in <head> of every page by
  * app/(site)/layout.tsx. Moves inside the site don't reload the page, so only
@@ -53,6 +53,15 @@ const valid = (value: string | null | undefined, shape: RegExp) => {
   return shape.test(id) ? id : null;
 };
 
+/** The proxy's cloud route, derived from the configured PostHog host. */
+function posthogRegion(host: string | undefined): "us" | "eu" | null {
+  try {
+    return new URL(host ?? "").hostname.startsWith("eu.") ? "eu" : "us";
+  } catch {
+    return null;
+  }
+}
+
 /** The site's conversions LinkedIn can count, as Site settings names them. */
 export const LINKEDIN_CONVERSIONS = ["enquiry", "newsletter", "booking", "deck"] as const;
 export type LinkedinConversion = (typeof LINKEDIN_CONVERSIONS)[number];
@@ -70,20 +79,26 @@ export interface BrowserTrackers {
 }
 
 /**
- * The tools this build runs, from Site settings: the Google tag's ID (null
- * is off), what starts in the browser, and whether anything is on at all,
- * which is when the cookie banner and Cookie settings are shown.
+ * The tools this build runs: PostHog takes its public environment
+ * configuration when present, otherwise Site settings supplies it. The result
+ * also decides whether the cookie banner and Cookie settings are shown.
  */
 export function trackers(settings: SiteSettings) {
   const id = (value: string | null | undefined, shape: RegExp) => (loadsAnalytics ? valid(value, shape) : null);
   const ga = id(settings.gaMeasurementId, GA_ID);
-  const posthogKey = id(settings.posthogKey, POSTHOG_KEY);
+  const configuredPosthogKey = id(process.env.NEXT_PUBLIC_POSTHOG_KEY, POSTHOG_KEY);
+  const posthogKey = configuredPosthogKey ?? id(settings.posthogKey, POSTHOG_KEY);
+  const configuredPosthogRegion = posthogRegion(process.env.NEXT_PUBLIC_POSTHOG_HOST);
   const partnerId = id(settings.linkedinPartnerId, AD_ID);
   const browser: BrowserTrackers = {
     posthog: posthogKey
       ? {
           key: posthogKey,
-          region: stegaClean(settings.posthogRegion) === "eu" ? "eu" : "us",
+          region: configuredPosthogKey
+            ? configuredPosthogRegion ?? (stegaClean(settings.posthogRegion) === "eu" ? "eu" : "us")
+            : stegaClean(settings.posthogRegion) === "eu"
+              ? "eu"
+              : "us",
           replays: settings.sessionReplays !== false,
         }
       : null,

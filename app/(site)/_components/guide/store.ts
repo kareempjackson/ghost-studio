@@ -198,6 +198,7 @@ export const guide = {
 
   /** Asks the guide, and writes its answer into the thread as it arrives. */
   async ask(question: string, path: string, shown: readonly string[]) {
+    restore();
     const text = question.trim();
     if (!text || state.thread.some((said) => said.writing) || state.turns.length >= MAX_TURNS) return;
 
