@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, useTransition, type FormEvent } from "react";
+import { readAttribution } from "@/lib/attribution";
+import { track } from "@/lib/track";
 import { ArrowPill } from "./ArrowPill";
 import { useChrome } from "./ChromeProvider";
 import { subscribe } from "./subscribe";
@@ -54,11 +56,13 @@ export function NewsletterSignup() {
         website,
         startedAt: startedAt.current,
         page: window.location.pathname,
+        attribution: readAttribution(),
       }).catch(() => ({ ok: false as const }));
       if (!result.ok) {
         setStatus("failed");
         return;
       }
+      track("newsletter_signup", { page: window.location.pathname });
       setValue("");
       setStatus("done");
     });

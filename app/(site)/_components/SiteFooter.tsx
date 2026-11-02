@@ -1,5 +1,7 @@
 import { cacheLife } from "next/cache";
+import { trackers } from "@/lib/analytics";
 import { getFooter, getSettings } from "@/sanity/content";
+import { CookieSettings } from "./CookieBanner";
 import { FooterReveal } from "./FooterReveal";
 import { FooterWordmark } from "./FooterWordmark";
 import { NewsletterSignup } from "./NewsletterSignup";
@@ -16,7 +18,10 @@ const MONO =
  * wordmark with the way back up and the small print beside it.
  */
 export async function SiteFooter() {
-  const [footer, { social }] = await Promise.all([getFooter(), getSettings()]);
+  const [footer, settings] = await Promise.all([getFooter(), getSettings()]);
+  const { social } = settings;
+  /* Cookie settings, only while there are cookies to set. */
+  const tracked = trackers(settings).on;
 
   return (
     <FooterReveal>
@@ -97,6 +102,14 @@ export async function SiteFooter() {
                   </a>
                 </li>
               ))}
+              {tracked && (
+                <li>
+                  <CookieSettings
+                    label={settings.cookieBanner?.settings || "Cookie settings"}
+                    className="cursor-pointer uppercase transition-colors duration-200 hover:text-white"
+                  />
+                </li>
+              )}
             </ul>
           </nav>
           <a

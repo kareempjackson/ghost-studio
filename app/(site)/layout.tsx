@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { stegaClean } from "next-sanity";
 import { arial, dmSans } from "@/app/fonts";
 import { typekit } from "@/lib/brand";
-import { gtagScript, gtagSrc, loadsAnalytics } from "@/lib/analytics";
+import { gtagScript, gtagSrc, trackers } from "@/lib/analytics";
 import { introScript } from "@/lib/intro";
 import { Suspense } from "react";
 import { draftMode } from "next/headers";
@@ -11,6 +11,8 @@ import { SITE_URL } from "@/lib/site";
 import { getChrome, getSettings } from "@/sanity/content";
 import { SanityLive } from "@/sanity/lib/live";
 import { ChromeProvider } from "./_components/ChromeProvider";
+import { CookieBanner } from "./_components/CookieBanner";
+import { Tracking } from "./_components/Tracking";
 import { PageTransition } from "./_components/PageTransition";
 import "./globals.css";
 
@@ -21,7 +23,7 @@ import "./globals.css";
  */
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { title, description, googleSiteVerification } = await getSettings();
+  const { title, description, googleSiteVerification, bingSiteVerification } = await getSettings();
   return {
     /* Where canonical and share-card addresses point: lib/site.ts. */
     metadataBase: new URL(SITE_URL),
@@ -34,12 +36,13 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
       googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
     },
-    /* Proves the site is the studio's to Google Search Console, where the
-       sitemap is submitted and the site's search performance is read. The
-       code is set in Site settings. */
-    ...(googleSiteVerification
-      ? { verification: { google: stegaClean(googleSiteVerification) } }
-      : {}),
+    /* Proves the site is the studio's to Google Search Console and Bing
+       Webmaster Tools, where the sitemap is submitted and the site's search
+       performance is read. The codes are set in Site settings. */
+    verification: {
+      ...(googleSiteVerification ? { google: stegaClean(googleSiteVerification) } : {}),
+      ...(bingSiteVerification ? { other: { "msvalidate.01": stegaClean(bingSiteVerification) } } : {}),
+    },
     /* A page without its own share fields still carries the site's. */
     openGraph: { type: "website", siteName: title, title, description },
     twitter: { card: "summary_large_image", title, description },
@@ -48,6 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const chrome = await getChrome();
+  const tracking = trackers(chrome.settings);
 
   return (
     <html
@@ -60,11 +64,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
-        {/* The Google tag. See lib/analytics.ts. */}
-        {loadsAnalytics && (
+        {/* The Google tag, with its consent defaults. See lib/analytics.ts. */}
+        {tracking.ga && (
           <>
-            <script async src={gtagSrc} />
-            <script dangerouslySetInnerHTML={{ __html: gtagScript }} />
+            <script async src={gtagSrc(tracking.ga)} />
+            <script dangerouslySetInnerHTML={{ __html: gtagScript(tracking.ga, tracking.browser.askEveryone) }} />
           </>
         )}
         {/* Decides, before first paint, whether this tab has seen the intro.
@@ -79,7 +83,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <link rel="stylesheet" href={typekit.href} />
       </head>
       <body className="min-h-full flex flex-col">
-        <ChromeProvider chrome={chrome}>{children}</ChromeProvider>
+        <ChromeProvider chrome={chrome}>
+          {children}
+          {/* PostHog, the pixels, consent and where visitors came from; the
+              banner only while there is something to ask about. See
+              lib/consent.ts. */}
+          <Tracking trackers={tracking.browser} />
+          {tracking.on && <CookieBanner />}
+        </ChromeProvider>
         <PageTransition />
         <Suspense>
           <Live />

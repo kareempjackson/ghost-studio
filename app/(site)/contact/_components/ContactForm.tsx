@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, useTransition, type FormEvent } from "react";
+import { readAttribution } from "@/lib/attribution";
+import { replayUrl, track } from "@/lib/track";
 import type { ContactPage } from "@/sanity/types";
 import { Rich } from "../../_components/Rich";
 import { sendEnquiry } from "../actions";
@@ -83,11 +85,14 @@ export function ContactForm({
         timing,
         website,
         startedAt: startedAt.current,
+        attribution: readAttribution(),
+        replayUrl: replayUrl(),
       }).catch(() => ({ ok: false as const }));
       if (!result.ok) {
         setStatus("failed");
         return;
       }
+      track("enquiry_sent", { source: "contact" });
       setSentTo(from);
       setStatus("sent");
       setName("");

@@ -15,6 +15,8 @@ type Opts = {
   description?: string;
   /** The tab the field sits on, where the document has tabs. */
   group?: string;
+  /** The set of fields it's shown in, where the document has them. */
+  fieldset?: string;
   hidden?: boolean;
   required?: boolean;
 };

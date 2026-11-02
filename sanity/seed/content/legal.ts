@@ -2,9 +2,14 @@
  * Ghost Savvy Studios — the legal pages: privacy, terms and cookies.
  *
  * Written to describe what the site actually does, as of the date below:
- * no analytics, advertising or tracking cookies; one item of session storage
- * (lib/intro.ts); fonts from Adobe Fonts; pictures and live updates from
- * Sanity; films from Cloudflare R2; hosting on Vercel; and the contact form,
+ * analytics by Google Analytics and PostHog, with PostHog's session
+ * recordings, and no advertising cookies (lib/analytics.ts); a cookie banner
+ * for visitors in the EEA, the UK and Switzerland, whose choice is kept in
+ * the `gs_consent` cookie (lib/consent.ts); a note of how each visitor
+ * arrived, sent with an enquiry or a sign-up (lib/attribution.ts); session
+ * storage for the intro (lib/intro.ts); fonts from Adobe Fonts; pictures
+ * and live updates from Sanity; films from Cloudflare R2; hosting on
+ * Vercel; and the contact form,
  * which stores an enquiry in Sanity and emails through Resend
  * (app/(site)/contact/actions.ts); and the newsletter sign-up, which adds
  * the address to a list kept by Resend and sends a welcome
@@ -65,9 +70,9 @@ export const legalDocuments = {
     title: "Privacy policy",
     description:
       "What personal information Ghost Savvy Studios collects when you visit our website or get in touch, how we use it, and the choices you have.",
-    /* Moved when the site guide arrived. */
-    updated: "31 October 2026",
-    intro: `This policy explains what personal information ${ENTITY}, doing business as ${TRADING} (“Ghost Savvy Studios”, “we”, “us”), collects when you visit our website or contact us, how we use it, and the choices you have. We collect very little: no advertising trackers, no analytics cookies, and we never sell your information.`,
+    /* Moved when analytics and the cookie banner arrived. */
+    updated: "2 November 2026",
+    intro: `This policy explains what personal information ${ENTITY}, doing business as ${TRADING} (“Ghost Savvy Studios”, “we”, “us”), collects when you visit our website or contact us, how we use it, and the choices you have. We collect what we need to answer you and to understand how our site is used. We never sell your information or use it to advertise to you, and if you’re in the European Economic Area, the United Kingdom or Switzerland, we ask before setting any analytics cookie.`,
     sections: [
       {
         id: "who-we-are",
@@ -103,13 +108,17 @@ export const legalDocuments = {
         id: "information-collected-automatically",
         title: "Information collected automatically",
         paragraphs: [
-          "We don’t use analytics, advertising or tracking cookies, and we don’t build profiles of visitors. When you load a page, some technical information is processed so the site can be delivered and kept secure:",
+          "When you load a page, some technical information is processed so the site can be delivered, kept secure and improved. We don’t use advertising cookies, and we don’t use what we collect to advertise to you:",
         ],
         list: [
           "**Server logs:** our hosting provider records your IP address, browser, the page requested and the time, to deliver the site and protect it from abuse. These logs are kept for a short period.",
+          "**Analytics:** Google Analytics and PostHog tell us how our site is used: which pages are read, how people arrive, and which of them get in touch. They receive your IP address, your browser and device type, and the pages you view, and set cookies that recognise a returning browser. Our [cookie policy](/cookies) lists them.",
+          "**Session recordings:** PostHog may record how our pages are used, such as scrolling, clicks and the pages visited, so we can see where the site is unclear. Anything typed into a form is masked and never recorded.",
+          "**How you found us:** your browser keeps a note of the campaign link or website that brought you here and the page you arrived on, for up to 90 days. If you contact us or sign up for our newsletter, the note is sent with your message, so we can see which of our links and channels people find us through.",
+          "**Your choice:** if you’re in the European Economic Area, the United Kingdom or Switzerland, no analytics cookie is set and the note is kept only until you close the tab, unless you accept. Wherever you are, you can change your choice at any time with **Cookie settings** at the foot of every page. If you decline, we still count your visit, without cookies, using an anonymous identifier that changes every day.",
           "**Fonts:** our typefaces are served by Adobe Fonts, which receives your IP address and the address of the page you’re viewing, to deliver the fonts and count page views for licensing.",
           "**Pictures, video and page updates:** these are delivered from Sanity’s and Cloudflare’s networks, which receive your IP address to send them to you.",
-          "**Browser storage:** one item in your browser’s session storage remembers that you’ve seen the opening animation. It holds no personal information and is deleted when you close the tab. Our [cookie policy](/cookies) has the details.",
+          "**Browser storage:** a few small items in your browser let the site work as designed, such as one that remembers you’ve seen the opening animation and a cookie that remembers your cookie choice. Our [cookie policy](/cookies) has the details.",
           "**The site guide’s conversation:** if you use the site guide, your browser’s session storage keeps the conversation as you move between pages. It is deleted when you close the tab.",
         ],
       },
@@ -125,6 +134,7 @@ export const legalDocuments = {
           "**To deliver our services** and manage our relationship with clients: to perform our contract.",
           "**To send our newsletter**, if you’ve asked for it: your consent, which you can withdraw at any time.",
           "**To run and secure the website**, and to keep spam and abuse out of the contact form: our legitimate interests.",
+          "**To understand how our site is used** and improve it, and to see which of our links and channels bring people to us: our legitimate interest in running a useful website and, where the law requires it, your consent.",
           "**To meet our legal obligations**, such as tax and accounting records: legal obligation.",
         ],
       },
@@ -140,6 +150,8 @@ export const legalDocuments = {
           "**Vercel**, which hosts the website.",
           "**Sanity**, which stores the website’s content and the messages sent through the contact form.",
           "**Resend**, which delivers the emails sent when you use the contact form, and keeps our newsletter’s list of subscribers and sends each issue.",
+          "**Google**, which provides Google Analytics.",
+          "**PostHog**, which provides our product analytics and session recordings.",
           "**Anthropic**, which writes the site guide’s answers from what you type into it.",
           "**Cloudflare**, which stores and delivers the website’s video.",
           "**Adobe**, which serves the website’s fonts.",
@@ -162,6 +174,9 @@ export const legalDocuments = {
           "**Client records:** for the length of the engagement, and up to seven years after it ends, to meet tax, accounting and legal obligations.",
           "**Newsletter:** until you unsubscribe.",
           "**Site guide conversations:** not kept, unless you send one to us as a brief, when it is kept as an enquiry is.",
+          "**Analytics:** up to 14 months, then deleted.",
+          "**Session recordings:** up to 30 days, then deleted.",
+          "**How you found us:** up to 90 days in your browser. Sent with an enquiry or a sign-up, it is kept as that is.",
           "**Server logs:** for a short period set by our hosting provider, typically a few days.",
         ],
       },
@@ -170,6 +185,7 @@ export const legalDocuments = {
         title: "Your rights and choices",
         paragraphs: [
           "Depending on where you live, you may have the right to access the personal information we hold about you, to correct it, to have it deleted, to restrict or object to how we use it, to receive a copy in a portable format, and to withdraw your consent at any time. You can stop the newsletter whenever you like with the unsubscribe link in any issue, or by emailing us.",
+          "You can accept or refuse analytics cookies, and change your mind at any time, with **Cookie settings** at the foot of every page.",
           "**In the European Economic Area or the United Kingdom**, you also have the right to complain to your local data protection authority. We’d welcome the chance to put things right first.",
           "**In California**, you have the right to know what personal information we collect, use and disclose; to have it corrected or deleted; and not to be treated differently for exercising these rights. We don’t sell or share personal information as California law defines those terms.",
           `To make a request, email ${mail}. We may ask you to confirm your identity before we act on it, and we’ll respond within one month.`,
@@ -212,10 +228,10 @@ export const legalDocuments = {
     title: "Cookie policy",
     description:
       "The cookies and browser storage the Ghost Savvy Studios website uses, the services that load with its pages, and how to control them.",
-    /* Moved when the site guide arrived. */
-    updated: "31 October 2026",
+    /* Moved when analytics and the cookie banner arrived. */
+    updated: "2 November 2026",
     intro:
-      "In short: our website doesn’t use advertising, analytics or tracking cookies. This policy explains the little we keep in your browser, the services that load with our pages, and how to control them.",
+      "In short: we use analytics cookies to understand how our site is used, never to advertise to you, and if you’re in the European Economic Area, the United Kingdom or Switzerland, we ask first. This policy lists everything we keep in your browser, the services that load with our pages, and how to control them.",
     sections: [
       {
         id: "what-cookies-are",
@@ -227,14 +243,28 @@ export const legalDocuments = {
       },
       {
         id: "what-we-use",
-        title: "What we use",
+        title: "What the site needs to work",
         paragraphs: [
-          "We don’t use cookies to track you, measure visits or show you advertising.",
-          "The only things we keep in your browser are a few small items the site needs to work as designed:",
+          "We don’t use cookies to show you advertising. A few small items are kept in your browser because the site needs them to work as designed. They hold no personal information and are always on:",
         ],
         list: [
+          "**gs_consent** (cookie, 6 months): remembers whether you accepted or declined analytics cookies, so you aren’t asked on every page.",
           "**gs-intro-played** (session storage): remembers that the opening animation has played in this tab, so it doesn’t play again as you move around the site. It holds no personal information and is deleted when you close the tab.",
           "**gs-guide** (session storage): keeps your conversation with the site guide, if you use it, as you move between pages. It holds only what you typed into the guide and is deleted when you close the tab.",
+        ],
+      },
+      {
+        id: "analytics",
+        title: "Analytics",
+        paragraphs: [
+          "These tell us how our site is used: which pages are read, how people arrive, and which of them get in touch. They are never used to advertise to you.",
+          "If you’re in the European Economic Area, the United Kingdom or Switzerland, they are set only once you accept. Elsewhere they are set when you arrive, and you can turn them off with **Cookie settings** at the foot of any page.",
+        ],
+        list: [
+          "**_ga** and **_ga_<ID>** (Google Analytics, cookies, 2 years): tell one visit from another and count returning browsers. [Google’s privacy policy](https://policies.google.com/privacy).",
+          "**ph_<key>_posthog** (PostHog, cookie and local storage, 1 year): the same, for our product analytics, and to record how our pages are used, with anything typed into a form masked. [PostHog’s privacy policy](https://posthog.com/privacy).",
+          "**gs-attribution** (local storage, 90 days): the campaign link or website that brought you here and the page you arrived on. If you contact us or sign up for our newsletter, it is sent with your message. Until you accept, or if you decline, it is kept in session storage instead and deleted when you close the tab.",
+          "**If you decline**, PostHog still counts your visit without keeping anything in your browser, using an anonymous identifier that changes every day, and Google Analytics sends only basic signals without cookies, such as that a page was viewed.",
         ],
       },
       {
@@ -268,14 +298,15 @@ export const legalDocuments = {
         id: "consent",
         title: "Consent",
         paragraphs: [
-          "Because we only use storage that is strictly necessary, we don’t ask for consent or show a cookie banner. If we ever add analytics or other non-essential cookies, we’ll update this policy first and ask for your consent where the law requires it.",
+          "If you’re in the European Economic Area, the United Kingdom or Switzerland, a banner asks whether you accept analytics cookies before any is set. Declining is as easy as accepting, and the site works the same either way.",
+          "Wherever you are, you can change your choice at any time with **Cookie settings** at the foot of every page. A new choice takes effect straight away; to remove cookies already set, clear them in your browser as described below.",
         ],
       },
       {
         id: "managing-cookies",
         title: "Managing cookies and storage",
         paragraphs: [
-          "You can block or delete cookies and site storage in your browser’s settings. Blocking the storage described above won’t stop our site working; you may just see the opening animation more than once. Help for the most common browsers:",
+          "You can block or delete cookies and site storage in your browser’s settings. Blocking the storage described above won’t stop our site working; you may just see the opening animation more than once, or be asked about cookies again. Help for the most common browsers:",
         ],
         list: [
           "[Google Chrome](https://support.google.com/chrome/answer/95647)",

@@ -10,6 +10,7 @@
  */
 
 import { defineArrayMember, defineField, defineType } from "sanity";
+import { cameFrom, touch } from "./attribution";
 
 const delivery = (name: string, title: string) =>
   defineField({
@@ -86,6 +87,23 @@ export const enquiry = defineType({
       readOnly: true,
       description: "What the sender asked the site guide and what it answered, before they sent the brief.",
     }),
+    touch(
+      "firstTouch",
+      "First came from",
+      "How the sender first found the site, in the last 90 days: the campaign tags on the link they followed, or the site that sent them.",
+    ),
+    touch(
+      "lastTouch",
+      "Last came from",
+      "The most recent visit that came from a tagged link or another site, before they wrote.",
+    ),
+    defineField({
+      name: "replayUrl",
+      title: "Session replay",
+      type: "url",
+      readOnly: true,
+      description: "PostHog's recording of the visit the message was sent from, where the sender allowed cookies.",
+    }),
     defineField({
       name: "delivery",
       type: "object",
@@ -106,12 +124,13 @@ export const enquiry = defineType({
     },
   ],
   preview: {
-    select: { name: "name", company: "company", status: "status", receivedAt: "receivedAt" },
-    prepare: ({ name, company, status, receivedAt }) => ({
+    select: { name: "name", company: "company", status: "status", receivedAt: "receivedAt", firstTouch: "firstTouch" },
+    prepare: ({ name, company, status, receivedAt, firstTouch }) => ({
       title: [name, company].filter(Boolean).join(" · ") || "Enquiry",
       subtitle: [
         status === "new" ? "● New" : status === "replied" ? "Replied" : status === "archived" ? "Archived" : null,
         receivedAt ? new Date(receivedAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : null,
+        cameFrom(firstTouch),
       ]
         .filter(Boolean)
         .join(" — "),

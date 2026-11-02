@@ -3,6 +3,7 @@
 import { createHash } from "node:crypto";
 import { stegaClean } from "next-sanity";
 import { Resend } from "resend";
+import { cleanAttribution, touchFields, type Attribution } from "@/lib/attribution";
 import { welcomeEmail } from "@/lib/email/newsletter";
 import { getNewsletterCopy } from "@/sanity/content";
 import { writeClient } from "@/sanity/lib/write";
@@ -16,6 +17,8 @@ export interface SubscribeInput {
   readonly startedAt: number;
   /** The page it was sent from, e.g. /work. */
   readonly page?: string;
+  /** Where they came from (lib/attribution.ts): the first touch is kept. */
+  readonly attribution?: Attribution;
 }
 
 export type SubscribeResult = { readonly ok: true } | { readonly ok: false };
@@ -76,6 +79,7 @@ export async function subscribe(input: SubscribeInput): Promise<SubscribeResult>
         email,
         subscribedAt: new Date().toISOString(),
         ...(page ? { page } : {}),
+        ...touchFields({ first: cleanAttribution(input.attribution).first }),
       });
       stored = true;
       /* Known only once it can be recorded too, so a welcome never repeats. */

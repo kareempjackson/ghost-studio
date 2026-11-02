@@ -11,7 +11,7 @@ import {
   type SealedTurn,
 } from "@/lib/guide/protocol";
 import { OTHER, UNSURE, shortlist, type Profile, type Shortlist } from "@/lib/guide/shortlist";
-import { track } from "@/lib/guide/track";
+import { track } from "@/lib/track";
 import type { GuideCatalogue } from "@/sanity/types";
 import { loadGuide } from "./actions";
 
@@ -293,6 +293,7 @@ export const guide = {
   sent() {
     set({ draft: null, thread: [], turns: [] });
     track("guide_brief_sent");
+    track("enquiry_sent", { source: "guide" });
   },
 };
 

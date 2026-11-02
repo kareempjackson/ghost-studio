@@ -15,6 +15,7 @@ import { MONO } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { ProjectCard } from "../../_components/ProjectCard";
 import { SiteHeader } from "../../_components/SiteHeader";
+import { TrackView } from "../../_components/TrackView";
 import { StructuredData, breadcrumbs, studio } from "../../_components/StructuredData";
 import { ClientFeedback } from "../_components/ClientFeedback";
 import { InDepth } from "../_components/InDepth";
@@ -149,6 +150,7 @@ export default async function ProjectPage({
     <>
       <SiteHeader />
       <StructuredData data={structured} />
+      <TrackView event="case_study_view" params={{ slug: stegaClean(slug) }} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">

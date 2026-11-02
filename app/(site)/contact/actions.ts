@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { stegaClean } from "next-sanity";
 import { Resend } from "resend";
+import { cleanAttribution, touchFields, type Attribution } from "@/lib/attribution";
 import { acknowledgementEmail, notificationEmail, type Email, type Enquiry } from "@/lib/email/enquiry";
 import { absoluteUrl } from "@/lib/site";
 import { getEnquiryCopy } from "@/sanity/content";
@@ -25,6 +26,10 @@ export interface EnquiryInput {
   readonly source?: "guide";
   /** The guide's conversation, as the panel showed it: kept with the brief. */
   readonly transcript?: string;
+  /** Where the sender came from (lib/attribution.ts). */
+  readonly attribution?: Attribution;
+  /** PostHog's recording of the visit, where they allowed cookies. */
+  readonly replayUrl?: string;
 }
 
 export type EnquiryResult = { readonly ok: true } | { readonly ok: false };
@@ -56,6 +61,10 @@ const prose = (value: unknown, max: number) =>
  * CONTACT_FROM or the studio's address; without a key the enquiry is still
  * stored and marked as not emailed. A bot, caught by the honeypot or by
  * sending too fast, is told it worked and nothing is kept.
+ *
+ * Where the sender came from is kept with it, for the studio to see which
+ * links and sites bring work in, and so is the link to PostHog's recording
+ * of the visit, where there is one.
  */
 export async function sendEnquiry(input: EnquiryInput): Promise<EnquiryResult> {
   if (line(input.website, 200) || !(Date.now() - Number(input.startedAt) >= MIN_FILL_MS)) {
@@ -82,6 +91,7 @@ export async function sendEnquiry(input: EnquiryInput): Promise<EnquiryResult> {
     transcript: input.source === "guide" ? prose(input.transcript, 8000) : "",
   };
   if (!enquiry.name || !EMAIL.test(enquiry.email)) return { ok: false };
+  const replayUrl = line(input.replayUrl, 500);
 
   /* Stored first, so a failed email never loses a message. */
   const id = `enquiry.${randomUUID()}`;
@@ -101,6 +111,8 @@ export async function sendEnquiry(input: EnquiryInput): Promise<EnquiryResult> {
         receivedAt: new Date().toISOString(),
         ...enquiry,
         help: [...enquiry.help],
+        ...touchFields(cleanAttribution(input.attribution)),
+        ...(/^https:\/\/(us|eu)\.posthog\.com\//.test(replayUrl) ? { replayUrl } : {}),
       });
       stored = true;
     } catch (error) {

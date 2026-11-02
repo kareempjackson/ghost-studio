@@ -12,6 +12,7 @@
  */
 
 import { defineField, defineType } from "sanity";
+import { touch } from "./attribution";
 
 const status = (name: string, title: string, list: { title: string; value: string }[]) =>
   defineField({ name, title, type: "string", readOnly: true, options: { list } });
@@ -30,6 +31,11 @@ export const subscriber = defineType({
       readOnly: true,
       description: "The page they were reading.",
     }),
+    touch(
+      "firstTouch",
+      "First came from",
+      "How they first found the site, in the 90 days before they signed up: the campaign tags on the link they followed, or the site that sent them.",
+    ),
     status("list", "Mailing list", [
       { title: "On the list", value: "added" },
       { title: "Failed: not on the list", value: "failed" },

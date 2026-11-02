@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, useTransition, type FormEvent } from "react";
+import { readAttribution } from "@/lib/attribution";
+import { replayUrl } from "@/lib/track";
 import type { Chat, GuideCatalogue } from "@/sanity/types";
 import { sendEnquiry } from "../../contact/actions";
 import { Rich } from "../Rich";
@@ -61,6 +63,8 @@ export function Brief({
         startedAt: state.openedAt,
         source: "guide",
         transcript: transcriptOf(state, catalogue),
+        attribution: readAttribution(),
+        replayUrl: replayUrl(),
       }).catch(() => ({ ok: false as const }));
       if (!result.ok) {
         setStatus("failed");

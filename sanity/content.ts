@@ -211,7 +211,14 @@ const shown = <T extends { href: string }>(links: readonly T[]): T[] =>
 export const getSettings = () =>
   single<SiteSettings>(
     "siteSettings",
-    `{title, description, googleSiteVerification, email, social[]{id, label, href}, headerAction${link}}`,
+    `{
+      title, description, googleSiteVerification, bingSiteVerification,
+      gaMeasurementId, posthogKey, posthogRegion, sessionReplays,
+      linkedinPartnerId, linkedinConversions{enquiry, newsletter, booking, deck}, metaPixelId, consentScope,
+      email, social[]{id, label, href}, headerAction${link},
+      bookingUrl, "deck": credentialsDeck.asset->{url, originalFilename},
+      "cookieBanner": select(defined(cookieBanner) => cookieBanner{message, link${link}, accept, decline, settings})
+    }`,
     [],
   );
 

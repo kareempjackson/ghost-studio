@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { track } from "@/lib/guide/track";
+import { track } from "@/lib/track";
 import type { Chat, GuideCard } from "@/sanity/types";
 import { UpRight } from "../UpRight";
 import { Visual } from "../Visual";

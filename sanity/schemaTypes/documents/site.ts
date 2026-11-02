@@ -18,29 +18,73 @@ import {
 
 const link = [text("label"), href()];
 
+/** An ID the ad platforms give as a number, kept as text so nothing rounds it. */
+const digits = (name: string, title: string, description: string, o: { group?: string; fieldset?: string } = {}) =>
+  defineField({
+    name,
+    type: "string",
+    title,
+    description,
+    ...o,
+    validation: (r) => r.regex(/^\d+$/, { name: "number, digits only" }),
+  });
+
+const ADS_POLICY =
+  "The privacy and cookie policies say the site runs no advertising: update them, and the cookie banner's message, before adding it.";
+
 export const siteSettings = defineType({
   name: "siteSettings",
   title: "Site settings",
   type: "document",
+  groups: [
+    { name: "site", title: "Site", default: true },
+    { name: "tracking", title: "Tracking" },
+  ],
+  fieldsets: [
+    {
+      name: "leads",
+      title: "Calls and credentials",
+      description:
+        "Where the site's booking and deck links lead. Link to /book or /deck from any button or link, and they go wherever these say.",
+      options: { collapsible: true, collapsed: true },
+    },
+    {
+      name: "search",
+      title: "Search engines",
+      description: "How Google and Bing know the site is yours, so its sitemap and search performance can be read there.",
+    },
+    {
+      name: "analytics",
+      title: "Analytics",
+      description: "What counts the site's visits and conversions. An empty ID is that tool off.",
+    },
+    {
+      name: "ads",
+      title: "Advertising",
+      description:
+        "The pixels that let LinkedIn and Meta count conversions from ads and build audiences. Each loads only with the visitor's consent. An empty ID is that pixel off.",
+    },
+    {
+      name: "consent",
+      title: "Cookie consent",
+      description: "Who is asked before a tracking cookie is set, and in what words. Shown only while a tool above is on.",
+    },
+  ],
   fields: [
     text("title", {
+      group: "site",
       description:
         "The site's name: after the page's name in the title of every page without a meta title of its own, and on share cards.",
     }),
     plain("description", {
+      group: "site",
       title: "Default meta description",
       description: "The line under the title in search results and on share cards, for a page without a meta description of its own.",
     }),
     defineField({
-      name: "googleSiteVerification",
-      type: "string",
-      title: "Google Search Console code",
-      description:
-        "Optional. Proves the site is yours to Google Search Console: add the site as a URL-prefix property, choose the HTML tag method, and paste the tag's content value here. Not needed when the site is verified by DNS or through the Google tag.",
-    }),
-    defineField({
       name: "email",
       type: "string",
+      group: "site",
       description: "The studio's address: the contact page, the footer, the chat and the forms all use it.",
       validation: (r) => r.required().email(),
     }),
@@ -57,12 +101,167 @@ export const siteSettings = defineType({
         }),
         ...link,
       ],
-      { preview: { select: { title: "label", subtitle: "href" } } },
+      { group: "site", preview: { select: { title: "label", subtitle: "href" } } },
     ),
     action("headerAction", {
+      group: "site",
       title: "Header action",
       description: "The button at the right of the header.",
     }),
+    defineField({
+      name: "bookingUrl",
+      type: "url",
+      title: "Booking link",
+      group: "site",
+      fieldset: "leads",
+      description:
+        "The page where a call is booked, on Cal.com, Calendly or the like. /book goes here, and each visit to it is counted. Empty, /book goes to the contact page.",
+      validation: (r) => r.uri({ scheme: ["https"] }),
+    }),
+    defineField({
+      name: "credentialsDeck",
+      type: "file",
+      title: "Credentials deck",
+      group: "site",
+      fieldset: "leads",
+      description:
+        "The PDF for RFPs and procurement: /deck downloads it, and each download is counted. Anyone with the link can open it. Empty, /deck goes to the contact page.",
+      options: { accept: "application/pdf" },
+    }),
+
+    /* ---- Tracking ---- */
+
+    defineField({
+      name: "googleSiteVerification",
+      type: "string",
+      title: "Google Search Console code",
+      group: "tracking",
+      fieldset: "search",
+      description:
+        "Proves the site is yours to Google Search Console: add the site as a URL-prefix property, choose the HTML tag method, and paste the content value of the tag it gives, without the quotes. Not needed when the site is verified by DNS or through Google Analytics.",
+    }),
+    defineField({
+      name: "bingSiteVerification",
+      type: "string",
+      title: "Bing Webmaster Tools code",
+      group: "tracking",
+      fieldset: "search",
+      description:
+        "Proves the site is yours to Bing, which also feeds ChatGPT and Copilot search: add the site, choose the meta tag method, and paste the content value of the msvalidate.01 tag it gives. Not needed when the site is imported from Google Search Console.",
+    }),
+    defineField({
+      name: "gaMeasurementId",
+      type: "string",
+      title: "Google Analytics measurement ID",
+      group: "tracking",
+      fieldset: "analytics",
+      description:
+        "GA4's ID for the site, like G-ABC123XYZ: in Google Analytics, Admin › Data streams › the web stream.",
+      validation: (r) => r.regex(/^G-[A-Z0-9]+$/, { name: "GA4 measurement ID, like G-ABC123XYZ" }),
+    }),
+    defineField({
+      name: "posthogKey",
+      type: "string",
+      title: "PostHog project key",
+      group: "tracking",
+      fieldset: "analytics",
+      description:
+        "The project API key, starting phc_: in PostHog, Settings › Project › General. Turn on cookieless mode in the same settings, or the visits of people who decline cookies are dropped.",
+      validation: (r) => r.regex(/^phc_[A-Za-z0-9]+$/, { name: "PostHog project key, starting phc_" }),
+    }),
+    defineField({
+      name: "posthogRegion",
+      type: "string",
+      title: "PostHog cloud",
+      group: "tracking",
+      fieldset: "analytics",
+      description: "Where the project lives, as in its address: us.posthog.com or eu.posthog.com.",
+      options: {
+        list: [
+          { title: "US", value: "us" },
+          { title: "EU", value: "eu" },
+        ],
+        layout: "radio",
+        direction: "horizontal",
+      },
+      initialValue: "us",
+    }),
+    defineField({
+      name: "sessionReplays",
+      type: "boolean",
+      title: "Record sessions",
+      group: "tracking",
+      fieldset: "analytics",
+      description:
+        "PostHog's recordings of visits, with everything typed masked, for visitors who allow cookies; each enquiry links to the visit it came from. Session replay must be on in PostHog's project settings too.",
+      initialValue: true,
+    }),
+    digits(
+      "linkedinPartnerId",
+      "LinkedIn Insight Tag partner ID",
+      `From the Insight Tag's code in LinkedIn Campaign Manager: the number it sets as _linkedin_partner_id. ${ADS_POLICY}`,
+      { group: "tracking", fieldset: "ads" },
+    ),
+    object(
+      "linkedinConversions",
+      [
+        digits("enquiry", "Enquiry sent", "From the contact form or the site guide."),
+        digits("newsletter", "Newsletter sign-up", "From the footer."),
+        digits("booking", "Booking page opened", "Any link to /book."),
+        digits("deck", "Credentials deck downloaded", "Any link to /deck."),
+      ],
+      {
+        title: "LinkedIn conversions",
+        group: "tracking",
+        fieldset: "ads",
+        description:
+          "Optional. For each conversion made in Campaign Manager to be counted by an event, its conversion ID: LinkedIn counts it each time the site's event happens.",
+        collapsed: true,
+      },
+    ),
+    digits(
+      "metaPixelId",
+      "Meta Pixel ID",
+      `In Meta Events Manager, the pixel's ID (Meta calls it a dataset). Enquiries reach Meta as Lead, newsletter sign-ups as CompleteRegistration, case studies read as ViewContent, and booking pages opened and decks downloaded as BookingOpened and DeckDownload. ${ADS_POLICY}`,
+      { group: "tracking", fieldset: "ads" },
+    ),
+    defineField({
+      name: "consentScope",
+      type: "string",
+      title: "Who is asked",
+      group: "tracking",
+      fieldset: "consent",
+      description:
+        "Whoever isn't asked is tracked from the first page, and can still say no from Cookie settings in the footer.",
+      options: {
+        list: [
+          { title: "Visitors in the EEA, the UK and Switzerland", value: "regions" },
+          { title: "Every visitor", value: "everyone" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "regions",
+    }),
+    object(
+      "cookieBanner",
+      [
+        text("message", { description: "One or two sentences: what the cookies are for." }),
+        object("link", link, { description: "After the message: the cookie policy, usually." }),
+        text("accept"),
+        text("decline", { description: "Shown the same size as Accept: saying no must be as easy." }),
+        text("settings", {
+          title: "Settings link",
+          description: "Among the footer's legal links, to open the banner again, e.g. Cookie settings.",
+        }),
+      ],
+      {
+        title: "Cookie banner",
+        group: "tracking",
+        fieldset: "consent",
+        description: "Asked of the visitors above before any tracking cookie is set, and of anyone who opens it from the footer.",
+        collapsed: true,
+      },
+    ),
   ],
   preview: { prepare: () => ({ title: "Site settings" }) },
 });

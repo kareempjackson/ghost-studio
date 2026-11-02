@@ -48,9 +48,49 @@ export interface SiteSettings {
   readonly description: string;
   /** The content of Google Search Console's verification tag, when the site is verified that way. */
   readonly googleSiteVerification: string | null;
+  /** The content of Bing Webmaster Tools' verification tag (msvalidate.01), likewise. */
+  readonly bingSiteVerification: string | null;
+  /** GA4's measurement ID, G-…; Google Analytics is off without one. */
+  readonly gaMeasurementId: string | null;
+  /** PostHog's project key, phc_…; PostHog is off without one. */
+  readonly posthogKey: string | null;
+  /** The PostHog cloud the project is on; US if unset. */
+  readonly posthogRegion: "us" | "eu" | null;
+  /** Whether PostHog records sessions; on unless set off. */
+  readonly sessionReplays: boolean | null;
+  /** LinkedIn Insight Tag's partner ID; LinkedIn is off without one. */
+  readonly linkedinPartnerId: string | null;
+  /** LinkedIn's conversion ID for each of the site's conversions that has one. */
+  readonly linkedinConversions: LinkedinConversions | null;
+  /** The Meta Pixel's ID; Meta is off without one. */
+  readonly metaPixelId: string | null;
+  /** Who is asked before tracking cookies are set: the EEA, UK and Switzerland if unset. */
+  readonly consentScope: "regions" | "everyone" | null;
   readonly email: string;
   readonly social: readonly { readonly id: string; readonly label: string; readonly href: string }[];
   readonly headerAction: Link;
+  /** Where /book sends people: the studio's booking page. */
+  readonly bookingUrl: string | null;
+  /** What /deck downloads: the credentials deck. */
+  readonly deck: { readonly url: string; readonly originalFilename: string | null } | null;
+  readonly cookieBanner: CookieBanner | null;
+}
+
+export interface LinkedinConversions {
+  readonly enquiry: string | null;
+  readonly newsletter: string | null;
+  readonly booking: string | null;
+  readonly deck: string | null;
+}
+
+/** The cookie banner's words (app/(site)/_components/CookieBanner.tsx). */
+export interface CookieBanner {
+  readonly message: string;
+  readonly link: Link | null;
+  readonly accept: string;
+  readonly decline: string;
+  /** The footer's way back to it, e.g. Cookie settings. */
+  readonly settings: string;
 }
 
 export interface NavItem extends Link {
