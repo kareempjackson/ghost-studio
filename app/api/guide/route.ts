@@ -11,9 +11,9 @@ import type {
 } from "@anthropic-ai/sdk/resources/beta/messages";
 import { posthogLog, posthogLogProvider } from "@/instrumentation";
 import { getGrounding, type Grounding } from "@/lib/guide/corpus";
+import { canAsk, siteMay, visitorMay } from "@/lib/guide/limit";
 import { GUIDE_PROMPT, MAX_PICKS } from "@/lib/guide/prompt";
 import {
-  GUIDE_ON,
   MAX_QUESTION,
   MAX_TURNS,
   type GuideBrief,
@@ -35,8 +35,6 @@ const MODEL = "claude-opus-5-5";
 const MAX_TOKENS = 4096;
 /** The largest request: the sealed turns carry the model's own blocks, which are not small. */
 const MAX_BODY = 512 * 1024;
-/** Questions one address may ask in a minute, on this instance: Vercel's firewall is the real limit. */
-const PER_MINUTE = 10;
 
 const key = process.env.ANTHROPIC_API_KEY;
 const client = key ? new Anthropic({ apiKey: key }) : null;
@@ -53,22 +51,6 @@ function sealed(turn: SealedTurn) {
 }
 
 /* ---- Abuse ----------------------------------------------------------------- */
-
-const recent = new Map<string, number[]>();
-
-/** Whether this address has asked too often in the last minute. Per instance, so best effort. */
-function tooMany(request: Request) {
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown";
-  const now = Date.now();
-  const times = (recent.get(ip) ?? []).filter((time) => now - time < 60_000);
-  times.push(now);
-  recent.set(ip, times);
-  if (recent.size > 5000) recent.clear();
-  return times.length > PER_MINUTE;
-}
 
 /** A browser on this site: its Origin is the site's, or the address the request came in at. */
 function fromTheSite(request: Request) {
@@ -252,6 +234,20 @@ function logGuideOutcome(
   posthogLog.emit({ body, severityNumber, attributes });
 }
 
+/** A question turned away by a limit (lib/guide/limit.ts), logged so abuse shows up. */
+function limited(error: GuideError, scope: "visitor" | "site") {
+  logGuideOutcome("guide request limited", SeverityNumber.WARN, {
+    event: "guide_request_limited",
+    endpoint: "/api/guide",
+    outcome: error,
+    scope,
+  });
+  after(async () => {
+    await posthogLogProvider.forceFlush();
+  });
+  return refuse(error, 429);
+}
+
 /**
  * The site guide's answers (app/(site)/_components/ChatPanel.tsx).
  *
@@ -261,15 +257,17 @@ function logGuideOutcome(
  * the conversation lives in the visitor's tab, sealed turn by turn, and
  * reaches the studio only if they send it as a brief.
  *
- * Off without ANTHROPIC_API_KEY, when the panel offers the shortlist and the
- * brief alone. Open only to the site's own pages, and limited per address; a
- * Vercel firewall rule on this path and a spend limit on the Anthropic
- * workspace are what actually cap the cost.
+ * Off without ANTHROPIC_API_KEY, or in production without the shared counts
+ * (lib/guide/limit.ts), when the panel offers the shortlist and the brief
+ * alone. Open only to the site's own pages, limited per visitor and for the
+ * whole site each day; the spend limit on the Anthropic workspace is the
+ * backstop.
  */
 export async function POST(request: Request) {
-  if (!GUIDE_ON || !client) return refuse("off", 503);
+  if (!canAsk || !client) return refuse("off", 503);
   if (!fromTheSite(request)) return refuse("failed", 403);
-  if (tooMany(request)) return refuse("busy", 429);
+  const may = await visitorMay(request);
+  if (may !== "ok") return limited(may, "visitor");
 
   const text = await request.text();
   if (text.length > MAX_BODY) return refuse("limit", 413);
@@ -285,6 +283,8 @@ export async function POST(request: Request) {
   if (!question || question.length > MAX_QUESTION) return refuse("failed", 400);
   if (turns.length >= MAX_TURNS) return refuse("limit", 400);
   if (!turns.every(sealed)) return refuse("failed", 400);
+  /* Counted last, so only a question that will reach the model uses the day's. */
+  if (!(await siteMay())) return limited("limit", "site");
 
   const startedAt = Date.now();
   const history: BetaMessageParam[] = turns.flatMap((turn) => JSON.parse(turn.raw) as BetaMessageParam[]);

@@ -1,11 +1,12 @@
 "use server";
 
+import { canAsk } from "@/lib/guide/limit";
 import { getGuideCatalogue } from "@/sanity/content";
 import type { GuideCatalogue } from "@/sanity/types";
 
 export interface GuideLoad {
   readonly catalogue: GuideCatalogue;
-  /** Whether the guide can answer questions: false without ANTHROPIC_API_KEY, when it offers the shortlist and the brief alone. */
+  /** Whether the guide can answer questions (lib/guide/limit.ts): when not, it offers the shortlist and the brief alone. */
   readonly canAsk: boolean;
 }
 
@@ -17,6 +18,6 @@ export interface GuideLoad {
 export async function loadGuide(): Promise<GuideLoad> {
   return {
     catalogue: await getGuideCatalogue(),
-    canAsk: Boolean(process.env.ANTHROPIC_API_KEY),
+    canAsk,
   };
 }

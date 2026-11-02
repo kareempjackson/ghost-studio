@@ -15,10 +15,10 @@ import type { GuideCard } from "@/sanity/types";
 import type { Profile } from "./shortlist";
 
 /**
- * Whether the guide is on: in development only, for now. A production build
- * draws no pill, and app/api/guide answers that it is off.
+ * Whether the guide is on. Turned off, no page draws the pill and
+ * app/api/guide answers that it is off.
  */
-export const GUIDE_ON = process.env.NODE_ENV !== "production";
+export const GUIDE_ON = true;
 
 /** Questions one conversation can ask before the guide hands over to the team. */
 export const MAX_TURNS = 12;
