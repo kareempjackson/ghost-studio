@@ -62,7 +62,7 @@ export function SelectedWork({
       {describe && <Describe describe={describe} />}
 
       <MotionConfig reducedMotion="user">
-        <ul className={`grid gap-x-5 gap-y-14 md:grid-cols-3 ${describe ? "mt-12 lg:mt-16" : "mt-20 lg:mt-32"}`}>
+        <ul className={`grid gap-x-5 gap-y-14 md:grid-cols-3 ${describe ? "mt-14 lg:mt-20" : "mt-20 lg:mt-32"}`}>
           {items.map(({ project, line }, index) => (
             <motion.li
               key={project.slug}

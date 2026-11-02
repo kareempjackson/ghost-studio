@@ -6,13 +6,15 @@ import { track } from "@/lib/track";
 import { noteInterest } from "@/lib/visitor";
 import type { Describe as Words } from "@/sanity/types";
 import { guide } from "./guide/store";
-import { ARROW } from "./guide/styles";
+import { ArrowPill } from "./ArrowPill";
 import { showMatched, useMatched } from "./moment";
+import { MONO } from "./SectionHead";
 
 type Status = "idle" | "working" | "found" | "busy" | "limit" | "error";
 
+/* As the newsletter's small print links: quiet, underlined, ink on hover. */
 const QUIET =
-  "text-ink-950 underline underline-offset-4 transition-colors duration-200 hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-950";
+  "text-ink-950 underline decoration-ink-300 underline-offset-[3px] transition-colors duration-200 hover:text-accent hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-950";
 
 /**
  * Describe your project: one line at the head of Selected work. The visitor
@@ -67,16 +69,21 @@ export function Describe({ describe }: { describe: Words }) {
   const trouble = status === "busy" ? describe.busy : status === "limit" ? describe.limit : status === "error" ? describe.error : null;
 
   return (
-    <div className="mt-14 max-w-[46rem] lg:mt-20">
-      <form onSubmit={onSubmit} role="search" aria-labelledby={`${id}-label`}>
-        <label
-          id={`${id}-label`}
-          htmlFor={`${id}-input`}
-          className="font-label text-[0.75rem] leading-none tracking-[0.06em] text-primary uppercase"
+    /* Set as the head of a band: its name in the margin, the field from
+       three-eighths across, where every band's heading starts (SectionHead). */
+    <div className="mt-20 grid gap-y-6 lg:mt-28 lg:grid-cols-[minmax(0,3fr)_minmax(0,5fr)] lg:gap-x-8">
+      <label id={`${id}-label`} htmlFor={`${id}-input`} className={`${MONO} text-ink-500 lg:pt-[1.3rem]`}>
+        {describe.label}
+      </label>
+      <div>
+        {/* The newsletter's field on the paper ground: one pill holding the
+            words and the control. On a phone the control drops under it. */}
+        <form
+          onSubmit={onSubmit}
+          role="search"
+          aria-labelledby={`${id}-label`}
+          className="flex flex-col items-start gap-3 sm:h-14 sm:flex-row sm:items-center sm:rounded-pill sm:border sm:border-ink-200 sm:pr-2 sm:pl-6 sm:transition-colors sm:duration-300 sm:focus-within:border-ink-950 sm:hover:border-ink-400 sm:focus-within:hover:border-ink-950"
         >
-          {describe.label}
-        </label>
-        <div className="mt-4 flex items-center gap-3 border-b border-ink-300 pb-3 transition-colors duration-200 focus-within:border-ink-950">
           <input
             id={`${id}-input`}
             value={text}
@@ -84,54 +91,38 @@ export function Describe({ describe }: { describe: Words }) {
             maxLength={MAX_QUESTION}
             autoComplete="off"
             placeholder={describe.placeholder}
-            className="min-w-0 flex-1 bg-transparent text-[1.125rem] leading-[1.3] tracking-[-0.02em] text-ink-950 outline-none placeholder:text-ink-400 lg:text-[1.5rem]"
+            className="h-14 w-full min-w-0 shrink-0 rounded-pill border border-ink-200 bg-transparent px-6 text-[1rem] leading-none tracking-[-0.01em] text-ink-950 caret-[#eb5b32] outline-none transition-colors duration-300 placeholder:text-ink-500 focus:border-ink-950 sm:h-auto sm:flex-1 sm:shrink sm:rounded-none sm:border-0 sm:px-0 lg:text-[1.0625rem]"
           />
-          <button
-            type="submit"
-            disabled={status === "working" || !text.trim()}
-            aria-label={describe.submit}
-            className="grid size-10 shrink-0 place-items-center rounded-pill bg-ink-950 text-white transition-colors duration-200 hover:bg-ink-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-950 disabled:bg-ink-300 lg:size-11"
-          >
-            <svg
-              aria-hidden
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.25"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="size-4"
-            >
-              <path d={ARROW} />
-            </svg>
-          </button>
-        </div>
-      </form>
+          <ArrowPill submit size="sm" disabled={status === "working"} className="inline-flex shrink-0">
+            {describe.submit}
+          </ArrowPill>
+        </form>
 
-      <div aria-live="polite" className="mt-4 min-h-[1.5rem] text-[0.9375rem] leading-[1.5] tracking-[-0.01em] text-ink-600">
-        {status === "working" && <p className="motion-safe:animate-pulse">{describe.working}</p>}
-        {status === "found" && matched && (
-          <p className="flex flex-wrap gap-x-5 gap-y-2">
-            <span>{describe.result}</span>
-            {toGuide}
-            <button
-              type="button"
-              onClick={() => {
-                showMatched(null);
-                setStatus("idle");
-              }}
-              className={QUIET}
-            >
-              {describe.clear}
-            </button>
-          </p>
-        )}
-        {trouble && (
-          <p className="flex flex-wrap gap-x-5 gap-y-2">
-            <span>{trouble}</span>
-            {toGuide}
-          </p>
-        )}
+        <div aria-live="polite" className="mt-4 min-h-[1.25rem] text-[0.8125rem] leading-[1.55] text-ink-600 sm:pl-6">
+          {status === "working" && <p className="motion-safe:animate-pulse">{describe.working}</p>}
+          {status === "found" && matched && (
+            <p className="flex flex-wrap gap-x-5 gap-y-2">
+              <span>{describe.result}</span>
+              {toGuide}
+              <button
+                type="button"
+                onClick={() => {
+                  showMatched(null);
+                  setStatus("idle");
+                }}
+                className={QUIET}
+              >
+                {describe.clear}
+              </button>
+            </p>
+          )}
+          {trouble && (
+            <p className="flex flex-wrap gap-x-5 gap-y-2">
+              <span>{trouble}</span>
+              {toGuide}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
