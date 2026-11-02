@@ -15,6 +15,8 @@ import { MONO } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { ProjectCard } from "../../_components/ProjectCard";
 import { SiteHeader } from "../../_components/SiteHeader";
+import { ForYouSummary } from "../../_components/ForYou";
+import { NoteTags } from "../../_components/NoteTags";
 import { TrackView } from "../../_components/TrackView";
 import { StructuredData, breadcrumbs, studio } from "../../_components/StructuredData";
 import { ClientFeedback } from "../_components/ClientFeedback";
@@ -151,6 +153,7 @@ export default async function ProjectPage({
       <SiteHeader />
       <StructuredData data={structured} />
       <TrackView event="case_study_view" params={{ slug: stegaClean(slug) }} />
+      <NoteTags kind="work" slug={stegaClean(slug)} audiences={project.tailored?.audiences ?? []} />
       {/* One layer above the footer, with its own ground: the page is the
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">
@@ -255,6 +258,8 @@ export default async function ProjectPage({
                 ))}
               </ul>
             )}
+            {/* For a visitor the site knows the audience of: the work told for them. */}
+            <ForYouSummary summaries={project.summaries} />
             {(project.overview.length > 0 || project.website) && (
               <div className="mt-20 lg:mt-28">
                 <Overview

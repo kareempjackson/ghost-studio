@@ -31,11 +31,19 @@ export const returningBand = {
   heading: ["You know the work.", "Tell us about yours."],
 } as const;
 
+/** What the band says instead to someone whose need leads to a way of working. */
+export const trackBands = [
+  { track: "engage", heading: ["Tell us what", "you want to make"] },
+  { track: "build", heading: ["Tell us where", "the roadmap goes next"] },
+  { track: "integrate", heading: ["Tell us what", "your systems must do"] },
+] as const;
+
 export const contactBand = {
   eyebrow: "Your next chapter starts here",
   heading: ["Have a good", "feeling about this?"],
   action: { label: "Let’s talk", href: "/contact" },
   returning: returningBand,
+  forTracks: trackBands,
 } as const;
 
 export const footer = {

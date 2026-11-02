@@ -6,6 +6,7 @@ import type { CSSProperties } from "react";
 import { useState } from "react";
 import type { Link, Testimonials as TestimonialsData } from "@/sanity/types";
 import { ArrowPill } from "./ArrowPill";
+import { useInterest } from "./moment";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 import { Rich } from "./Rich";
 
@@ -105,6 +106,9 @@ function StepButton({
  * step through them; the quote slides in the direction of travel and the
  * change is announced politely. The leaf holds its height to the longest
  * quote so the controls never move under the pointer.
+ *
+ * For a visitor the site knows the audience of (lib/interest.ts), quotes
+ * about work for that audience come first; otherwise the editor's order.
  */
 export function Testimonials({
   testimonials,
@@ -114,7 +118,11 @@ export function Testimonials({
   /** The way through to the studio's point of view. */
   action: Link;
 }) {
-  const ITEMS = testimonials.items;
+  const audience = useInterest()?.audience?.slug;
+  const forThem = (item: TestimonialsData["items"][number]) => Boolean(audience && item.audiences?.includes(audience));
+  const ITEMS = audience
+    ? [...testimonials.items].sort((a, b) => Number(forThem(b)) - Number(forThem(a)))
+    : testimonials.items;
   const [[index, direction], setState] = useState<[number, 1 | -1]>([0, 1]);
   const reduced = usePrefersReducedMotion();
   const item = ITEMS[index];

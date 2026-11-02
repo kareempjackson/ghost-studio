@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import { projectHref } from "@/lib/links";
 import type { HomePage, Moments } from "@/sanity/types";
 import { Claim } from "./Claim";
+import { Describe } from "./Describe";
 import { COVER_SVH } from "./Hero";
 import { useOrderedWork } from "./moment";
 import { NewMark } from "./NewMark";
@@ -22,20 +23,28 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const;
  * gets no track to overlap, so the margin comes off with it.
  *
  * The work is in this visitor's order once it is known (moment.ts): what
- * a link they came in on leads with, then work from where they are, and for
- * someone back, what they haven't read before what they have.
+ * a link they came in on leads with, then work for who they are and from
+ * where they are, and for someone back, what they haven't read before what
+ * they have. Each card's line is written for their audience where Tailor
+ * with AI has written one. Over the grid, a box brings up the work closest
+ * to what they describe (Describe.tsx).
  */
 export function SelectedWork({
   selectedWork,
   claim,
   moments,
+  allWork,
+  describe,
 }: {
   selectedWork: HomePage["selectedWork"];
   claim: HomePage["claim"];
   /** The hero's moments, so the repeated claim says what the hero does. */
   moments: Moments;
+  /** All the work, for what the box brings up. */
+  allWork: HomePage["allWork"];
+  describe: HomePage["describe"];
 }) {
-  const items = useOrderedWork(selectedWork.items, moments);
+  const items = useOrderedWork(selectedWork.items, moments, allWork);
 
   return (
     <section
@@ -50,9 +59,11 @@ export function SelectedWork({
       {/* The claim again, carried up with the work it is claiming. */}
       <Claim claim={claim} moments={moments} repeat />
 
+      {describe && <Describe describe={describe} />}
+
       <MotionConfig reducedMotion="user">
-        <ul className="mt-20 grid gap-x-5 gap-y-14 md:grid-cols-3 lg:mt-32">
-          {items.map((project, index) => (
+        <ul className={`grid gap-x-5 gap-y-14 md:grid-cols-3 ${describe ? "mt-12 lg:mt-16" : "mt-20 lg:mt-32"}`}>
+          {items.map(({ project, line }, index) => (
             <motion.li
               key={project.slug}
               initial={{ opacity: 0, y: 48 }}
@@ -88,7 +99,7 @@ export function SelectedWork({
                   {project.name}
                 </h3>
                 <p className="mt-1 text-[0.9375rem] leading-[1.4] text-secondary lg:text-[1.0625rem]">
-                  {project.scope}
+                  {line}
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2 lg:mt-6">
                   <span className="inline-block bg-ink-100 px-2.5 py-1.5 font-label text-[0.6875rem] leading-none tracking-[0.04em] text-primary uppercase">

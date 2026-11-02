@@ -15,7 +15,8 @@ import {
 import { OTHER, UNSURE, shortlist, type Profile, type Shortlist } from "@/lib/guide/shortlist";
 import { insightHref, projectHref } from "@/lib/links";
 import { track } from "@/lib/track";
-import { readVisitor, type Read } from "@/lib/visitor";
+import { needNote, type InterestSource } from "@/lib/interest";
+import { noteInterest, readVisitor, type Read } from "@/lib/visitor";
 import type { GuideCatalogue } from "@/sanity/types";
 import { loadGuide } from "./actions";
 
@@ -161,6 +162,40 @@ export function shortlistFor(catalogue: GuideCatalogue, current: GuideState): Sh
   return shortlist(catalogue, current.profile);
 }
 
+/**
+ * Notes what the visitor is looking for (lib/interest.ts): an audience's
+ * slug and a need's key from the catalogue, never their words. "Someone
+ * else" and "not sure" say nothing.
+ */
+function noteWhat(from: InterestSource, audience: string | null | undefined, needKey: string | null | undefined) {
+  const catalogue = loaded?.catalogue;
+  const fits = catalogue?.audiences.some((one) => one.slug === audience) ? audience! : undefined;
+  const need = catalogue?.needs.find((one) => one.key === needKey);
+  if (!fits && !need) return;
+  noteInterest({ from, ...(fits ? { audience: fits } : {}), ...(need ? { need: needNote(need) } : {}) });
+  track("interest_noted", { from, audience: fits ?? "", need: need?.label ?? "" });
+}
+
+/* ---- Opened from elsewhere on the page ------------------------------------------ */
+
+let opens = 0;
+const openListeners = new Set<() => void>();
+
+/** How many times the panel has been asked for, now. */
+export const openRequests = () => opens;
+
+/** How many times something on the page has asked for the panel: the launcher opens on each. */
+export function useOpenRequests() {
+  return useSyncExternalStore(
+    (listener) => {
+      openListeners.add(listener);
+      return () => openListeners.delete(listener);
+    },
+    () => opens,
+    () => 0,
+  );
+}
+
 /* ---- What the panel does ----------------------------------------------------- */
 
 const id = () => Math.random().toString(36).slice(2, 10);
@@ -197,16 +232,29 @@ export const guide = {
 
   chooseAudience(audience: string) {
     set((current) => ({ profile: { ...current.profile, audience } }));
+    noteWhat("picker", audience, null);
   },
 
   chooseNeed(need: string) {
     set((current) => ({ profile: { ...current.profile, need }, picked: true }));
     const { audience } = state.profile;
     track("guide_pick", { audience: audience ?? "", need });
+    noteWhat("picker", null, need);
   },
 
   skip() {
     set({ picked: true });
+  },
+
+  /**
+   * Opens the panel on a question asked somewhere else on the page, such as
+   * the box over Selected work, and asks it: the conversation starts there.
+   */
+  openWith(question: string, path: string) {
+    opens += 1;
+    for (const listener of openListeners) listener();
+    void prepare();
+    void guide.ask(question, path, []);
   },
 
   restart() {
@@ -266,6 +314,9 @@ export const guide = {
       switch (event.t) {
         case "text":
           update((said) => ({ text: said.text + event.v }));
+          break;
+        case "interest":
+          noteWhat("guide", event.v.audience, event.v.need);
           break;
         case "picks":
           update(() => ({ picks: event.v }));

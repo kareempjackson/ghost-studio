@@ -11,6 +11,7 @@ import { ChatLauncher } from "../../_components/ChatLauncher";
 import { ContactBand } from "../../_components/ContactBand";
 import { Rich } from "../../_components/Rich";
 import { RichText, outline } from "../../_components/RichText";
+import { NoteTags } from "../../_components/NoteTags";
 import { MONO } from "../../_components/SectionHead";
 import { SiteFooter } from "../../_components/SiteFooter";
 import { SiteHeader } from "../../_components/SiteHeader";
@@ -138,6 +139,7 @@ export default async function InsightPage({ params }: PageProps<"/insights/[slug
   return (
     <>
       <SiteHeader />
+      <NoteTags kind="insights" slug={stegaClean(article.slug)} audiences={article.audiences ?? []} />
       <ReadingProgress target="insight-body" />
       <StructuredData data={structured} />
       {/* One layer above the footer, with its own ground: the page is the

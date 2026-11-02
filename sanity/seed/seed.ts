@@ -38,7 +38,7 @@ import { approachPage, phases as approachPhases } from "./content/approach";
 import { buildPage } from "./content/build";
 import { contact } from "./content/contact";
 import { engagePage } from "./content/engage";
-import { greetings, moments, newLabel, studioTimeZone } from "./content/moments";
+import { describe, forYouLabel, greetings, moments, newLabel, shortNames, studioTimeZone } from "./content/moments";
 import { engagement } from "./content/engagement";
 import { ghostUPage, givesPage, labsPage, type FamilyPageData } from "./content/family-pages";
 import { stories } from "./content/family-stories";
@@ -150,6 +150,7 @@ async function documents() {
       "We build public-facing digital systems for institutions that cannot afford to get them wrong.",
     email,
     studioTimeZone,
+    forYouLabel,
     social,
     headerAction: { label: "Let’s talk", href: "/contact" },
   });
@@ -229,6 +230,7 @@ async function documents() {
     },
     claim: { cover: positioning.cover, motto: positioning.motto },
     moments: { greetings, newLabel, items: moments },
+    describe,
     methodology: { heading: "Methodology", difference: positioning.difference },
     selectedWork: {
       tag: selectedWork.tag,
@@ -314,6 +316,7 @@ async function documents() {
     add(`audience-${slug}`, "audience", {
       ...item,
       slug: { _type: "slug", current: slug },
+      ...(shortNames[slug] ? { shortName: shortNames[slug] } : {}),
       ...(audiencePages[slug] ?? {}),
     });
   }

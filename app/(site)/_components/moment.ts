@@ -4,7 +4,8 @@ import { useEffect, useSyncExternalStore } from "react";
 import { readAttribution } from "@/lib/attribution";
 import { orderWork, pick, readSignals, waitsForRegion, type Said } from "@/lib/moments";
 import { regionOf, whereFrom, type Region } from "@/lib/region";
-import { readVisitor, type Visitor } from "@/lib/visitor";
+import { cardFor } from "@/lib/tailored";
+import { readVisitor, subscribeVisitor, type Visitor } from "@/lib/visitor";
 import type { Moments, Project } from "@/sanity/types";
 
 /**
@@ -12,7 +13,9 @@ import type { Moments, Project } from "@/sanity/types";
  * worked out once a page load after the page is up, and shared: the moment
  * said in the motto's place, which the claim's two instances never disagree
  * on; where the visitor is, which orders Selected work; and their visits,
- * which mark what is new since the last one.
+ * which mark what is new since the last one; what they seem to be looking
+ * for (lib/interest.ts), which orders Selected work and says its lines in
+ * their terms; and the work the box at its head found for them.
  *
  * The moment is decided at once from what the browser knows. Only when a
  * moment that reads the visitor's region comes before the first that holds
@@ -30,6 +33,8 @@ interface Known {
   readonly where?: { readonly country?: string; readonly region?: Region };
   /** Their visits, this one counted; null where the browser keeps nothing. */
   readonly visitor?: Visitor | null;
+  /** The work the box found for what they described, each with why (Describe.tsx). */
+  readonly matched?: { readonly slugs: readonly string[]; readonly why: Readonly<Record<string, string>> } | null;
 }
 
 const NOTHING: Known = {};
@@ -108,6 +113,8 @@ async function workOut(moments: Moments, from: string) {
     country: standIn.country,
     recent: moments.recent,
     work: moments.work,
+    interest: visitor?.interest,
+    audienceNames: moments.audienceNames,
   };
   let signals = readSignals(input);
   if (!standIn.country && waitsForRegion(moments, signals)) {
@@ -132,28 +139,63 @@ export function useMoment(moments: Moments | undefined) {
   return useKnown().said;
 }
 
-/** The visitor's visits, this one counted: undefined until the page is up, null if the browser keeps nothing. */
+/**
+ * The visitor's visits, this one counted: undefined until the page is up,
+ * null if the browser keeps nothing. Kept up to date as the page goes on: a
+ * page read, an interest noted.
+ */
 export function useVisitor() {
   useEffect(() => {
     if (known.visitor === undefined) learn({ visitor: readVisitor() ?? null });
+    return subscribeVisitor(() => learn({ visitor: readVisitor() ?? null }));
   }, []);
   return useKnown().visitor;
 }
 
+/** What the visitor seems to be looking for (lib/interest.ts): undefined until the page is up, or if nothing has said. */
+export const useInterest = () => useVisitor()?.interest;
+
+/** The work the box found, shown first until they clear it; null clears it. */
+export function showMatched(matched: Known["matched"]) {
+  learn({ matched });
+}
+
+export const useMatched = () => useKnown().matched;
+
+/** A card as this visitor sees it: the project, and the line under its name. */
+export interface Shown {
+  readonly project: Project;
+  readonly line: string;
+}
+
 /**
- * Selected work in this visitor's order (lib/moments.ts › orderWork): as the
+ * Selected work in this visitor's order, each card with its line. The work
+ * the box found leads, with why; otherwise lib/moments.ts › orderWork, with
+ * the line Tailor with AI wrote for their audience, or the scope. As the
  * editor set it until anything is known, so the page is prerendered and
  * hydrated in that order.
  */
-export function useOrderedWork(items: readonly Project[], moments: Moments) {
+export function useOrderedWork(items: readonly Project[], moments: Moments, all: readonly Project[]): readonly Shown[] {
   const said = useMoment(moments);
   const visitor = useVisitor();
-  const { where } = useKnown();
-  if (!said?.leadWith.length && !where?.country && !(visitor && visitor.visits > 1)) return items;
-  return orderWork(items, {
-    leadWith: said?.leadWith,
-    country: where?.country,
-    region: where?.region,
-    read: visitor && visitor.visits > 1 ? new Set(visitor.read.work.map((one) => one.slug)) : undefined,
-  });
+  const { where, matched } = useKnown();
+  const audience = visitor?.interest?.audience?.slug;
+  const line = (project: Project) => matched?.why[project.slug] || cardFor(project.tailored, audience) || project.scope;
+
+  if (matched?.slugs.length) {
+    const found = matched.slugs.flatMap((slug) => all.find((one) => one.slug === slug) ?? []);
+    return orderWork(items, { leadWith: found }).map((project) => ({ project, line: line(project) }));
+  }
+  const ordered =
+    !said?.leadWith.length && !where?.country && !(visitor && visitor.visits > 1) && !visitor?.interest
+      ? items
+      : orderWork(items, {
+          leadWith: said?.leadWith,
+          audience,
+          discipline: visitor?.interest?.need?.discipline,
+          country: where?.country,
+          region: where?.region,
+          read: visitor && visitor.visits > 1 ? new Set(visitor.read.work.map((one) => one.slug)) : undefined,
+        });
+  return ordered.map((project) => ({ project, line: line(project) }));
 }

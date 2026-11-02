@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { insightHref } from "@/lib/links";
 import type { JournalSection } from "@/sanity/types";
 import { ArrowPill } from "./ArrowPill";
+import { ForYouMark } from "./ForYou";
 import { NewMark } from "./NewMark";
 import { Visual } from "./Visual";
 import { Rich } from "./Rich";
@@ -97,6 +98,7 @@ export function Journal({
               at={featured.at}
               className="rounded-pill bg-signal-500 px-2.5 py-1.5 font-label text-[0.625rem] leading-none tracking-[0.04em] text-ink-950 uppercase"
             />
+            <ForYouMark audiences={featured.audiences} className="rounded-pill bg-ink-950 px-2.5 py-1.5 font-label text-[0.625rem] leading-none tracking-[0.04em] text-white uppercase" />
           </div>
           <h3 className="mt-7 lg:mt-9" style={FEATURED_STYLE}>
             {featured.title.map((line) => (
@@ -176,6 +178,7 @@ export function Journal({
                       at={entry.at}
                       className="rounded-pill bg-signal-500 px-1.5 py-1 text-ink-950"
                     />
+                    <ForYouMark audiences={entry.audiences} className="rounded-pill bg-ink-950 px-1.5 py-1 text-white" />
                   </p>
                   <h3
                     className="mt-3 line-clamp-2 text-ink-950 transition-colors duration-200 group-hover:text-accent lg:mt-4"

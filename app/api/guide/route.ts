@@ -11,7 +11,7 @@ import type {
 } from "@anthropic-ai/sdk/resources/beta/messages";
 import { posthogLog, posthogLogProvider } from "@/instrumentation";
 import { getGrounding, type Grounding } from "@/lib/guide/corpus";
-import { canAsk, siteMay, visitorMay } from "@/lib/guide/limit";
+import { canAsk, fromTheSite, siteMay, visitorMay } from "@/lib/guide/limit";
 import { GUIDE_PROMPT, MAX_PICKS } from "@/lib/guide/prompt";
 import {
   MAX_EARLIER_READS,
@@ -21,12 +21,12 @@ import {
   type GuideContext,
   type GuideError,
   type GuideEvent,
+  type GuideInterest,
   type GuidePick,
   type GuideRequest,
   type SealedTurn,
 } from "@/lib/guide/protocol";
 import { OTHER, UNSURE } from "@/lib/guide/shortlist";
-import { SITE_URL } from "@/lib/site";
 
 /** An answer is short; this is the ceiling on one, its thinking included. */
 export const maxDuration = 60;
@@ -53,12 +53,6 @@ function sealed(turn: SealedTurn) {
 
 /* ---- Abuse ----------------------------------------------------------------- */
 
-/** A browser on this site: its Origin is the site's, or the address the request came in at. */
-function fromTheSite(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return false;
-  return origin === new URL(SITE_URL).origin || origin === new URL(request.url).origin;
-}
 
 /* ---- The request ----------------------------------------------------------- */
 
@@ -114,7 +108,10 @@ function contextNote(context: GuideContext, grounding: Grounding) {
     .join("\n");
 }
 
-/** The two tools, their choices drawn from the site: the pages it may point to, the form's options. */
+/** What note_interest says for a choice it can't make. */
+const UNKNOWN = "unknown";
+
+/** The tools, their choices drawn from the site: the pages it may point to, the form's options, its audiences and needs. */
 function tools(grounding: Grounding): BetaTool[] {
   const paths = Object.keys(grounding.catalogue.cards).sort();
   return [
@@ -166,14 +163,44 @@ function tools(grounding: Grounding): BetaTool[] {
         additionalProperties: false,
       },
     },
+    {
+      name: "note_interest",
+      description:
+        "Note which of the studio's audiences the visitor is and what they need, so the site can show them the closest work first. Not shown to them.",
+      strict: true,
+      eager_input_streaming: true,
+      input_schema: {
+        type: "object",
+        properties: {
+          audience: {
+            type: "string",
+            enum: [...grounding.catalogue.audiences.map((one) => one.slug), UNKNOWN],
+            description: "Who the work would be for, as Who we serve in <site> names them.",
+          },
+          need: {
+            type: "string",
+            enum: [...grounding.catalogue.needs.map((one) => one.label), UNKNOWN],
+            description: "What they need, in the site's own words.",
+          },
+        },
+        required: ["audience", "need"],
+        additionalProperties: false,
+      },
+    },
   ];
 }
+
 
 /** The answer to a tool call the panel has already acted on: it drew the cards, or put up the brief. */
 const toolResult = (block: BetaToolUseBlock): BetaContentBlockParam => ({
   type: "tool_result",
   tool_use_id: block.id,
-  content: block.name === "offer_brief" ? "The draft brief is in front of the visitor." : "Shown to the visitor.",
+  content:
+    block.name === "offer_brief"
+      ? "The draft brief is in front of the visitor."
+      : block.name === "note_interest"
+        ? "Noted."
+        : "Shown to the visitor.",
 });
 
 /**
@@ -218,6 +245,17 @@ function briefFrom(blocks: readonly BetaToolUseBlock[], grounding: Grounding): G
     (one): one is string => typeof one === "string" && options.has(one),
   );
   return { summary, help: [...new Set(help)] };
+}
+
+/** The last thing note_interest said, checked against the site's own lists: a need's label becomes its key. */
+function interestFrom(blocks: readonly BetaToolUseBlock[], grounding: Grounding): GuideInterest | null {
+  const input = blocks.findLast((one) => one.name === "note_interest")?.input as
+    | { audience?: unknown; need?: unknown }
+    | undefined;
+  const { audiences, needs } = grounding.catalogue;
+  const audience = audiences.find((one) => one.slug === input?.audience)?.slug;
+  const need = needs.find((one) => one.label === input?.need)?.key;
+  return audience || need ? { ...(audience ? { audience } : {}), ...(need ? { need } : {}) } : null;
 }
 
 /* ---- The route ------------------------------------------------------------- */
@@ -375,6 +413,8 @@ export async function POST(request: Request) {
         if (picks.length) send({ t: "picks", v: picks });
         const brief = briefFrom(calls, grounding);
         if (brief) send({ t: "brief", v: brief });
+        const interest = interestFrom(calls, grounding);
+        if (interest) send({ t: "interest", v: interest });
 
         const raw = JSON.stringify([...asked, { role: "assistant", content }]);
         logGuideOutcome("guide response completed", SeverityNumber.INFO, {
@@ -385,6 +425,7 @@ export async function POST(request: Request) {
           tool_call_count: calls.length,
           picks_shown: picks.length,
           brief_offered: Boolean(brief),
+          interest_noted: Boolean(interest),
         });
         send({ t: "turn", v: { raw, seal: seal(raw) } });
         send({ t: "done" });

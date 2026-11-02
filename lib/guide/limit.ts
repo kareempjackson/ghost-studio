@@ -20,6 +20,7 @@ import "server-only";
 import { createHmac } from "node:crypto";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { SITE_URL } from "@/lib/site";
 import { GUIDE_ON } from "./protocol";
 
 /** Questions one visitor may ask in a minute. */
@@ -28,6 +29,9 @@ const PER_MINUTE = 5;
 const PER_DAY = 30;
 /** Questions the whole site may ask in a day (UTC): at a cent or two each, $2 to $4. */
 const SITE_PER_DAY = 200;
+/** Searches one visitor may make from the home page's box (Describe.tsx) in a minute, and in a day. */
+const MATCH_PER_MINUTE = 3;
+const MATCH_PER_DAY = 10;
 /** How long to wait for Redis before refusing the question. */
 const TIMEOUT = 2000;
 
@@ -47,6 +51,8 @@ const windows = {
   minute: { max: PER_MINUTE, ms: 60_000, limiter: Ratelimit.slidingWindow(PER_MINUTE, "1 m") },
   day: { max: PER_DAY, ms: 86_400_000, limiter: Ratelimit.fixedWindow(PER_DAY, "1 d") },
   site: { max: SITE_PER_DAY, ms: 86_400_000, limiter: Ratelimit.fixedWindow(SITE_PER_DAY, "1 d") },
+  matchMinute: { max: MATCH_PER_MINUTE, ms: 60_000, limiter: Ratelimit.slidingWindow(MATCH_PER_MINUTE, "1 m") },
+  matchDay: { max: MATCH_PER_DAY, ms: 86_400_000, limiter: Ratelimit.fixedWindow(MATCH_PER_DAY, "1 d") },
 };
 type Window = keyof typeof windows;
 
@@ -115,5 +121,22 @@ export async function visitorMay(request: Request): Promise<"ok" | "busy" | "lim
   return !minute ? "busy" : !day ? "limit" : "ok";
 }
 
-/** Whether the site has questions left today, counting this one. */
+/**
+ * Whether this visitor may search from the box on the home page again: its
+ * own counts, kept apart from the guide's, so one never uses up the other.
+ */
+export async function matchMay(request: Request): Promise<"ok" | "busy" | "limit"> {
+  const id = visitor(request);
+  const [minute, day] = await Promise.all([within("matchMinute", id), within("matchDay", id)]);
+  return !minute ? "busy" : !day ? "limit" : "ok";
+}
+
+/** Whether the site has questions left today, counting this one: the guide's and the box's together. */
 export const siteMay = () => within("site", "all");
+
+/** A browser on this site: its Origin is the site's, or the address the request came in at. */
+export function fromTheSite(request: Request) {
+  const origin = request.headers.get("origin");
+  if (!origin) return false;
+  return origin === new URL(SITE_URL).origin || origin === new URL(request.url).origin;
+}

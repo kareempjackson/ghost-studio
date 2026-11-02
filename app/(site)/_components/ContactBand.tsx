@@ -22,8 +22,9 @@ const HEADING_STYLE: CSSProperties = {
  * trails out from under its bottom edge.
  *
  * Someone who keeps coming back (lib/visitor.ts) may be told something else
- * (Footer › Contact band › For returning visitors). It is decided once the
- * page is up, long before the band at its foot is reached.
+ * (Footer › Contact band › For returning visitors), and so may someone whose
+ * need the site knows (For what they need). It is decided once the page is
+ * up, long before the band at its foot is reached.
  */
 export function ContactBand() {
   const {
@@ -33,8 +34,12 @@ export function ContactBand() {
   const visitor = useVisitor();
   const { returning } = contactBand;
   const back = Boolean(returning && visitor && visitor.visits >= (returning.after ?? 3));
-  const eyebrow = (back && returning?.eyebrow) || contactBand.eyebrow;
-  const heading = back && returning ? returning.heading : contactBand.heading;
+  /* Or, for what they need (lib/interest.ts), the words for its way of working. */
+  const track = visitor?.interest?.need?.track;
+  const forTrack = track ? contactBand.forTracks?.find((one) => one.track === track) : undefined;
+  const words = back && returning ? returning : forTrack;
+  const eyebrow = words?.eyebrow || contactBand.eyebrow;
+  const heading = words ? words.heading : contactBand.heading;
 
   return (
     <div className="relative z-[1] isolate">

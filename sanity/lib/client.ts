@@ -32,6 +32,8 @@ const NOT_COPY = new Set([
   "studioTimeZone",
   "region",
   "countries",
+  /* The way of working a contact band line is for: compared, not shown. */
+  "track",
 ]);
 
 export const client = createClient({

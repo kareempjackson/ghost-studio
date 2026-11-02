@@ -15,6 +15,7 @@ import { SiteHeader } from "./SiteHeader";
 import { StructuredData, faqPage, studio } from "./StructuredData";
 import { LABEL } from "./StudioStrip";
 import { Questions } from "../build/_components/Questions";
+import { ForYouMark } from "./ForYou";
 import { WordmarkPlate } from "./WordmarkPlate";
 import { Rich } from "./Rich";
 
@@ -123,7 +124,8 @@ export async function TrackPage({
 
         {/* The terms, straight after the picture: what it costs, how long. */}
         <div className="flex flex-col gap-4 px-5 pt-14 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12 lg:pt-20">
-          <p className="text-[0.9375rem] leading-none tracking-[-0.01em] text-primary">
+          <p className="flex items-center gap-3 text-[0.9375rem] leading-none tracking-[-0.01em] text-primary">
+            <ForYouMark track={stegaClean(data.slug)} className="rounded-pill bg-ink-950 px-2.5 py-1.5 font-label text-[0.625rem] leading-none tracking-[0.04em] text-white uppercase" />
             {terms.price}
           </p>
           <p className="text-[0.9375rem] leading-none tracking-[-0.01em] text-primary">

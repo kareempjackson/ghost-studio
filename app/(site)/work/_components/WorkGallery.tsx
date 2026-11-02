@@ -3,6 +3,9 @@
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { useState } from "react";
 import { projectHref } from "@/lib/links";
+import { orderWork } from "@/lib/moments";
+import { cardFor } from "@/lib/tailored";
+import { useInterest } from "../../_components/moment";
 import { Visual } from "../../_components/Visual";
 import type { Discipline, Project } from "@/sanity/types";
 
@@ -55,12 +58,15 @@ function CornerArrow() {
  */
 function ProjectCard({
   project,
+  line,
   previewLabel,
   partOf,
   featured = false,
   side = "left",
 }: {
   project: Project;
+  /** The line under its name: the tagline, or the one written for the visitor's audience. */
+  line: string;
   previewLabel: string;
   /** Before the larger project's name, on a card that is one part of it. */
   partOf: string;
@@ -122,7 +128,7 @@ function ProjectCard({
         {project.name}
       </h3>
       <p className="mt-2 text-[0.9375rem] leading-[1.5] text-secondary lg:text-[1rem]">
-        {project.tagline}
+        {line}
       </p>
       {/* Where it was and what for — or, for one part of a larger
           project, which: the rest it shares with that project. */}
@@ -142,6 +148,11 @@ function ProjectCard({
  * reader scans in one go, and a querystring for it would be state nobody
  * asked to share. When the filter leaves one project standing, that project
  * takes the featured plate — the page always opens on a piece of work.
+ *
+ * For a visitor the site knows something about (lib/interest.ts), the work
+ * for who they are and what they need comes first, and each card says its
+ * line in their terms (Tailor with AI); everyone else sees the order the
+ * editor set, which is also what the page is prerendered in.
  */
 export function WorkGallery({
   projects,
@@ -162,9 +173,12 @@ export function WorkGallery({
   empty: string;
 }) {
   const [filter, setFilter] = useState<Discipline | null>(null);
-  const shown = filter
-    ? projects.filter((project) => project.disciplines.includes(filter))
-    : projects;
+  const interest = useInterest();
+  const audience = interest?.audience?.slug;
+  const discipline = interest?.need?.discipline;
+  const ordered = audience || discipline ? orderWork(projects, { audience, discipline }) : projects;
+  const shown = filter ? ordered.filter((project) => project.disciplines.includes(filter)) : ordered;
+  const line = (project: Project) => cardFor(project.tailored, audience) ?? project.tagline;
   const [lead, ...rest] = shown;
 
   const pill = (active: boolean) =>
@@ -237,6 +251,7 @@ export function WorkGallery({
               >
                 <ProjectCard
                   project={lead}
+                  line={line(lead)}
                   previewLabel={previewLabel}
                   partOf={partOf}
                   featured
@@ -268,6 +283,7 @@ export function WorkGallery({
                     >
                       <ProjectCard
                         project={project}
+                        line={line(project)}
                         previewLabel={previewLabel}
                         partOf={partOf}
                         side={index % 2 ? "right" : "left"}

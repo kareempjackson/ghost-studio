@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { CACHE_CONTROL, listFilms, publicUrl, safeName, signedPut, videoKey } from "@/lib/r2";
-import { refuseUnlessEditor } from "../editor";
+import { refuseUnlessEditor } from "@/lib/studio-auth";
 
 /** Larger than any reel the site should ship; R2 takes up to 5 GB a PUT. */
 const MAX_BYTES = 1024 * 1024 * 1024;
@@ -13,7 +13,7 @@ const MAX_BYTES = 1024 * 1024 * 1024;
  * Studio gets that copy back instead.
  */
 export async function POST(request: NextRequest) {
-  const refusal = await refuseUnlessEditor(request);
+  const refusal = await refuseUnlessEditor(request, "change films");
   if (refusal) return refusal;
 
   const { filename, contentType, size } = (await request.json().catch(() => ({}))) as {

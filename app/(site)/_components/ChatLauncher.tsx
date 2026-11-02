@@ -1,11 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { GUIDE_ON } from "@/lib/guide/protocol";
 import { ChatPanel } from "./ChatPanel";
 import { useChrome } from "./ChromeProvider";
-import { guide, prepare } from "./guide/store";
+import { guide, openRequests, prepare, useOpenRequests } from "./guide/store";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 import { WithPathname } from "./WithPathname";
 
@@ -106,13 +106,21 @@ function useOutOfTheWay(path: string | null) {
 function Launcher({ path }: { path: string | null }) {
   const { launcher } = useChrome().chat;
   const [open, setOpen] = useState(false);
+  /* Asked for from elsewhere on the page (guide.openWith): open until closed. */
+  const asked = useOpenRequests();
+  const [answered, setAnswered] = useState(0);
+  const wanted = open || asked > answered;
+  const close = useCallback(() => {
+    setOpen(false);
+    setAnswered(openRequests());
+  }, []);
   const shown = useOutOfTheWay(path);
   const still = usePrefersReducedMotion();
   const rootRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLButtonElement>(null);
 
   /* Out of the way is out of reach: the panel is only open with its pill. */
-  const panelOpen = open && shown;
+  const panelOpen = wanted && shown;
   const motionFor = (duration: number) => ({ duration: still ? 0 : duration, ease: EASE });
 
   useEffect(() => {
@@ -127,11 +135,11 @@ function Launcher({ path }: { path: string | null }) {
     if (!panelOpen) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      setOpen(false);
+      close();
       pillRef.current?.focus();
     };
     const onDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      if (!rootRef.current?.contains(event.target as Node)) close();
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onDown);
@@ -139,7 +147,7 @@ function Launcher({ path }: { path: string | null }) {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("pointerdown", onDown);
     };
-  }, [panelOpen]);
+  }, [panelOpen, close]);
 
   return (
     <div
@@ -163,7 +171,7 @@ function Launcher({ path }: { path: string | null }) {
             <ChatPanel
               path={path ?? "/"}
               onClose={() => {
-                setOpen(false);
+                close();
                 pillRef.current?.focus({ preventScroll: true });
               }}
             />
@@ -181,7 +189,7 @@ function Launcher({ path }: { path: string | null }) {
         }
         transition={motionFor(0.3)}
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => (wanted ? close() : setOpen(true))}
         aria-expanded={panelOpen}
         aria-controls="chat-panel"
         className={`${panelOpen ? "max-sm:hidden" : ""} group flex h-12 items-center gap-3 rounded-pill bg-[#111] pr-6 pl-2.5 text-white shadow-[0_12px_30px_-12px_rgb(14_13_11/0.6)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.03] motion-reduce:hover:scale-100 lg:h-14 lg:pr-7 lg:pl-3`}

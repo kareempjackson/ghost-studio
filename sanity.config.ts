@@ -8,7 +8,7 @@ import { visionTool } from "@sanity/vision";
 import { defineConfig } from "sanity";
 import { presentationTool } from "sanity/presentation";
 import { structureTool } from "sanity/structure";
-import { unpublishEverywhere } from "./sanity/actions";
+import { TailorWithAI, unpublishEverywhere } from "./sanity/actions";
 import { apiVersion, dataset, projectId, studioUrl } from "./sanity/env";
 import { resolve } from "./sanity/presentation";
 import { fixedPages, schemaTypes, singletons } from "./sanity/schemaTypes";
@@ -20,6 +20,8 @@ const fixedTypes = new Set<string>(fixedPages.map((p) => p.type));
 const siteWritten = new Set(["enquiry", "subscriber"]);
 /* Unpublished, these come out of every place that shows them first. */
 const takenOutOnUnpublish = new Set(["project"]);
+/* Written for each audience by Tailor with AI (lib/tailor.ts). */
+const tailoredTypes = new Set(["project", "article"]);
 
 export default defineConfig({
   name: "ghost-savvy",
@@ -80,9 +82,12 @@ export default defineConfig({
         ? actions.filter(
             ({ action }) => action && !["duplicate", "delete", "unpublish"].includes(action),
           )
-        : takenOutOnUnpublish.has(schemaType)
-        ? actions.map((Action) => (Action.action === "unpublish" ? unpublishEverywhere(Action) : Action))
-        : actions,
+        : [
+            ...(takenOutOnUnpublish.has(schemaType)
+              ? actions.map((Action) => (Action.action === "unpublish" ? unpublishEverywhere(Action) : Action))
+              : actions),
+            ...(tailoredTypes.has(schemaType) ? [TailorWithAI] : []),
+          ],
   },
   plugins: [
     structureTool({ structure }),

@@ -15,6 +15,7 @@
  */
 
 import type { Attribution } from "./attribution";
+import type { Interest } from "./interest";
 import { regionName, regionOf, type Region } from "./region";
 import type { Visitor } from "./visitor";
 import type { Moment, MomentWhen, Moments, Place, Project, Published, TimeOfDay } from "@/sanity/types";
@@ -33,6 +34,7 @@ export const TOKENS = {
   lastVisit: "30 September",
   new: "three projects and two insights",
   region: "the Caribbean",
+  audience: "established businesses",
 } as const;
 
 export type Token = keyof typeof TOKENS;
@@ -66,6 +68,11 @@ export interface Signals {
   readonly region?: Region;
   /** Whether Selected work has a project from their country or region. */
   readonly local: boolean;
+  /** Which audience they are taken to be (lib/interest.ts), as a slug, and as a sentence names it. */
+  readonly audience?: string;
+  readonly audienceName?: string;
+  /** Whether Selected work has work for that audience. */
+  readonly forThem: boolean;
   /** The studio's clock, e.g. "9:40 pm". */
   readonly studioTime: string;
   /** Hours from the studio's clock to theirs. */
@@ -87,8 +94,12 @@ export interface SignalInputs {
   readonly referrer?: string;
   readonly country?: string;
   readonly recent: readonly Published[];
-  /** Where Selected work's projects were for. */
+  /** Where Selected work's projects were for, and who. */
   readonly work?: readonly Place[];
+  /** What they seem to be looking for. */
+  readonly interest?: Interest;
+  /** How a sentence names each audience. */
+  readonly audienceNames?: readonly { readonly slug: string; readonly short: string }[];
 }
 
 /** One moment, ready to say. */
@@ -174,6 +185,7 @@ export function readSignals(input: SignalInputs): Signals {
     .join(" ");
   const country = input.country?.toUpperCase();
   const region = regionOf(country);
+  const audience = input.interest?.audience?.slug;
 
   return {
     time: partOfDay(theirs.hour),
@@ -187,6 +199,9 @@ export function readSignals(input: SignalInputs): Signals {
     country,
     region,
     local: (input.work ?? []).some((place) => isFrom(place, country, region) < 2),
+    audience,
+    audienceName: input.audienceNames?.find((one) => one.slug === audience)?.short.trim(),
+    forThem: Boolean(audience && (input.work ?? []).some((place) => place.audiences.includes(audience))),
     studioTime: new Intl.DateTimeFormat("en-GB", {
       timeZone: studioZone,
       hour: "numeric",
@@ -213,6 +228,8 @@ export function holds(when: MomentWhen, s: Signals): boolean {
     (!when.sources?.length || when.sources.some((one) => Boolean(word(one) && s.source?.includes(word(one))))) &&
     (!when.regions?.length || Boolean(s.region && when.regions.includes(s.region))) &&
     (!when.local || s.local) &&
+    (!when.interest || s.forThem) &&
+    (!when.audiences?.length || Boolean(s.audience && when.audiences.includes(s.audience))) &&
     (!when.gap || Math.abs(s.gapHours) >= 2)
   );
 }
@@ -248,6 +265,7 @@ export function fill(moment: Moment, s: Signals, greetings: Moments["greetings"]
     lastVisit: s.lastVisit && day(s.lastVisit, s.timeZone),
     new: whatsNew(s.fresh),
     region: s.region && regionName(s.region),
+    audience: s.audienceName,
   };
   let missing = false;
   const lines = (moment.lines ?? [])
@@ -301,17 +319,32 @@ function isFrom(place: Partial<Pick<Place, "region" | "countries">>, country?: s
   return 2;
 }
 
+/** Ranks compared from the first place they differ, lower first. */
+function byRank(a: readonly number[], b: readonly number[]) {
+  for (let at = 0; at < a.length; at += 1) if (a[at] !== b[at]) return a[at] - b[at];
+  return 0;
+}
+
+/** How close a project is to what they are looking for: 0 written for their audience, 1 their discipline, 2 neither. */
+function isFor(project: Project, audience?: string, discipline?: string) {
+  if (audience && project.tailored?.audiences.includes(audience)) return 0;
+  if (discipline && project.disciplines.some((one) => one === discipline)) return 1;
+  return 2;
+}
+
 /**
  * Selected work in this visitor's order. The projects the moment said leads
  * with come first, taking the places of the last in the selection, so the
- * grid keeps its count. Then work from their country, then their region; a
- * returning visitor's unread before what they have read; and otherwise the
- * order the editor set.
+ * grid keeps its count. Then work for who they are and what they need, then
+ * work from their country, then their region; a returning visitor's unread
+ * before what they have read; and otherwise the order the editor set.
  */
 export function orderWork(
   items: readonly Project[],
-  { leadWith = [], country, region, read }: {
+  { leadWith = [], audience, discipline, country, region, read }: {
     leadWith?: readonly Project[];
+    audience?: string;
+    discipline?: string;
     country?: string;
     region?: Region;
     read?: ReadonlySet<string>;
@@ -320,8 +353,11 @@ export function orderWork(
   const lead = leadWith.filter((project, i) => leadWith.findIndex((one) => one.slug === project.slug) === i);
   const rest = items
     .filter((project) => !lead.some((one) => one.slug === project.slug))
-    .map((project, i) => ({ project, rank: [isFrom(project, country, region), read?.has(project.slug) ? 1 : 0, i] }))
-    .sort((a, b) => a.rank[0] - b.rank[0] || a.rank[1] - b.rank[1] || a.rank[2] - b.rank[2])
+    .map((project, i) => ({
+      project,
+      rank: [isFor(project, audience, discipline), isFrom(project, country, region), read?.has(project.slug) ? 1 : 0, i],
+    }))
+    .sort((a, b) => byRank(a.rank, b.rank))
     .map(({ project }) => project);
   return [...lead, ...rest].slice(0, Math.max(items.length, lead.length));
 }

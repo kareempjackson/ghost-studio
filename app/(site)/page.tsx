@@ -118,7 +118,13 @@ export default async function Home() {
           sheet that slides up off the footer lying underneath it. */}
       <main className="relative z-[1] flex flex-1 flex-col bg-surface-page">
         <Hero hero={home.hero} claim={home.claim} moments={moments} />
-        <SelectedWork selectedWork={home.selectedWork} claim={home.claim} moments={moments} />
+        <SelectedWork
+          selectedWork={home.selectedWork}
+          claim={home.claim}
+          moments={moments}
+          allWork={home.allWork}
+          describe={home.describe}
+        />
         <ExploreWork hero={home.hero} workAction={home.selectedWork.action} />
         <PointOfView pointOfView={pointOfView} />
         <Methodology

@@ -223,6 +223,12 @@ export const audience = defineType({
       validation: (r) => r.required(),
     }),
     para("body", { description: "The line on the card." }),
+    text("shortName", {
+      required: false,
+      title: "Short name",
+      description:
+        "How a sentence names them, e.g. health services: {audience} in the home page's moments. The name if empty.",
+    }),
     metaTitle(),
     plain("description", {
       required: false,

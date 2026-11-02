@@ -5,6 +5,8 @@ import Image from "next/image";
 import type { CSSProperties, KeyboardEvent } from "react";
 import { useRef, useState } from "react";
 import type { Engagement as EngagementData } from "@/sanity/types";
+import { ForYouMark } from "./ForYou";
+import { useInterest } from "./moment";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 import { Visual } from "./Visual";
 import { Rich } from "./Rich";
@@ -26,7 +28,12 @@ const COPY_STYLE: CSSProperties = {
  */
 export function Engagement({ engagement }: { engagement: EngagementData }) {
   const MODELS = engagement.models;
-  const [active, setActive] = useState(MODELS.length - 1);
+  /* It opens on the way of working the visitor's need leads to (lib/interest.ts),
+     until they or the timer move it; otherwise on the last. */
+  const track = useInterest()?.need?.track;
+  const fitting = MODELS.findIndex((one) => one.slug === track);
+  const [chosen, setActive] = useState<number | null>(null);
+  const active = chosen ?? (fitting >= 0 ? fitting : MODELS.length - 1);
   const [held, setHeld] = useState(false);
   const reduced = usePrefersReducedMotion();
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
@@ -36,7 +43,7 @@ export function Engagement({ engagement }: { engagement: EngagementData }) {
   const paused = held || !inView;
   const model = MODELS[active];
 
-  const advance = () => setActive((i) => (i + 1) % MODELS.length);
+  const advance = () => setActive((i) => ((i ?? active) + 1) % MODELS.length);
 
   function onKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     const step =
@@ -209,6 +216,13 @@ export function Engagement({ engagement }: { engagement: EngagementData }) {
                     }`}
                   >
                     {m.kind}
+                  </span>
+                  {/* Every tab keeps the mark's line, so the three stay level whichever has it. */}
+                  <span className="mt-3 block h-[1.0625rem]">
+                    <ForYouMark
+                      track={m.slug}
+                      className="inline-block rounded-pill bg-ink-950 px-2 py-1 font-label text-[0.5625rem] leading-none tracking-[0.04em] text-white uppercase"
+                    />
                   </span>
                 </button>
               );

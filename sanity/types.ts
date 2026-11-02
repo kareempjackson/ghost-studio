@@ -69,6 +69,8 @@ export interface SiteSettings {
   readonly email: string;
   /** The studio's clock, as an IANA time zone, for {studioTime} on the home page; America/New_York if unset. */
   readonly studioTimeZone: string | null;
+  /** The mark on what fits a visitor (lib/interest.ts); none if null. */
+  readonly forYouLabel: string | null;
   readonly social: readonly { readonly id: string; readonly label: string; readonly href: string }[];
   readonly headerAction: Link;
   /** Where /book sends people: the studio's booking page. */
@@ -127,6 +129,8 @@ export interface Footer {
       readonly eyebrow: string | null;
       readonly heading: Lines;
     } | null;
+    /** What it says instead to a visitor whose need leads to a way of working. */
+    readonly forTracks?: readonly { readonly track: string; readonly eyebrow: string | null; readonly heading: Lines }[];
   };
   readonly explore: { readonly label: string; readonly links: readonly Link[] };
   readonly newsletter: {
@@ -273,6 +277,8 @@ export interface Project {
   readonly countries?: readonly string[] | null;
   /** When it went up on the site: for what is new since a visit. */
   readonly addedAt?: string;
+  /** What Tailor with AI wrote for it (lib/tailor.ts): null until it has. */
+  readonly tailored?: Tailored | null;
   readonly disciplines: readonly Discipline[];
   readonly ground: string;
   /** Null until the picture is uploaded: a draft can exist without one. */
@@ -285,6 +291,20 @@ export interface Project {
   readonly parent: { readonly slug: string; readonly name: string } | null;
 }
 
+/** One audience's words for a project: its card line. */
+export interface ForAudience {
+  /** The audience's slug. */
+  readonly audience: string;
+  readonly line: string;
+}
+
+/** What a project carries from Tailor with AI. */
+export interface Tailored {
+  /** The audiences the work answers directly, as slugs. */
+  readonly audiences: readonly string[];
+  readonly cards: readonly ForAudience[];
+}
+
 /** An insight's topic, by name: the topics are documents editors add. */
 export type Topic = string;
 
@@ -293,6 +313,8 @@ export interface ArticleCard {
   readonly topic: Topic;
   readonly title: Lines;
   readonly excerpt: Rich;
+  /** The audiences it speaks to, from Tailor with AI. */
+  readonly audiences?: readonly string[];
   readonly cover: { readonly src: string | null; readonly alt: string; readonly video: Film; readonly ground: string };
 }
 
@@ -334,6 +356,8 @@ export interface ProjectDetail extends Project {
   readonly facts: readonly { readonly label: string; readonly value: Rich }[];
   readonly tags: Lines;
   readonly overview: Rich;
+  /** The 30-second summary for each audience, from Tailor with AI. */
+  readonly summaries: readonly { readonly audience: string; readonly text: string }[];
   readonly website: string | null;
   /** The Ghost family members the work came through, each a way to its page; none while the family is not on show. */
   readonly families: readonly Link[];
@@ -377,6 +401,7 @@ export interface JournalSection {
     readonly action: string;
     /** When it was published: for what is new since a visit. */
     readonly at?: string | null;
+    readonly audiences?: readonly string[];
     readonly image: { readonly src: string | null; readonly alt: string; readonly video: Film };
   };
   readonly entries: readonly {
@@ -386,6 +411,7 @@ export interface JournalSection {
     readonly excerpt: Rich;
     readonly cover: { readonly src: string | null; readonly alt: string; readonly video: Film; readonly ground: string };
     readonly at?: string | null;
+    readonly audiences?: readonly string[];
   }[];
 }
 
@@ -408,6 +434,24 @@ export interface HomePage {
   };
   readonly journal: JournalSection;
   readonly moments: HomeMoments;
+  /** All the work, in /work's order: what the box can bring up besides the selection. */
+  readonly allWork: readonly Project[];
+  /** The box's words (Describe.tsx); no box without them. */
+  readonly describe: Describe | null;
+}
+
+/** The "Describe your project" box at the head of Selected work. */
+export interface Describe {
+  readonly label: string;
+  readonly placeholder: string;
+  readonly submit: string;
+  readonly working: string;
+  readonly result: string;
+  readonly clear: string;
+  readonly guide: string;
+  readonly busy: string;
+  readonly limit: string;
+  readonly error: string;
 }
 
 /** A part of the day, by the visitor's own clock. */
@@ -432,6 +476,10 @@ export interface MomentWhen {
   readonly regions?: readonly string[] | null;
   /** Only when Selected work has a project from their country or region. */
   readonly local?: boolean | null;
+  /** Only when we know who they work for (lib/interest.ts) and Selected work has work for them. */
+  readonly interest?: boolean | null;
+  /** The audiences, as slugs, they may be taken to be: any of them will do. */
+  readonly audiences?: readonly string[] | null;
   /** Only when their clock is two hours or more from the studio's. */
   readonly gap?: boolean | null;
 }
@@ -446,11 +494,12 @@ export interface Moment {
   readonly leadWith: readonly Project[];
 }
 
-/** Where a project was for. */
+/** Where a project was for, and who (Tailor with AI). */
 export interface Place {
   readonly slug: string;
   readonly region: string | null;
   readonly countries: readonly string[] | null;
+  readonly audiences: readonly string[];
 }
 
 /** A case study or an insight, and when it went up: for what is new since a visit. */
@@ -469,6 +518,8 @@ export interface HomeMoments {
   readonly items: readonly Moment[];
   /** Where Selected work's projects were for, for "work from where they are". */
   readonly work: readonly Place[];
+  /** How a sentence names each audience, for {audience}: their short name. */
+  readonly audienceNames: readonly { readonly slug: string; readonly short: string }[];
   /** The latest case studies and insights, newest first. */
   readonly recent: readonly Published[];
 }
@@ -563,6 +614,8 @@ export interface Testimonial {
   /** Square, cropped around the face; their initials are shown without one. */
   readonly portrait: string | null;
   readonly portraitAlt: string;
+  /** The audiences their project was for (Tailor with AI), for putting it first. */
+  readonly audiences?: readonly string[];
 }
 
 export interface Testimonials {

@@ -80,8 +80,40 @@ export interface GuideBrief {
  */
 export type GuideError = "off" | "busy" | "limit" | "declined" | "failed";
 
+/**
+ * Which of the site's audiences and needs the guide judged the visitor to
+ * be, from the conversation: an audience's slug and a need's key, either
+ * left out where it couldn't tell (lib/interest.ts).
+ */
+export interface GuideInterest {
+  readonly audience?: string;
+  readonly need?: string;
+}
+
+/**
+ * The box on the home page (Describe.tsx) and app/api/guide/match: what
+ * the visitor typed goes, and the closest work comes back, each with why,
+ * with the audience and need Claude took them to be. Nothing comes back in
+ * words of its own, and nothing they typed is kept.
+ */
+export interface MatchRequest {
+  readonly question: string;
+}
+
+export interface MatchAnswer {
+  readonly picks: readonly { readonly slug: string; readonly why: string }[];
+  readonly audience?: string;
+  readonly need?: { readonly key: string; readonly track?: string; readonly discipline?: string };
+}
+
+export type MatchReply = MatchAnswer | { readonly error: GuideError };
+
+/** The most work the box brings up: a row of the grid. */
+export const MAX_MATCHES = 3;
+
 export type GuideEvent =
   | { readonly t: "text"; readonly v: string }
+  | { readonly t: "interest"; readonly v: GuideInterest }
   | { readonly t: "picks"; readonly v: readonly GuidePick[] }
   | { readonly t: "brief"; readonly v: GuideBrief }
   | { readonly t: "turn"; readonly v: SealedTurn }

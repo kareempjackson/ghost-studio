@@ -7,28 +7,13 @@
 import { SearchIcon } from "@sanity/icons/Search";
 import { Box, Card, Dialog, Flex, Spinner, Stack, Text, TextInput } from "@sanity/ui";
 import { useEffect, useState } from "react";
-import { useClient, type SanityClient } from "sanity";
+import { useClient } from "sanity";
+import { callSite } from "../lib/call-site";
 import type { R2Video, StoredFilm } from "../../lib/r2";
 import { apiVersion } from "../env";
 
 /** Calls one of the site's /api/r2 routes as the signed-in Studio user. */
-export async function callR2<T>(
-  client: SanityClient,
-  path: string,
-  { body, signal }: { body?: unknown; signal?: AbortSignal } = {},
-) {
-  const token = client.config().token;
-  if (!token) throw new Error("No Studio session token. Sign out and in again.");
-  const res = await fetch(path, {
-    method: body === undefined ? "GET" : "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: body === undefined ? undefined : JSON.stringify(body),
-    cache: "no-store",
-    signal,
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return (await res.json()) as T;
-}
+export const callR2 = callSite;
 
 export const megabytes = (bytes = 0) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 

@@ -100,6 +100,10 @@ const PROJECT = `{
   "slug": slug.current,
   name, scope, tagline, location, sector, region, countries,
   "addedAt": _createdAt,
+  "tailored": select(defined(tailored) => {
+    "audiences": coalesce(tailored.audiences[]->slug.current, []),
+    "cards": coalesce(tailored.cards[defined(line) && defined(audience->slug.current)]{"audience": audience->slug.current, line}, [])
+  }),
   "disciplines": ${DISCIPLINES},
   ground,
   "image": ${url("image")},
@@ -135,6 +139,7 @@ const workOrder = (projection: string) => `[
 const ARTICLE = `{
   "slug": slug.current,
   "topic": ${TOPIC}, title, excerpt,
+  "audiences": coalesce(tailored.audiences[]->slug.current, []),
   "cover": {"src": ${url("cover.image")}, "alt": coalesce(cover.image.alt, ""), "video": ${vid("cover.image")}, "ground": coalesce(cover.ground, "#e7e6e1")}
 }`;
 
@@ -216,7 +221,7 @@ export const getSettings = () =>
       title, description, googleSiteVerification, bingSiteVerification,
       gaMeasurementId, posthogKey, posthogRegion, sessionReplays,
       linkedinPartnerId, linkedinConversions{enquiry, newsletter, booking, deck}, metaPixelId, consentScope,
-      email, studioTimeZone, social[]{id, label, href}, headerAction${link},
+      email, studioTimeZone, forYouLabel, social[]{id, label, href}, headerAction${link},
       bookingUrl, "deck": credentialsDeck.asset->{url, originalFilename},
       "cookieBanner": select(defined(cookieBanner) => cookieBanner{message, link${link}, accept, decline, settings})
     }`,
@@ -273,7 +278,8 @@ export async function getFooter(): Promise<Footer> {
     `{
       contactBand{
         eyebrow, heading, action${link},
-        "returning": select(count(returning.heading) > 0 => returning{after, eyebrow, heading})
+        "returning": select(count(returning.heading) > 0 => returning{after, eyebrow, heading}),
+        "forTracks": coalesce(forTracks[count(heading) > 0]{track, eyebrow, heading}, [])
       },
       explore{label, links[]${link}},
       newsletter{heading, placeholder, inputLabel, action, note{before, link${link}, after}, done, invalid, failed},
@@ -353,13 +359,18 @@ export const getHomePage = () =>
       metaTitle, description,
       hero{"video": ${film("video")}, "poster": ${url("poster")}, showreelLabel, showreelMark},
       claim{cover, motto},
+      "allWork": *[_id == "workPage"][0]{"list": ${workOrder(PROJECT)}}.list,
+      "describe": select(defined(describe.placeholder) => describe{label, placeholder, submit, working, result, clear, guide, busy, limit, error}),
       methodology{heading, difference},
       selectedWork{tag, "items": projects[defined(@->slug.current)]->${PROJECT}, action${link}},
       journal{
         eyebrow, heading,
         "featured": featured{
           label, action,
-          ...article->{"slug": slug.current, "category": ${TOPIC}, title, "summary": excerpt, "at": publishedAt},
+          ...article->{
+            "slug": slug.current, "category": ${TOPIC}, title, "summary": excerpt, "at": publishedAt,
+            "audiences": coalesce(tailored.audiences[]->slug.current, [])
+          },
           "image": {
             "src": coalesce(${url("image")}, ${url("article->cover.image")}),
             "video": coalesce(${vid("image")}, ${vid("article->cover.image")}),
@@ -368,6 +379,7 @@ export const getHomePage = () =>
         },
         "entries": entries[defined(@->slug.current)]->{
           "slug": slug.current, "category": ${TOPIC}, title, excerpt, "at": publishedAt,
+          "audiences": coalesce(tailored.audiences[]->slug.current, []),
           "cover": {"src": ${url("cover.image")}, "alt": coalesce(cover.image.alt, ""), "video": ${vid("cover.image")}, "ground": coalesce(cover.ground, "#e7e6e1")}
         }
       },
@@ -375,10 +387,16 @@ export const getHomePage = () =>
         "greetings": moments.greetings{morning, afternoon, evening, night},
         "newLabel": moments.newLabel,
         "items": coalesce(moments.items[count(lines) > 0]{
-          "key": _key, title, "when": coalesce(when, {}), lines,
+          "key": _key, title, lines,
+          "when": coalesce(when{..., "audiences": audiences[]->slug.current}, {}),
           "leadWith": coalesce(leadWith[defined(@->slug.current)]->${PROJECT}, [])
         }, []),
-        "work": selectedWork.projects[defined(@->slug.current)]->{"slug": slug.current, region, countries},
+        "work": selectedWork.projects[defined(@->slug.current)]->{
+          "slug": slug.current, region, countries, "audiences": coalesce(tailored.audiences[]->slug.current, [])
+        },
+        "audienceNames": *[_type == "audience" && defined(slug.current)]{
+          "slug": slug.current, "short": coalesce(shortName, array::join(name, " "))
+        },
         "recent": *[_type in ["project", "article"] && defined(slug.current)]
           | order(coalesce(publishedAt, _createdAt) desc)[0...20]{
             "kind": _type, "slug": slug.current, "at": coalesce(publishedAt, _createdAt)
@@ -442,7 +460,10 @@ export async function getTestimonials(): Promise<Testimonials> {
     "testimonials",
     `{
       eyebrow, heading, deck, label,
-      items[]{quote, name, role, company, "portrait": portrait${PORTRAIT}, "portraitAlt": coalesce(portrait.alt, "")},
+      items[]{
+        quote, name, role, company, "portrait": portrait${PORTRAIT}, "portraitAlt": coalesce(portrait.alt, ""),
+        "audiences": coalesce(project->tailored.audiences[]->slug.current, [])
+      },
       controls
     }`,
     [],
@@ -971,6 +992,7 @@ export async function getProject(slug: string): Promise<ProjectDetail | null> {
         "facts": coalesce(facts[]{label, value}, []),
         "tags": coalesce(tags, []),
         "overview": coalesce(overview, []),
+        "summaries": coalesce(tailored.summaries[defined(text) && defined(audience->slug.current)]{"audience": audience->slug.current, text}, []),
         website,
         "families": *[_type == "familyPage" && slug in coalesce(^.families, [])]{"label": coalesce(title, slug), "href": "/" + slug},
         "feature": select(defined(feature) => feature${MEDIA}),

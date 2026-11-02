@@ -9,6 +9,10 @@
  * case studies and insights read on earlier visits (guide/store.ts), so it
  * can build on them. No event or form sends it.
  *
+ * It also holds what they seem to be looking for (lib/interest.ts): which of
+ * the studio's audiences and needs, learned from the guide, the box on the
+ * home page and what they read.
+ *
  * Kept where consent allows, as the attribution record is
  * (lib/attribution.ts): in local storage once the visitor allows cookies
  * (lib/consent.ts), so a visit weeks later still knows them; until then in
@@ -16,10 +20,14 @@
  * they choose. Until consent is known it is only held, and written once it is.
  */
 
+import { audienceFromReads, mergeInterest, type Interest, type InterestNote } from "./interest";
+
 export interface Read {
   readonly slug: string;
   /** When, as an ISO date. */
   readonly at: string;
+  /** The audiences the page was written for (Tailor with AI), once it has said. */
+  readonly audiences?: readonly string[];
 }
 
 export interface Visitor {
@@ -35,6 +43,8 @@ export interface Visitor {
   readonly lastSeen: string;
   /** The case studies and insights they have read, latest first. */
   readonly read: { readonly work: readonly Read[]; readonly insights: readonly Read[] };
+  /** What they seem to be looking for, if anything has said. */
+  readonly interest?: Interest;
 }
 
 const KEY = "gs-visitor";
@@ -49,6 +59,15 @@ const KEEP_READS = 20;
 let record: Visitor | null = null;
 /** Where it is kept: null until consent is known. */
 let persist: boolean | null = null;
+const listeners = new Set<() => void>();
+
+/** Hears each change to the record in this page: a page read, an interest noted. */
+export function subscribeVisitor(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
 
 function parse(raw: string | null): Visitor | null {
   try {
@@ -74,6 +93,13 @@ function advance(before: Visitor | null, now: Date): Visitor {
     return { ...before, visits: before.visits + 1, current: at, previous: before.lastSeen, lastSeen: at };
   }
   return { ...before, lastSeen: at };
+}
+
+/** Takes the new record, tells whoever listens, and keeps it where consent allows. */
+function commit(next: Visitor) {
+  record = next;
+  for (const listener of listeners) listener();
+  save();
 }
 
 function save() {
@@ -117,9 +143,32 @@ export function noteRead(path: string) {
   if (page) {
     const kind = page[1] === "work" ? "work" : "insights";
     const slug = decodeURIComponent(page[2]);
-    const read = [{ slug, at: now.toISOString() }, ...next.read[kind].filter((one) => one.slug !== slug)];
+    const known = next.read[kind].find((one) => one.slug === slug);
+    const read = [{ ...known, slug, at: now.toISOString() }, ...next.read[kind].filter((one) => one.slug !== slug)];
     next = { ...next, read: { ...next.read, [kind]: read.slice(0, KEEP_READS) } };
   }
-  record = next;
-  save();
+  commit(next);
+}
+
+/** Notes what a source says they are looking for (lib/interest.ts). */
+export function noteInterest(note: InterestNote) {
+  const before = readVisitor();
+  if (!before) return;
+  commit({ ...before, interest: mergeInterest(before.interest, note) });
+}
+
+/**
+ * Notes the audiences a page they are reading was written for, and, once two
+ * or more pages share one, takes it as what they are looking for.
+ */
+export function noteTags(kind: "work" | "insights", slug: string, audiences: readonly string[]) {
+  const before = readVisitor();
+  if (!before) return;
+  const known = before.read[kind].find((one) => one.slug === slug);
+  const read = known
+    ? before.read[kind].map((one) => (one.slug === slug ? { ...one, audiences } : one))
+    : [{ slug, at: new Date().toISOString(), audiences }, ...before.read[kind]].slice(0, KEEP_READS);
+  const next = { ...before, read: { ...before.read, [kind]: read } };
+  const audience = audienceFromReads([...next.read.work, ...next.read.insights]);
+  commit(audience ? { ...next, interest: mergeInterest(next.interest, { audience, from: "reading" }) } : next);
 }

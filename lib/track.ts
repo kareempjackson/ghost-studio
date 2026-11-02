@@ -9,8 +9,9 @@
  * that the panel was opened, what its two questions were answered, which
  * pages it sent people to, that a question was asked and that a brief was
  * sent. And which of the home page's moments a visitor was shown, by its
- * title (lib/moments.ts). Counts and pages only: nothing anyone types is
- * ever sent.
+ * title (lib/moments.ts), and which of the site's audiences and needs they
+ * were taken to be, and from where (lib/interest.ts). Counts, pages and the
+ * site's own lists only: nothing anyone types is ever sent.
  *
  * Quiet wherever no tool is loaded, which is everywhere but a production
  * build with their IDs set. An event from before PostHog or the pixels have
@@ -36,7 +37,9 @@ export type EventName =
   | "guide_brief_sent"
   | "showreel_started"
   | "insight_shared"
-  | "moment_shown";
+  | "moment_shown"
+  | "interest_noted"
+  | "match_asked";
 
 /** Held until PostHog starts, if it is going to. */
 const held: [EventName, Params][] = [];

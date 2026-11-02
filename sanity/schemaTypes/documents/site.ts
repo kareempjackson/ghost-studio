@@ -89,6 +89,13 @@ export const siteSettings = defineType({
       description: "The studio's address: the contact page, the footer, the chat and the forms all use it.",
       validation: (r) => r.required().email(),
     }),
+    text("forYouLabel", {
+      group: "site",
+      required: false,
+      title: "For you mark",
+      description:
+        "The mark on what fits a visitor: the way of working for what they need, an insight for who they are, and over a case study's summary written for them. No mark if empty.",
+    }),
     defineField({
       name: "studioTimeZone",
       type: "string",
@@ -374,6 +381,25 @@ export const footer = defineType({
             description:
               "What the band says instead to someone who keeps coming back, counted in their browser (the home page's moments count the same visits). The action stays the same.",
             collapsed: true,
+          },
+        ),
+        list(
+          "forTracks",
+          [
+            defineField({
+              name: "track",
+              type: "string",
+              options: { list: ["build", "engage", "integrate"] },
+              validation: (r) => r.required(),
+            }),
+            text("eyebrow", { required: false, description: "The eyebrow above is kept if empty." }),
+            lines("heading"),
+          ],
+          {
+            title: "For what they need",
+            description:
+              "What the band says instead to a visitor whose need leads to this way of working (lib/interest.ts). Someone back on their third visit is told the returning words first.",
+            preview: { select: { title: "track", subtitle: "heading.0" } },
           },
         ),
       ],

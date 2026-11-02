@@ -7,6 +7,7 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { families } from "../../../lib/links";
 import { REGIONS } from "../../../lib/region";
+import { CARD_MAX } from "../../../lib/tailored";
 import {
   action,
   colour,
@@ -131,6 +132,97 @@ const chapters = (extra: ReturnType<typeof defineField>[] = []) =>
 /** A document's own id, as a reference filter needs it: without "drafts.". */
 const ownId = (document: { _id: string }) => document._id.replace(/^drafts\./, "");
 
+/** An audience a line or summary is written for. */
+const forAudience = defineField({
+  name: "audience",
+  type: "reference",
+  to: [{ type: "audience" }],
+  validation: (r) => r.required(),
+});
+
+/** An audience's name, for a row's preview: its lines joined. */
+const audienceName = { n0: "audience.name.0", n1: "audience.name.1", n2: "audience.name.2" };
+const joinName = ({ n0, n1, n2 }: Record<string, string | undefined>) => [n0, n1, n2].filter(Boolean).join(" ");
+
+/**
+ * What Tailor with AI writes (lib/tailor.ts): the audiences the work speaks
+ * to and, for a project, each audience's card line and summary. Written
+ * again whenever what it was written from changes, unless Keep my edits is on.
+ */
+const tailored = (lines: boolean) =>
+  defineField({
+    name: "tailored",
+    type: "object",
+    group: "audiences",
+    title: "For each audience",
+    description:
+      "Written by Tailor with AI (the action menu) from this document, and written again whenever it changes. Change anything here; with Keep my edits on, it is never written over.",
+    options: { collapsible: false },
+    fields: [
+      defineField({
+        name: "audiences",
+        title: "Speaks to",
+        type: "array",
+        of: [defineArrayMember({ type: "reference", to: [{ type: "audience" }] })],
+        description: lines
+          ? "The audiences whose own problems this work answers. Visitors who fit them see it first."
+          : "The audiences whose own problems this piece addresses. Visitors who fit them see it marked.",
+      }),
+      ...(lines
+        ? [
+            defineField({
+              name: "cards",
+              title: "Card lines",
+              type: "array",
+              description: "The line under the name on its card, for each audience. The tagline for anyone else.",
+              of: [
+                defineArrayMember({
+                  type: "object",
+                  fields: [
+                    forAudience,
+                    defineField({
+                      name: "line",
+                      type: "string",
+                      validation: (r) => r.required().max(CARD_MAX).warning(`Cards hold about ${CARD_MAX} characters.`),
+                    }),
+                  ],
+                  preview: {
+                    select: { title: "line", ...audienceName },
+                    prepare: ({ title, ...name }) => ({ title, subtitle: joinName(name) }),
+                  },
+                }),
+              ],
+            }),
+            defineField({
+              name: "summaries",
+              title: "30-second summaries",
+              type: "array",
+              description: "Set at the top of the case study, for a visitor from each audience.",
+              of: [
+                defineArrayMember({
+                  type: "object",
+                  fields: [forAudience, defineField({ name: "text", type: "text", rows: 3, validation: (r) => r.required() })],
+                  preview: {
+                    select: { title: "text", ...audienceName },
+                    prepare: ({ title, ...name }) => ({ title, subtitle: joinName(name) }),
+                  },
+                }),
+              ],
+            }),
+          ]
+        : []),
+      defineField({
+        name: "keep",
+        title: "Keep my edits",
+        type: "boolean",
+        initialValue: false,
+        description: "On, Tailor with AI leaves this tab alone.",
+      }),
+      defineField({ name: "source", type: "string", hidden: true, readOnly: true }),
+      defineField({ name: "writtenAt", title: "Written", type: "datetime", readOnly: true }),
+    ],
+  });
+
 export const project = defineType({
   name: "project",
   title: "Project",
@@ -138,6 +230,7 @@ export const project = defineType({
   groups: [
     { name: "card", title: "Card", default: true },
     { name: "story", title: "Case study" },
+    { name: "audiences", title: "For each audience" },
     { name: "seo", title: "SEO" },
   ],
   fields: [
@@ -356,6 +449,7 @@ export const project = defineType({
           (value?.length ?? 0) <= 2 ? true : "Two at most: remove one to make room.",
         ),
     }),
+    tailored(true),
   ],
   preview: {
     select: { title: "name", scope: "scope", parent: "parent.name", media: "image" },
@@ -651,6 +745,7 @@ export const article = defineType({
   type: "document",
   groups: [
     { name: "content", title: "Content", default: true },
+    { name: "audiences", title: "For each audience" },
     { name: "seo", title: "SEO" },
   ],
   fields: [
@@ -689,6 +784,7 @@ export const article = defineType({
     }),
     { ...body, group: "content" },
     defineField({ name: "seo", type: "seo", title: "SEO", group: "seo" }),
+    tailored(false),
   ],
   orderings: [
     {

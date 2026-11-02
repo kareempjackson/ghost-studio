@@ -159,6 +159,20 @@ const moments = object(
               description: "From the country their connection is in; never closer than that. None ticked: anywhere.",
             }),
             defineField({
+              name: "interest",
+              title: "Work for who they are",
+              type: "boolean",
+              description:
+                "Only when we know which audience they are (from the site guide, the box above Selected work, or what they have read) and Selected work has work for them, which it then shows first.",
+            }),
+            defineField({
+              name: "audiences",
+              title: "Who they are",
+              type: "array",
+              of: [defineArrayMember({ type: "reference", to: [{ type: "audience" }] })],
+              description: "Only for visitors taken to be one of these audiences. None: anyone.",
+            }),
+            defineField({
               name: "local",
               title: "Work from where they are",
               type: "boolean",
@@ -231,6 +245,27 @@ export const homePage = defineType({
       lines("cover", { description: "The claim, one line per row. The break is part of the design." }),
       lines("motto", { description: "Set opposite the claim, one sentence per line." }),
     ]),
+    object(
+      "describe",
+      [
+        text("label", { description: "Over the box, e.g. Describe your project." }),
+        text("placeholder", { description: "In the box until they type." }),
+        text("submit", { description: "The button's words, read out by screen readers." }),
+        text("working", { description: "While the work is read." }),
+        text("result", { description: "Over the work it found." }),
+        text("clear", { description: "Back to the selection." }),
+        text("guide", { description: "Takes what they typed to the site guide." }),
+        text("busy", { description: "When too many searches arrive at once." }),
+        text("limit", { description: "When they have searched their day's worth." }),
+        text("error", { description: "When it couldn't search." }),
+      ],
+      {
+        title: "Describe your project",
+        description:
+          "The box at the head of Selected work: a visitor says what they are working on, and Claude brings up the closest work. Hidden until it has its words.",
+        collapsed: true,
+      },
+    ),
     object("methodology", [text("heading"), para("difference")]),
     object("selectedWork", [
       text("tag"),
@@ -413,6 +448,14 @@ export const testimonials = defineType({
         text("name"),
         text("role"),
         text("company"),
+        defineField({
+          name: "project",
+          title: "Their project",
+          type: "reference",
+          to: [{ type: "project" }],
+          description:
+            "Optional. The work they are speaking of: a visitor of the audience it was for (Tailor with AI) sees this quote first.",
+        }),
         picture("portrait", {
           required: false,
           video: false,

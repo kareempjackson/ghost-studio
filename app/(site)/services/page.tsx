@@ -20,6 +20,7 @@ import { SiteFooter } from "../_components/SiteFooter";
 import { SiteHeader } from "../_components/SiteHeader";
 import { StructuredData, studio } from "../_components/StructuredData";
 import { LABEL, StudioStrip } from "../_components/StudioStrip";
+import { ForYouMark } from "../_components/ForYou";
 import { Disciplines } from "./_components/Disciplines";
 import { Rich } from "../_components/Rich";
 
@@ -129,8 +130,11 @@ export default async function Services() {
                 className="grid gap-y-5 lg:grid-cols-[minmax(0,9fr)_minmax(0,7fr)_minmax(0,4fr)] lg:gap-x-8"
               >
                 <div>
-                  <p className={`${MONO} text-ink-500`}>
-                    {pad(index + 1)} / {model.name}
+                  <p className={`${MONO} flex items-center gap-3 text-ink-500`}>
+                    <span>
+                      {pad(index + 1)} / {model.name}
+                    </span>
+                    <ForYouMark track={stegaClean(model.slug)} className="rounded-pill bg-ink-950 px-2.5 py-1.5 font-label text-[0.625rem] leading-none tracking-[0.04em] text-white uppercase" />
                   </p>
                   <h3 className="mt-6 lg:mt-10">
                     <a

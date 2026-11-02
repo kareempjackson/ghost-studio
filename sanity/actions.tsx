@@ -11,6 +11,7 @@
  * With nothing pointing to it, or inside a release, Sanity's own action runs.
  */
 
+import { SparklesIcon } from "@sanity/icons/Sparkles";
 import { Stack, Text } from "@sanity/ui";
 import { useToast } from "@sanity/ui/toast";
 import { useState } from "react";
@@ -25,6 +26,7 @@ import {
   type Schema,
 } from "sanity";
 import { apiVersion } from "./env";
+import { callSite } from "./lib/call-site";
 
 /** A document that points to the one going, and the fields it does it from. */
 type Place = { id: string; label: string; fields: string[] };
@@ -149,3 +151,46 @@ export function unpublishEverywhere(Unpublish: DocumentActionComponent): Documen
   wrapped.set(Unpublish, Action);
   return Action;
 }
+
+/**
+ * Tailor with AI: writes the For each audience tab of the project or insight
+ * open in the Studio (lib/tailor.ts, through /api/tailor) into its draft, to
+ * read over and publish. Off while Keep my edits is on. Claude takes up to a
+ * minute over a whole case study.
+ */
+export const TailorWithAI: DocumentActionComponent = ({ id, type, draft, published, onComplete }) => {
+  const client = useClient({ apiVersion });
+  const toast = useToast();
+  const { patch } = useDocumentOperation(id, type);
+  const [busy, setBusy] = useState(false);
+  const kept = Boolean(((draft ?? published)?.tailored as { keep?: boolean } | undefined)?.keep);
+
+  return {
+    label: busy ? "Tailoring…" : "Tailor with AI",
+    icon: SparklesIcon,
+    title: kept
+      ? "Keep my edits is on in For each audience"
+      : "Write its card lines and summaries for each audience, into the draft",
+    disabled: busy || kept || (!draft && !published),
+    onHandle: async () => {
+      setBusy(true);
+      try {
+        const { tailored } = await callSite<{ tailored: Record<string, unknown> }>(client, "/api/tailor", {
+          body: { id, type },
+        });
+        patch.execute([{ set: { tailored } }]);
+        toast.push({
+          status: "success",
+          title: "Written for each audience",
+          description: "Read it over in the For each audience tab, then publish.",
+        });
+      } catch (error) {
+        toast.push({ status: "error", title: "Couldn't tailor this", description: (error as Error).message });
+      } finally {
+        setBusy(false);
+        onComplete();
+      }
+    },
+  };
+};
+TailorWithAI.displayName = "TailorWithAIAction";
