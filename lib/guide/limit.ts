@@ -7,9 +7,9 @@
  * number in a day, which holds the bill to a few dollars however many
  * visitors, or addresses, there are.
  *
- * The counts live in Upstash Redis (UPSTASH_REDIS_REST_URL and _TOKEN, or the
- * KV_REST_API_ pair the Vercel integration sets), which every instance
- * shares: Vercel runs many, and a count one instance keeps in memory is no
+ * The counts live in Upstash Redis (REDIS_KV_REST_API_URL and _TOKEN, as the
+ * Vercel integration set them for this project; KV_REST_API_ or
+ * UPSTASH_REDIS_REST_ work too), which every instance shares: Vercel runs many, and a count one instance keeps in memory is no
  * limit. In production the guide takes no questions without it; in
  * development a count in memory stands in. A visitor is counted by a keyed
  * hash of their address, never the address itself, and a count goes when
@@ -31,8 +31,11 @@ const SITE_PER_DAY = 200;
 /** How long to wait for Redis before refusing the question. */
 const TIMEOUT = 2000;
 
-const redis =
-  process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL ? Redis.fromEnv() : null;
+const url =
+  process.env.REDIS_KV_REST_API_URL || process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+const token =
+  process.env.REDIS_KV_REST_API_TOKEN || process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+const redis = url && token ? new Redis({ url, token }) : null;
 
 /** Whether the guide may answer questions: on, with a key, and with counts that hold. */
 export const canAsk =
