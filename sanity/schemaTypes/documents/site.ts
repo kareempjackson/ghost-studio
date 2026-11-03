@@ -554,7 +554,10 @@ export const chat = defineType({
         text("audienceLink", {
           description: "{audience}: the audience's name. The link to its page under the shortlist.",
         }),
-        text("restart"),
+        text("restart", {
+          description:
+            "For screen readers, and on hover: the button in the panel's header that clears the answers and the conversation.",
+        }),
       ],
       { group: "shortlist" },
     ),

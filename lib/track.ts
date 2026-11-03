@@ -7,8 +7,8 @@
  * or the site guide, a newsletter sign-up, a case study read, the booking
  * page opened, the credentials deck downloaded. And the site guide's own:
  * that the panel was opened, what its two questions were answered, which
- * pages it sent people to, that a question was asked and that a brief was
- * sent. And which of the home page's moments a visitor was shown, by its
+ * pages it sent people to, that a question was asked, that a conversation
+ * was started again and that a brief was sent. And which of the home page's moments a visitor was shown, by its
  * title (lib/moments.ts), and which of the site's audiences and needs they
  * were taken to be, and from where (lib/interest.ts). Counts, pages and the
  * site's own lists only: nothing anyone types is ever sent.
@@ -34,6 +34,7 @@ export type EventName =
   | "guide_pick"
   | "guide_ask"
   | "guide_card_click"
+  | "guide_restart"
   | "guide_brief_sent"
   | "showreel_started"
   | "insight_shared"

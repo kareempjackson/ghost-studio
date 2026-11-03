@@ -8,6 +8,10 @@ import { AskBar, Thread } from "./guide/Thread";
 import { guide, prepare, shortlistFor, useCatalogue, useGuide } from "./guide/store";
 import { KICKER } from "./guide/styles";
 
+/** A round button on the panel's dark header: start again, close. */
+const HEADER_BUTTON =
+  "grid size-9 shrink-0 place-items-center rounded-full bg-white/15 text-white transition-colors duration-200 hover:bg-white hover:text-ink-950";
+
 /**
  * The site guide's panel: a header that says what it is, then the way in.
  *
@@ -56,6 +60,16 @@ export function ChatPanel({ onClose, path }: { onClose: () => void; path: string
   ];
   const follow = () => onClose();
 
+  /* Something to clear: an answer given, the questions skipped, or a question asked. */
+  const started = state.view === "guide" && (state.profile.audience !== null || state.picked || state.thread.length > 0);
+  const restart = () => {
+    guide.restart();
+    /* The button goes with what it cleared, so focus goes to the first question. */
+    requestAnimationFrame(() =>
+      root.current?.querySelector<HTMLElement>("[data-autofocus]")?.focus({ preventScroll: true }),
+    );
+  };
+
   return (
     <div
       ref={root}
@@ -74,24 +88,43 @@ export function ChatPanel({ onClose, path }: { onClose: () => void; path: string
           </h2>
           <p className="mt-2 text-[0.8125rem] leading-[1.35] text-ink-400">{chat.disclosure}</p>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={chat.closeLabel}
-          className="grid size-9 shrink-0 place-items-center rounded-full bg-white/15 text-white transition-colors duration-200 hover:bg-white hover:text-ink-950"
-        >
-          <svg
-            aria-hidden
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            className="size-3.5"
-          >
-            <path d="m4 4 8 8M12 4l-8 8" />
-          </svg>
-        </button>
+        <div className="flex shrink-0 gap-2">
+          {loaded && started && (
+            <button
+              type="button"
+              onClick={restart}
+              aria-label={chat.picker.restart}
+              title={chat.picker.restart}
+              className={HEADER_BUTTON}
+            >
+              <svg
+                aria-hidden
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-3.5"
+              >
+                <path d="M2.5 8a5.5 5.5 0 1 0 5.5-5.5 6 6 0 0 0-4.1 1.7L2.5 5.5M2.5 2.5v3h3" />
+              </svg>
+            </button>
+          )}
+          <button type="button" onClick={onClose} aria-label={chat.closeLabel} className={HEADER_BUTTON}>
+            <svg
+              aria-hidden
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              className="size-3.5"
+            >
+              <path d="m4 4 8 8M12 4l-8 8" />
+            </svg>
+          </button>
+        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5">

@@ -200,6 +200,9 @@ export function useOpenRequests() {
 
 const id = () => Math.random().toString(36).slice(2, 10);
 
+/** The latest answer asked for, to stop if the conversation is started again. */
+let asking: AbortController | null = null;
+
 /**
  * For someone who has been before, what the guide is told of it: how often,
  * when last, and the case studies and insights read on earlier visits
@@ -257,8 +260,15 @@ export const guide = {
     void guide.ask(question, path, []);
   },
 
+  /**
+   * Clears the two answers, the conversation and the brief it drafted, and
+   * stops an answer being written: the panel is as it was first opened. The
+   * pages read in this tab stay, for the next conversation.
+   */
   restart() {
-    set({ profile: { audience: null, need: null }, picked: false });
+    asking?.abort();
+    set({ profile: EMPTY.profile, picked: false, thread: [], turns: [], draft: null, view: "guide" });
+    track("guide_restart");
   },
 
   show(view: GuideState["view"]) {
@@ -272,6 +282,8 @@ export const guide = {
     if (!text || state.thread.some((said) => said.writing) || state.turns.length >= MAX_TURNS) return;
 
     const answer = id();
+    const controller = new AbortController();
+    asking = controller;
     const context: GuideContext = { path, visited: state.visited, profile: state.profile, shown, returning: returning() };
     const turns = state.turns;
     /* A question typed before the two are answered passes over them. */
@@ -297,6 +309,7 @@ export const guide = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ turns, question: text, context }),
+        signal: controller.signal,
       });
     } catch {
       fail("failed");

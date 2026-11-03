@@ -123,12 +123,7 @@ export function Picker({
 
   return (
     <section aria-label={picker.resultLabel}>
-      <div className="flex items-baseline justify-between gap-4">
-        <h3 className={KICKER}>{picker.resultLabel}</h3>
-        <button type="button" onClick={guide.restart} className={`shrink-0 ${QUIET} text-[0.8125rem]`}>
-          {picker.restart}
-        </button>
-      </div>
+      <h3 className={KICKER}>{picker.resultLabel}</h3>
       {answered.length > 0 && (
         <p className="mt-2.5 text-[0.8125rem] leading-[1.35] text-ink-600">{answered.join(" · ")}</p>
       )}
