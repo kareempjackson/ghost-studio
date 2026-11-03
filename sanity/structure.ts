@@ -1,5 +1,9 @@
-import type { StructureResolver } from "sanity/structure";
+import { LockIcon } from "@sanity/icons/Lock";
+import { SearchIcon } from "@sanity/icons/Search";
+import type { DefaultDocumentNodeResolver, StructureResolver } from "sanity/structure";
+import { ANALYTICS_KEYS_ID } from "../lib/analytics-keys";
 import { families } from "../lib/links";
+import { seoView } from "./analytics";
 import { fixedPages, singletons } from "./schemaTypes";
 
 const SITE = ["siteSettings", "navigation", "footer", "chat"];
@@ -268,6 +272,28 @@ export const structure: StructureResolver = (S) => {
         .title("Sections")
         .child(S.list().title("Sections").items(sections.map(single))),
       S.divider(),
-      ...SITE.map(single),
+      ...SITE.flatMap((type) =>
+        type === "siteSettings"
+          ? [
+              single(type),
+              /* The Analytics tool's Google keys, at a private id (lib/analytics-keys.ts). */
+              S.listItem()
+                .title("Analytics keys")
+                .id("analytics-keys")
+                .icon(LockIcon)
+                .child(S.document().schemaType("analyticsKeys").documentId(ANALYTICS_KEYS_ID).title("Analytics keys")),
+            ]
+          : [single(type)],
+      ),
     ]);
 };
+
+/**
+ * A project or an insight opens with an SEO tab beside its form: how its
+ * page does in Google Search, and its latest Lighthouse scores
+ * (sanity/analytics.tsx).
+ */
+export const defaultDocumentNode: DefaultDocumentNodeResolver = (S, { schemaType }) =>
+  schemaType === "project" || schemaType === "article"
+    ? S.document().views([S.view.form(), S.view.component(seoView).id("seo").title("SEO").icon(SearchIcon)])
+    : S.document();

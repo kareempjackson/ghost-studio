@@ -12,7 +12,7 @@ import "server-only";
 import { sanityFetch } from "./lib/live";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { stegaClean } from "next-sanity";
-import { FAMILY_ON_SHOW, families, insightHref, isFamilyHref, projectHref, storyHref } from "../lib/links";
+import { FAMILY_ON_SHOW, PAGE_PATHS, families, insightHref, isFamilyHref, projectHref, storyHref } from "../lib/links";
 import { dataset, projectId } from "./env";
 import { toBlocks } from "./lib/rich";
 import { guide as seededGuide, guideExclude, guideNeeds } from "./seed/content/guide";
@@ -1360,19 +1360,6 @@ export async function getPhaseShare(slug: string): Promise<ShareCardData | null>
 }
 
 /* ---- Sitemap ---------------------------------------------------------------- */
-
-/** Where each page document is served. Fixed pages are at /{slug}. */
-const PAGE_PATHS: Record<string, string> = {
-  homePage: "/",
-  aboutPage: "/about",
-  servicesPage: "/services",
-  managedServicesPage: "/integrate/managed-services",
-  whoWeServePage: "/who-we-serve",
-  workPage: "/work",
-  insightsPage: "/insights",
-  contactPage: "/contact",
-  approachPage: "/our-approach",
-};
 
 /**
  * Every published page with the time it last changed, for the sitemap: the

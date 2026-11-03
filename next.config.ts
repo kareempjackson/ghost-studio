@@ -1,8 +1,20 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 import { sanity } from "next-sanity/live/cache-life";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  /* The Studio's Analytics tool imports its icons as @sanity/icons 3 named
+     them, which version 5 no longer does: its imports are rewritten to where
+     each icon now is (sanity/lib/icon-imports-loader.cjs). */
+  turbopack: {
+    rules: {
+      "*.js": {
+        condition: { path: /node_modules\/sanity-plugin-analytics\/dist\/index\.js$/ },
+        loaders: [path.resolve("sanity/lib/icon-imports-loader.cjs")],
+      },
+    },
+  },
   /* Content is cached until Sanity Live or the webhook says it changed. */
   cacheLife: { default: sanity },
   images: {

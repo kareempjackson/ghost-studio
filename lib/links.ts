@@ -8,6 +8,23 @@ export const projectHref = (slug: string) => `/work/${slug}`;
 /** An insight's own page. The journal band on the home page links here too. */
 export const insightHref = (slug: string) => `/insights/${slug}`;
 
+/**
+ * Where each page that is one document is served, by its id: the sitemap
+ * lists them, and the Studio's Lighthouse tab tests them. Track, family and
+ * legal pages are at /{slug}.
+ */
+export const PAGE_PATHS: Readonly<Record<string, string>> = {
+  homePage: "/",
+  aboutPage: "/about",
+  servicesPage: "/services",
+  managedServicesPage: "/integrate/managed-services",
+  whoWeServePage: "/who-we-serve",
+  workPage: "/work",
+  insightsPage: "/insights",
+  contactPage: "/contact",
+  approachPage: "/our-approach",
+};
+
 /** A page's Markdown copy, for agents: an insight's or a project's, at its address plus .md. See lib/markdown.ts. */
 export const markdownHref = (href: string) => `${href}.md`;
 

@@ -177,6 +177,19 @@ export const siteSettings = defineType({
         "Proves the site is yours to Bing, which also feeds ChatGPT and Copilot search: add the site, choose the meta tag method, and paste the content value of the msvalidate.01 tag it gives. Not needed when the site is imported from Google Search Console.",
     }),
     defineField({
+      name: "searchConsoleProperty",
+      type: "string",
+      title: "Search Console property",
+      group: "tracking",
+      fieldset: "search",
+      description:
+        "Which Search Console property the Studio's Analytics tool reads, as Search Console names it: the site's address with a slash at the end for a URL-prefix property, like https://www.ghostsavvy.com/, or sc-domain:ghostsavvy.com for a domain property. The site's address if empty.",
+      validation: (r) =>
+        r.regex(/^(https:\/\/[^\s]+\/|sc-domain:[a-z0-9.-]+)$/, {
+          name: "https://…/ with the slash at the end, or sc-domain:…",
+        }),
+    }),
+    defineField({
       name: "gaMeasurementId",
       type: "string",
       title: "Google Analytics measurement ID",
@@ -186,6 +199,12 @@ export const siteSettings = defineType({
         "GA4's ID for the site, like G-ABC123XYZ: in Google Analytics, Admin › Data streams › the web stream.",
       validation: (r) => r.regex(/^G-[A-Z0-9]+$/, { name: "GA4 measurement ID, like G-ABC123XYZ" }),
     }),
+    digits(
+      "gaPropertyId",
+      "Google Analytics property ID",
+      "What the Studio's Analytics tool reads its reports from: the number in Google Analytics under Admin › Property details, not the G- measurement ID above. It is read as the service account in Analytics keys, which must be a Viewer on the property. The Analytics tab is empty without it.",
+      { group: "tracking", fieldset: "analytics" },
+    ),
     defineField({
       name: "posthogKey",
       type: "string",

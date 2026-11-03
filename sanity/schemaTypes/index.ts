@@ -28,6 +28,7 @@ import {
   studioStrip,
   testimonials,
 } from "./documents/sections";
+import { analyticsKeys } from "./documents/keys";
 import { chat, footer, navigation, siteSettings } from "./documents/site";
 
 export const schemaTypes = [
@@ -35,6 +36,7 @@ export const schemaTypes = [
   enquiry,
   subscriber,
   siteSettings,
+  analyticsKeys,
   navigation,
   footer,
   chat,

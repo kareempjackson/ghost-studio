@@ -9,12 +9,14 @@ import { defineConfig } from "sanity";
 import { presentationTool } from "sanity/presentation";
 import { structureTool } from "sanity/structure";
 import { TailorWithAI, unpublishEverywhere } from "./sanity/actions";
+import { analytics } from "./sanity/analytics";
 import { apiVersion, dataset, projectId, studioUrl } from "./sanity/env";
 import { resolve } from "./sanity/presentation";
 import { fixedPages, schemaTypes, singletons } from "./sanity/schemaTypes";
-import { structure } from "./sanity/structure";
+import { defaultDocumentNode, structure } from "./sanity/structure";
 
-const singletonTypes = new Set<string>(singletons.map((s) => s.type));
+/* Analytics keys is one document too, at a private id (lib/analytics-keys.ts). */
+const singletonTypes = new Set<string>([...singletons.map((s) => s.type), "analyticsKeys"]);
 const fixedTypes = new Set<string>(fixedPages.map((p) => p.type));
 /* What the site writes, never an editor: no "new" button, no copies. */
 const siteWritten = new Set(["enquiry", "subscriber"]);
@@ -90,11 +92,13 @@ export default defineConfig({
           ],
   },
   plugins: [
-    structureTool({ structure }),
+    structureTool({ structure, defaultDocumentNode }),
     presentationTool({
       resolve,
       previewUrl: { previewMode: { enable: "/api/draft-mode/enable" } },
     }),
     visionTool({ defaultApiVersion: apiVersion }),
+    /* GA4, Search Console and Lighthouse, for editors (sanity/analytics.tsx). */
+    analytics(),
   ],
 });
